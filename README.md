@@ -162,7 +162,7 @@ The version is in three places, and the build fails if they differ: `SbgVrVersio
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.1 loaded` appears, and every SBG VR feature line starts with `[ok]`.
+1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.2 loaded` appears, and every SBG VR feature line starts with `[ok]`.
 2. Main menu: the game shows in the headset and follows your head; the menu stays readable while the background scenes change; each scene holds still; the fade between scenes darkens the whole view behind the menu; the mouse cursor is visible and clicks land where it points.
 3. Settings, lobby and match setup menus work. Joining or leaving a match fades the whole view.
 4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
