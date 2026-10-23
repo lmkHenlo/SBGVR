@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SbgVr.Hud
 {
@@ -11,7 +12,7 @@ namespace SbgVr.Hud
     /// doesn't (VR HUD.MarkersOnTop).
     ///
     /// Markers ignore depth so scenery can't hide them, which means nothing can: they're drawn after the
-    /// scene. So each frame, just before rendering, the markers and the characters in front of them are
+    /// scene. So each frame, after the UI is rebuilt and before anything is drawn, the markers and the characters in front of them are
     /// put in drawing order from far to near, like a painter, using render queues just below the markers'
     /// usual one: a marker is drawn, then any character nearer than it is drawn again over it
     /// (<see cref="PlayerOccluder"/>), then nearer markers, and so on. Only characters that are in front of a
@@ -49,10 +50,13 @@ namespace SbgVr.Hud
 
         internal static void Initialize()
         {
-            Application.onBeforeRender += OnBeforeRender;
+            // Runs once a frame after the UI has rebuilt its graphics (CanvasUpdateRegistry handles the same
+            // event; it's created first here, so it runs first) and before anything is drawn.
+            _ = CanvasUpdateRegistry.instance;
+            Canvas.willRenderCanvases += OnWillRenderCanvases;
         }
 
-        private static void OnBeforeRender()
+        private static void OnWillRenderCanvases()
         {
             var top = WorldMarker.TopRenderQueue;
             var camera = WorldMarker.Enabled && Settings.MarkersOnTop.Value && Settings.PlayersCoverMarkers.Value
@@ -127,11 +131,12 @@ namespace SbgVr.Hud
                 Drawn.Add(player);
             }
 
-            // Each marker's queue is set once a frame: changing it switches its graphics' materials, which
-            // rebuilds its canvas.
+            // Every marker, covered or not: its queue for this frame, then the materials it's drawn with.
             foreach (var marker in WorldMarker.InWorld)
             {
-                if (marker != null) marker.SetRenderQueue(Queues.TryGetValue(marker, out var queue) ? queue : top);
+                if (marker == null) continue;
+                marker.SetRenderQueue(Queues.TryGetValue(marker, out var queue) ? queue : top);
+                marker.EnforceDrawnMaterials();
             }
 
             foreach (var pair in Occluders)

@@ -40,12 +40,17 @@ namespace SbgVr.Hud
 
         private static Material _onTopMaterial;
 
-        // On-top materials by render queue, shared by all markers: plain UI graphics by queue, text by its
-        // font material and queue. A graphic is switched to another material to change its queue, rather
-        // than the queue of its material being changed: UI masks (and SoftMask) draw with copies of a
-        // graphic's material that they make once and keep, so a changed queue would never reach them.
+        private const string ZTestProperty = "unity_GUIZTestMode";
+
+        // On-top materials shared by all markers: plain UI graphics by render queue, text by its font material
+        // and render queue.
         private static readonly Dictionary<int, Material> UiMaterials = new Dictionary<int, Material>();
         private static readonly Dictionary<(Material, int), Material> FontMaterials = new Dictionary<(Material, int), Material>();
+
+        // Copies of the materials markers are actually drawn with, by the drawn material and render queue,
+        // and back to the material each copy was made from.
+        private static readonly Dictionary<(Material, int), Material> DrawnCopies = new Dictionary<(Material, int), Material>();
+        private static readonly Dictionary<Material, Material> DrawnCopySources = new Dictionary<Material, Material>();
 
         private int _renderQueue = -1;
 
@@ -148,13 +153,66 @@ namespace SbgVr.Hud
 
         /// <summary>
         /// Draws the marker at <paramref name="renderQueue"/>; <see cref="TopRenderQueue"/> unless a player
-        /// character in front of it has to be drawn after it.
+        /// character in front of it has to be drawn after it. Takes effect in
+        /// <see cref="EnforceDrawnMaterials"/>.
         /// </summary>
         internal void SetRenderQueue(int renderQueue)
         {
-            if (renderQueue == _renderQueue || !_materialsSwapped) return;
-            _renderQueue = renderQueue;
-            ApplyRenderQueue();
+            if (_materialsSwapped) _renderQueue = renderQueue;
+        }
+
+        /// <summary>
+        /// Makes every part of the marker draw at its render queue, ignoring depth, by setting the material
+        /// each canvas renderer actually draws with. Called once a frame after the UI has been rebuilt and
+        /// before it's drawn.
+        ///
+        /// Setting the graphics' own materials isn't enough. What's drawn is the material after UI masks and
+        /// mask plugins (SoftMask) have swapped in copies of their own, which they make once and keep; and the
+        /// game can set a label's font material again at any time. Text kept drawing over players that way,
+        /// at a queue that came before them.
+        /// </summary>
+        internal void EnforceDrawnMaterials()
+        {
+            if (!_inWorld || !_materialsSwapped || _renderQueue < 0) return;
+
+            GetComponentsInChildren(false, _visibleGraphics);
+            foreach (var graphic in _visibleGraphics)
+            {
+                var canvasRenderer = graphic.canvasRenderer;
+                if (canvasRenderer == null) continue;
+
+                for (var i = 0; i < canvasRenderer.materialCount; i++)
+                {
+                    var drawn = canvasRenderer.GetMaterial(i);
+                    if (drawn == null) continue;
+
+                    var wanted = DrawnCopy(drawn, _renderQueue);
+                    if (wanted != drawn) canvasRenderer.SetMaterial(wanted, i);
+                }
+            }
+
+            _visibleGraphics.Clear();
+        }
+
+        /// <summary>
+        /// <paramref name="drawn"/>, or a copy of the material it was made from, that ignores depth and draws
+        /// at <paramref name="renderQueue"/>.
+        /// </summary>
+        private static Material DrawnCopy(Material drawn, int renderQueue)
+        {
+            if (drawn.renderQueue == renderQueue && (!drawn.HasProperty(ZTestProperty) ||
+                                                     drawn.GetInt(ZTestProperty) == (int)CompareFunction.Always))
+                return drawn;
+
+            var source = DrawnCopySources.TryGetValue(drawn, out var original) && original != null ? original : drawn;
+            if (DrawnCopies.TryGetValue((source, renderQueue), out var copy) && copy != null) return copy;
+
+            copy = new Material(source) { name = $"{source.name} (SBG VR marker {renderQueue})" };
+            if (copy.HasProperty(ZTestProperty)) copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
+            copy.renderQueue = renderQueue;
+            DrawnCopies[(source, renderQueue)] = copy;
+            DrawnCopySources[copy] = source;
+            return copy;
         }
 
         private void ApplyRenderQueue()
