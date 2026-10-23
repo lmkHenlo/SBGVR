@@ -1,0 +1,92 @@
+<Project DefaultTargets="Build">
+  <!--
+    Builds SBG VR and the Thunderstore package.
+
+      dotnet build SBG_VR.proj -c Release      build everything and make artifacts\lmkHenlo-SBG_VR-<version>.zip
+      dotnet build SBG_VR.proj -c Debug        build without packaging
+      dotnet build SBG_VR.proj -t:Clean        delete artifacts\
+
+    Paths come from Directory.Build.props; override them with -p:GameDir=... and -p:BepInExDir=...
+
+    UUVR is built in its own "modern-mono" configuration (Unity 2020 and later, Mono). The SDK's
+    restore can't build a project reference in a different configuration, which is why this file
+    builds each project itself.
+  -->
+  <Import Project="Directory.Build.props" />
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <ThunderstoreDir>$(RepoRoot)thunderstore\</ThunderstoreDir>
+    <PackageDir>$(ArtifactsDir)package\</PackageDir>
+    <PackageZip>$(ArtifactsDir)lmkHenlo-SBG_VR-$(SbgVrVersion).zip</PackageZip>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <UuvrProject Include="uuvr\Uuvr\Uuvr.csproj;uuvr\Uuvr.Patcher\Uuvr.Patcher.csproj" />
+    <SbgVrProject Include="src\SbgVr\SbgVr.csproj" />
+  </ItemGroup>
+
+  <Target Name="Restore">
+    <!-- The extra property gives restore its own evaluation, so the build re-reads the restore results. -->
+    <MSBuild Projects="@(UuvrProject)" Targets="Restore" Properties="Configuration=modern-mono;SbgVrRestoring=true" />
+    <MSBuild Projects="@(SbgVrProject)" Targets="Restore" Properties="Configuration=$(Configuration);SbgVrRestoring=true" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="CheckVersions">
+    <MSBuild Projects="@(UuvrProject)" Targets="Build" Properties="Configuration=modern-mono" />
+    <MSBuild Projects="@(SbgVrProject)" Targets="Build" Properties="Configuration=$(Configuration)" />
+    <CallTarget Targets="Package" Condition="'$(Configuration)' == 'Release'" />
+  </Target>
+
+  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
+
+  <Target Name="Clean">
+    <MSBuild Projects="@(UuvrProject)" Targets="Clean" Properties="Configuration=modern-mono" />
+    <MSBuild Projects="@(SbgVrProject)" Targets="Clean" Properties="Configuration=$(Configuration)" />
+    <RemoveDir Directories="$(ArtifactsDir)" />
+  </Target>
+
+  <!-- The version lives in three files; refuse to build when they disagree. -->
+  <Target Name="CheckVersions">
+    <PropertyGroup>
+      <_ManifestText>$([System.IO.File]::ReadAllText('$(ThunderstoreDir)manifest.json'))</_ManifestText>
+      <_ManifestVersion>$([System.Text.RegularExpressions.Regex]::Match($(_ManifestText), '"version_number"\s*:\s*"([^"]+)"').Groups[1].Value)</_ManifestVersion>
+      <_PluginText>$([System.IO.File]::ReadAllText('$(RepoRoot)src\SbgVr\Plugin.cs'))</_PluginText>
+      <_PluginVersion>$([System.Text.RegularExpressions.Regex]::Match($(_PluginText), 'const string Version = "([^"]+)"').Groups[1].Value)</_PluginVersion>
+    </PropertyGroup>
+    <Error Condition="'$(_ManifestVersion)' != '$(SbgVrVersion)'"
+           Text="thunderstore\manifest.json has version_number '$(_ManifestVersion)', but SbgVrVersion in Directory.Build.props is '$(SbgVrVersion)'." />
+    <Error Condition="'$(_PluginVersion)' != '$(SbgVrVersion)'"
+           Text="Plugin.Version in src\SbgVr\Plugin.cs is '$(_PluginVersion)', but SbgVrVersion in Directory.Build.props is '$(SbgVrVersion)'." />
+  </Target>
+
+  <!--
+    Thunderstore package layout:
+      manifest.json, icon.png, README.md, LICENSE, THIRD_PARTY_NOTICES.md
+      plugins/   UUVR, its XR libraries, SBG VR and UUVR's cursor image
+      patchers/  UUVR's patcher and the native VR files it copies into the game
+  -->
+  <Target Name="Package">
+    <ItemGroup>
+      <_RootFile Include="$(ThunderstoreDir)manifest.json;$(ThunderstoreDir)icon.png;$(ThunderstoreDir)README.md;$(RepoRoot)LICENSE;$(RepoRoot)THIRD_PARTY_NOTICES.md" />
+      <_PluginFile Include="$(StageDir)plugins\Uuvr.dll;$(StageDir)plugins\Uuvr.XR.Management.dll;$(StageDir)plugins\Uuvr.XR.OpenXR.dll;$(StageDir)plugins\Uuvr.XR.OpenVR.dll;$(StageDir)plugins\SbgVr.dll" />
+      <_PluginAsset Include="$(StageDir)plugins\Assets\**\*" />
+      <_PatcherFile Include="$(StageDir)patchers\Uuvr.Patcher.dll" />
+      <_PatcherContent Include="$(StageDir)patchers\CopyToGame\**\*" />
+    </ItemGroup>
+    <Error Condition="!Exists('%(_RootFile.Identity)')" Text="Missing package file: %(_RootFile.Identity)" />
+    <Error Condition="!Exists('%(_PluginFile.Identity)')" Text="Missing build output: %(_PluginFile.Identity)" />
+    <Error Condition="!Exists('%(_PatcherFile.Identity)')" Text="Missing build output: %(_PatcherFile.Identity)" />
+    <Error Condition="'@(_PluginAsset)' == ''" Text="UUVR's Assets folder is missing from $(StageDir)plugins." />
+    <Error Condition="'@(_PatcherContent)' == ''" Text="UUVR's CopyToGame files are missing from $(StageDir)patchers." />
+
+    <RemoveDir Directories="$(PackageDir)" />
+    <Copy SourceFiles="@(_RootFile)" DestinationFolder="$(PackageDir)" />
+    <Copy SourceFiles="@(_PluginFile)" DestinationFolder="$(PackageDir)plugins" />
+    <Copy SourceFiles="@(_PluginAsset)" DestinationFiles="@(_PluginAsset->'$(PackageDir)plugins\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(_PatcherFile)" DestinationFolder="$(PackageDir)patchers" />
+    <Copy SourceFiles="@(_PatcherContent)" DestinationFiles="@(_PatcherContent->'$(PackageDir)patchers\CopyToGame\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ZipDirectory SourceDirectory="$(PackageDir)" DestinationFile="$(PackageZip)" Overwrite="true" />
+    <Message Importance="high" Text="Thunderstore package: $(PackageZip)" />
+  </Target>
+</Project>
