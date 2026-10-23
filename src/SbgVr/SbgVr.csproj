@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>SbgVr</AssemblyName>
+    <RootNamespace>SbgVr</RootNamespace>
+    <LangVersion>10</LangVersion>
+    <Nullable>disable</Nullable>
+    <DebugType>embedded</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(StageDir)plugins\</OutputPath>
+
+    <Version>$(SbgVrVersion)</Version>
+    <Product>SBG VR</Product>
+    <AssemblyTitle>SbgVr</AssemblyTitle>
+    <Description>Super Battle Golf fixes for the UUVR VR mod.</Description>
+    <Authors>lmkHenlo</Authors>
+    <Company>lmkHenlo</Company>
+    <Copyright>Copyright (c) 2026 lmkHenlo</Copyright>
+  </PropertyGroup>
+
+</Project>
