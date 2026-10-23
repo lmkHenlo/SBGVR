@@ -37,6 +37,7 @@ namespace SbgVr
         internal static ConfigEntry<bool> MarkersOnTop;
         internal static ConfigEntry<float> MarkerScale;
         internal static ConfigEntry<float> MarkerViewAngle;
+        internal static ConfigEntry<bool> HideMarkersOverPlayers;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
 
@@ -85,6 +86,10 @@ namespace SbgVr
                     "Icons for targets within this many degrees of straight ahead are drawn in the world; " +
                     "targets further round get the game's arrow at the edge of the floating screen.",
                     new AcceptableValueRange<float>(30f, 120f)));
+            HideMarkersOverPlayers = config.Bind(hud, "HideMarkersOverPlayers", true,
+                "Hide a world-space marker while it's drawn over a player character (yours or anyone else's) and " +
+                "show it again once it isn't, so markers don't cover the players. A name tag or teammate icon " +
+                "isn't hidden by the player it belongs to.");
 
             const string graphics = "VR Graphics";
             AmbientOcclusion = config.Bind(graphics, "AmbientOcclusion", true,

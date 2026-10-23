@@ -31,6 +31,7 @@ namespace SbgVr.Hud
         // floating screen cover markers the way the game's menus cover its HUD.
         private const int QueuesBeforeFloatingScreen = 10;
         private const float FloatingScreenWidthPerScale = 1.8f;
+        private const float OverPlayerFadeSeconds = 0.12f;
 
         private static Material _onTopMaterial;
 
@@ -46,6 +47,10 @@ namespace SbgVr.Hud
         private int _graphicCount;
         private readonly List<KeyValuePair<Graphic, Material>> _originalMaterials = new List<KeyValuePair<Graphic, Material>>();
         private readonly List<KeyValuePair<TMP_Text, Material>> _originalFontMaterials = new List<KeyValuePair<TMP_Text, Material>>();
+        private readonly List<Graphic> _visibleGraphics = new List<Graphic>();
+        private readonly Vector3[] _corners = new Vector3[4];
+        private float _overPlayerAlpha = 1f;
+        private bool _justPlaced;
 
         internal static void Initialize()
         {
@@ -62,8 +67,10 @@ namespace SbgVr.Hud
         /// <summary>
         /// Draws <paramref name="marker"/> at <paramref name="worldPosition"/> when <paramref name="inWorld"/> is
         /// true, or returns it to the HUD. Call after the game has positioned the marker for this frame.
+        /// <paramref name="owner"/> is the player the marker belongs to (a name tag's or teammate icon's), whose
+        /// own character doesn't hide it.
         /// </summary>
-        internal static void Place(Component marker, Vector3 worldPosition, bool inWorld)
+        internal static void Place(Component marker, Vector3 worldPosition, bool inWorld, PlayerInfo owner = null)
         {
             if (marker == null) return;
 
@@ -74,7 +81,7 @@ namespace SbgVr.Hud
                 worldMarker = marker.gameObject.AddComponent<WorldMarker>();
             }
 
-            worldMarker.PlaceInternal(worldPosition, inWorld);
+            worldMarker.PlaceInternal(worldPosition, inWorld, owner);
         }
 
         private void OnDestroy()
@@ -98,7 +105,7 @@ namespace SbgVr.Hud
                 Destroy(gameObject);
         }
 
-        private void PlaceInternal(Vector3 worldPosition, bool inWorld)
+        private void PlaceInternal(Vector3 worldPosition, bool inWorld, PlayerInfo owner)
         {
             if (_rect == null) _rect = transform;
             var camera = Enabled ? Fades.FullViewFade.ViewCamera() : null;
@@ -112,6 +119,72 @@ namespace SbgVr.Hud
             UpdateMaterials();
             MirrorHudVisibility();
             Position(camera, worldPosition);
+            HideOverPlayers(camera, owner);
+        }
+
+        /// <summary>
+        /// VR HUD.HideMarkersOverPlayers: fades the marker out while it's drawn over a player character, and
+        /// back in once it isn't, so markers don't cover the players. Runs after <see cref="Position"/>, so
+        /// the marker's graphics are where they'll be drawn this frame.
+        /// </summary>
+        private void HideOverPlayers(Camera camera, PlayerInfo owner)
+        {
+            var hidden = Settings.HideMarkersOverPlayers.Value && _canvas.enabled && IsOverPlayer(camera, owner);
+            var target = hidden ? 0f : 1f;
+            _overPlayerAlpha = _justPlaced
+                ? target
+                : Mathf.MoveTowards(_overPlayerAlpha, target, Time.unscaledDeltaTime / OverPlayerFadeSeconds);
+            _justPlaced = false;
+            _canvasGroup.alpha *= _overPlayerAlpha;
+        }
+
+        /// <summary>
+        /// The world corners of what the graphic draws: its rectangle, or for text the text itself, since a
+        /// label's rectangle is usually much wider than its words.
+        /// </summary>
+        private bool GetDrawnCorners(Graphic graphic)
+        {
+            var rectTransform = graphic.rectTransform;
+            if (!(graphic is TMP_Text text))
+            {
+                rectTransform.GetWorldCorners(_corners);
+                return true;
+            }
+
+            var bounds = text.textBounds;
+            if (bounds.size.x <= 0f || bounds.size.y <= 0f) return false;
+            var min = bounds.min;
+            var max = bounds.max;
+            _corners[0] = rectTransform.TransformPoint(new Vector3(min.x, min.y, 0f));
+            _corners[1] = rectTransform.TransformPoint(new Vector3(min.x, max.y, 0f));
+            _corners[2] = rectTransform.TransformPoint(new Vector3(max.x, max.y, 0f));
+            _corners[3] = rectTransform.TransformPoint(new Vector3(max.x, min.y, 0f));
+            return true;
+        }
+
+        private bool IsOverPlayer(Camera camera, PlayerInfo owner)
+        {
+            // The area the marker covers in view: the union of its visible graphics.
+            var cameraTransform = camera.transform;
+            var area = default(Rect);
+            var empty = true;
+            GetComponentsInChildren(false, _visibleGraphics);
+            foreach (var graphic in _visibleGraphics)
+            {
+                if (!graphic.enabled || graphic.color.a <= 0f) continue;
+                if (!GetDrawnCorners(graphic)) continue;
+                foreach (var corner in _corners)
+                {
+                    if (!PlayerOverlap.Encapsulate(cameraTransform, corner, ref area, ref empty))
+                    {
+                        _visibleGraphics.Clear();
+                        return false;
+                    }
+                }
+            }
+
+            _visibleGraphics.Clear();
+            return !empty && PlayerOverlap.Covers(camera, area, owner);
         }
 
         private void MoveToWorld()
@@ -134,6 +207,7 @@ namespace SbgVr.Hud
 
             _rect.SetParent(_anchor.transform, false);
             _inWorld = true;
+            _justPlaced = true;
         }
 
         private void MoveToHud()

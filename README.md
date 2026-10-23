@@ -92,6 +92,7 @@ Settings live in `BepInEx\config`. In r2modman, open them with **Config editor**
 | `com.sbgvr.cfg` | `VR HUD` → `MarkersOnTop` | `true` | Draw world-space markers over scenery, like the game does. Menus on the floating screen still cover them. |
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerScale` | `1` | Size of world-space markers (0.25–4); 1 = their size on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerViewAngle` | `70` | Degrees from straight ahead within which icons stay in the world; further round they become edge arrows (30–120). |
+| `com.sbgvr.cfg` | `VR HUD` → `HideMarkersOverPlayers` | `true` | Hide a world-space marker while it's drawn over a player character, and show it again once it isn't. A name tag or teammate icon isn't hidden by its own player. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs. `0` = never. |
@@ -134,7 +135,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Menu background | `Comfort/MenuBackground.cs` | Holds each `MainMenuScenario` camera halfway between its two pan points. |
 | Full-view fades | `Fades/` | Hides `ColorOverlay`'s image and the main menu's overlay, and draws their colour on spheres around the camera, over and behind the floating screen. |
 | Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
-| World-space markers | `Hud/` | After `WorldspaceIconUi`, `NameTagUi` and `TargetReticleUi` lay out a marker, `WorldMarker` moves its UI objects under a world-space canvas at the target, scaled to their size on the floating screen. They return to the HUD when off screen. |
+| World-space markers | `Hud/` | After `WorldspaceIconUi`, `NameTagUi` and `TargetReticleUi` lay out a marker, `WorldMarker` moves its UI objects under a world-space canvas at the target, scaled to their size on the floating screen. They return to the HUD when off screen. `PlayerOverlap` projects each player's mesh bounds into the camera's view each frame; a marker whose graphics overlap one fades out. |
 
 It also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
@@ -168,7 +169,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 2. Main menu: the game shows in the headset and follows your head; the menu stays readable while the background scenes change; each scene holds still; the fade between scenes darkens the whole view behind the menu; the mouse cursor is visible and clicks land where it points.
 3. Settings, lobby and match setup menus work. Joining or leaving a match fades the whole view.
 4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
-5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen. Opening a menu (Match Setup, say) covers the markers behind it, including interaction prompts such as Set Up Match.
+5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen. Opening a menu (Match Setup, say) covers the markers behind it, including interaction prompts such as Set Up Match. A marker that would be drawn over any player character, including yours, fades out, and fades back in once it's clear of them; name tags stay on their own players.
 6. No black areas over nearby scenery or your character when you look around or move. Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes and doesn't smear or flicker when you turn your head. The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size). With `AmbientOcclusion` off, the frame rate goes up.
 7. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
 8. F4 recentres the view; F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.

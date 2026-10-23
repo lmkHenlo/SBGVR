@@ -16,9 +16,13 @@ namespace SbgVr.Hud
         // Ball, hole, objective, teammate and warning icons.
         [HarmonyPatch(typeof(WorldspaceIconUi), "LateUpdate")]
         [HarmonyPostfix]
-        private static void IconLateUpdate(WorldspaceIconUi __instance, Vector3 ___worldPosition, bool ___isOffscreen)
+        private static void IconLateUpdate(
+            WorldspaceIconUi __instance, Vector3 ___worldPosition, bool ___isOffscreen, Transform ___parent)
         {
-            WorldMarker.Place(__instance, ___worldPosition, WorldMarker.Enabled && !___isOffscreen);
+            var inWorld = WorldMarker.Enabled && !___isOffscreen;
+            // A teammate's icon sits on that player, whose own character shouldn't hide it.
+            var owner = inWorld && ___parent != null ? ___parent.GetComponentInParent<PlayerInfo>() : null;
+            WorldMarker.Place(__instance, ___worldPosition, inWorld, owner);
         }
 
         /// <summary>
@@ -43,9 +47,9 @@ namespace SbgVr.Hud
         // Player name tags.
         [HarmonyPatch(typeof(NameTagUi), "LateUpdate")]
         [HarmonyPostfix]
-        private static void NameTagLateUpdate(NameTagUi __instance, Vector3 ___worldPosition)
+        private static void NameTagLateUpdate(NameTagUi __instance, Vector3 ___worldPosition, PlayerInfo ___playerInfo)
         {
-            WorldMarker.Place(__instance, ___worldPosition, WorldMarker.Enabled);
+            WorldMarker.Place(__instance, ___worldPosition, WorldMarker.Enabled, ___playerInfo);
         }
 
         // The reticle on whatever you can interact with, and its button prompt.

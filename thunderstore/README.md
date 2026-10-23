@@ -37,7 +37,7 @@ Settings are in two files under `BepInEx\config`. In r2modman, open them with **
 - `com.sbgvr.cfg`: SBG VR's settings. They only apply while VR is running:
   - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` and `FlashFrames` (off), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
-  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
+  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `HideMarkersOverPlayers` (hide a marker while it's drawn over a player character, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
   - **Diagnostics:** logging for bug reports.
 
 If the headset shows nothing, try these UUVR settings, one at a time:
