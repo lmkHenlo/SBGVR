@@ -55,6 +55,7 @@ namespace SbgVr.Hud
         private int _renderQueue = -1;
         private int _coveringMask;
         private bool _isReticle;
+        private int _lastPlacedFrame;
         private Canvas _hudCanvas;
 
         private Transform _rect;
@@ -139,12 +140,20 @@ namespace SbgVr.Hud
         {
             // The HUD object the marker came from is gone, which would have taken the marker with it.
             if (_rect != null && _inWorld && _hadHudParent && _hudParent == null && _anchor != null && _rect.parent == _anchor.transform)
+            {
                 Destroy(gameObject);
+                return;
+            }
+
+            // The game stopped laying the marker out (its owner went back to a pool, say): back to the HUD,
+            // where it's hidden with its owner, rather than left showing in the world.
+            if (_inWorld && Time.frameCount - _lastPlacedFrame > 1) MoveToHud();
         }
 
         private void PlaceInternal(Vector3 worldPosition, bool inWorld)
         {
             if (_rect == null) _rect = transform;
+            _lastPlacedFrame = Time.frameCount;
             var camera = Enabled ? Fades.FullViewFade.ViewCamera() : null;
             if (!inWorld || camera == null)
             {
