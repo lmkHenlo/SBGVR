@@ -82,7 +82,7 @@ public class CanvasRedirectPatchMode : UuvrBehaviour, VrUiPatchMode
             PatchCanvas(canvas);
         }
 #else
-        // SBG VR: the game's UnityEngine.UI keeps GraphicRegistry.m_Graphics private
+        // SBGVR: the game's UnityEngine.UI keeps GraphicRegistry.m_Graphics private
         // (upstream compiled against a publicized copy), so it is read through reflection.
         if (GraphicRegistry.instance == null || GraphicsField?.GetValue(GraphicRegistry.instance) is not System.Collections.IDictionary graphics) return;
 

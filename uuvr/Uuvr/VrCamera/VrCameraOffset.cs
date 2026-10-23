@@ -6,7 +6,7 @@ namespace Uuvr.VrCamera;
 // TODO: add manual offsets.
 public class VrCameraOffset: UuvrBehaviour
 {
-    // SBG VR: extra rotation applied under every VR camera, used to recenter the view (for example to
+    // SBGVR: extra rotation applied under every VR camera, used to recenter the view (for example to
     // cancel the headset's current yaw). Identity means no change.
     public static Quaternion RecenterRotation = Quaternion.identity;
 

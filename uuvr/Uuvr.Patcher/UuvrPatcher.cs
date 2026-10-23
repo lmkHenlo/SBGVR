@@ -31,7 +31,7 @@ public class Patcher
 #endif
 
     // Names without the .dll extension; it's appended when matching.
-    // SBG VR: "ucrtbased.dll" never matched (it became "ucrtbased.dll.dll"), and OVRPlugin is listed
+    // SBGVR: "ucrtbased.dll" never matched (it became "ucrtbased.dll.dll"), and OVRPlugin is listed
     // because earlier UUVR versions copied both into the game, while this package no longer ships them.
     private static readonly List<string> PluginsToDeleteBeforePatch =
         new()

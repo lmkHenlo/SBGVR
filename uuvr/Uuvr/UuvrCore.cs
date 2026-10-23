@@ -24,7 +24,7 @@ public class UuvrCore: MonoBehaviour
     private VrTogglerManager? _vrTogglerManager;
 
 #if MONO
-    // SBG VR: Unity destroys every object while the game quits; don't rebuild UUVR then.
+    // SBGVR: Unity destroys every object while the game quits; don't rebuild UUVR then.
     private static bool _isQuitting;
 #endif
 
