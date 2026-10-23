@@ -145,10 +145,22 @@ public class VrCamera : UuvrBehaviour
             _childCamera.depth = -100;
         }
 
-        if (HighestDepthVrCamera == null || ParentCamera.depth > HighestDepthVrCamera.CameraInUse.depth)
+        // SBG VR: re-pick when the current camera stops rendering. Upstream only replaced it with a camera of
+        // strictly higher depth, so when a game swaps between cameras of equal depth (Super Battle Golf's main
+        // menu cycles seven), the UI kept following a camera that had been switched off.
+        if (IsRendering(this) &&
+            (!IsRendering(HighestDepthVrCamera) || ParentCamera.depth > HighestDepthVrCamera!.CameraInUse.depth))
         {
             HighestDepthVrCamera = this;
         }
+    }
+
+    private static bool IsRendering(VrCamera? vrCamera)
+    {
+        return vrCamera != null &&
+               vrCamera.isActiveAndEnabled &&
+               vrCamera.ParentCamera != null &&
+               vrCamera.ParentCamera.isActiveAndEnabled;
     }
 
     private void UpdateRelativeMatrix()
