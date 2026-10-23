@@ -40,6 +40,8 @@ namespace SbgVr
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
+            if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
+                Hud.WorldMarker.Initialize();
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Recenter key", typeof(Comfort.Recenter));
             if (Settings.DiagnosticsEnabled.Value)
