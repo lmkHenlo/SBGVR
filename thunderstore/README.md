@@ -8,6 +8,7 @@ Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
 - Starts VR when the game starts. The game is shown in stereo in your headset and follows your head.
 - Shows menus and the HUD on a floating screen in front of you, and draws markers (your ball, the hole, name tags, the interaction reticle) in the world at their target, so they line up at any distance.
+- Turns off the game's ambient occlusion while in VR, where it drew nearby scenery black.
 - Fades your whole view when the game fades the screen, holds the main menu's background scenes still, and turns off screen shake, explosion flashes, the CRT effect and the pause menu's background blur (which made the menu itself blurry in VR). Camera moves between views are quicker. All of this can be changed in the settings.
 - Keeps your usual controls: mouse and keyboard or gamepad. Motion controllers aren't used.
 - Only changes what you see. Nothing is sent to other players, so you can play VR in any lobby with flat-screen players.

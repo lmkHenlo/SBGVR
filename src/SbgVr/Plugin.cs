@@ -38,6 +38,7 @@ namespace SbgVr
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
+            Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
