@@ -25,6 +25,12 @@ public class CanvasRedirectPatchMode : UuvrBehaviour, VrUiPatchMode
     
     private Camera? _uiCaptureCamera;
 
+#if !CPP
+    private static readonly System.Reflection.FieldInfo? GraphicsField = typeof(GraphicRegistry).GetField(
+        "m_Graphics",
+        System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+#endif
+
     protected override void OnSettingChanged()
     {
         base.OnSettingChanged();
@@ -68,17 +74,23 @@ public class CanvasRedirectPatchMode : UuvrBehaviour, VrUiPatchMode
         // TODO: handle finding canvases that aren't here because they don't have anything inside them.
         // Game example: Smushi.
 
-        var keys =
 #if CPP
-            GraphicRegistry.instance.m_Graphics.keys;
-#else
-            GraphicRegistry.instance.m_Graphics.Keys;
-#endif
+        var keys = GraphicRegistry.instance.m_Graphics.keys;
         
         foreach (var canvas in keys)
         {
             PatchCanvas(canvas);
         }
+#else
+        // SBG VR: the game's UnityEngine.UI keeps GraphicRegistry.m_Graphics private
+        // (upstream compiled against a publicized copy), so it is read through reflection.
+        if (GraphicRegistry.instance == null || GraphicsField?.GetValue(GraphicRegistry.instance) is not System.Collections.IDictionary graphics) return;
+
+        foreach (var key in graphics.Keys)
+        {
+            PatchCanvas(key as Canvas);
+        }
+#endif
 
         // Cursed way of making the UI capture camera not capture the projected UI itself without having to use more layers.
         // I don't know why it keeps getting reset so I'm just doing it every frame yahoo.
