@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 namespace SbgVr.Hud
@@ -22,7 +23,10 @@ namespace SbgVr.Hud
     /// </summary>
     internal static class MarkerOcclusion
     {
-        /// <summary>Render queues used below the markers' usual one, one per marker or character in order.</summary>
+        /// <summary>
+        /// Render queues used below the markers' usual one: two per marker or character in order, the second
+        /// for a character's see-through parts, drawn over the character again.
+        /// </summary>
         internal const int QueueSlots = 80;
 
         private struct MarkerInView
@@ -54,10 +58,23 @@ namespace SbgVr.Hud
             // event; it's created first here, so it runs first) and before anything is drawn.
             _ = CanvasUpdateRegistry.instance;
             Canvas.willRenderCanvases += OnWillRenderCanvases;
+            RenderPipelineManager.endContextRendering += OnEndContextRendering;
+        }
+
+        /// <summary>
+        /// Once the headset's view has been drawn, puts back the materials of characters' see-through parts.
+        /// (Also done at the start of the next frame, in case it wasn't drawn.)
+        /// </summary>
+        private static void OnEndContextRendering(ScriptableRenderContext context, List<Camera> cameras)
+        {
+            var view = Fades.FullViewFade.ViewCamera();
+            if (view == null || cameras.Contains(view)) PlayerOccluder.RestoreSeeThrough();
         }
 
         private static void OnWillRenderCanvases()
         {
+            PlayerOccluder.RestoreSeeThrough();
+
             var top = WorldMarker.TopRenderQueue;
             var camera = WorldMarker.Enabled && Settings.MarkersOnTop.Value && Settings.PlayersCoverMarkers.Value
                 ? Fades.FullViewFade.ViewCamera()
@@ -112,7 +129,7 @@ namespace SbgVr.Hud
 
             for (var i = 0; i < Items.Count; i++)
             {
-                var queue = top - QueueSlots + Mathf.Min(i, QueueSlots - 1);
+                var queue = top - QueueSlots + 2 * Mathf.Min(i, QueueSlots / 2 - 1);
                 var item = Items[i];
                 if (item.Marker != null)
                 {

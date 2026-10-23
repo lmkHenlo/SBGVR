@@ -28,8 +28,12 @@ namespace SbgVr.Hud
 
         private readonly Dictionary<Renderer, SkinnedMeshRenderer> _twins = new Dictionary<Renderer, SkinnedMeshRenderer>();
         private readonly Dictionary<Material, Material> _copies = new Dictionary<Material, Material>();
+        private readonly Dictionary<Material, Material> _seeThroughCopies = new Dictionary<Material, Material>();
         private readonly Dictionary<Material, int> _copiedFrame = new Dictionary<Material, int>();
         private readonly List<Renderer> _gone = new List<Renderer>();
+
+        // See-through parts switched to later-drawn copies for this frame, with the materials to put back.
+        private static readonly List<KeyValuePair<Renderer, Material[]>> Swapped = new List<KeyValuePair<Renderer, Material[]>>();
         private int _renderQueue = -1;
 
         /// <summary>Draws the character's visible meshes again at <paramref name="renderQueue"/> this frame.</summary>
@@ -57,6 +61,22 @@ namespace SbgVr.Hud
                 }
             }
 
+            // The character's see-through parts (a shield on its chest, say) are drawn after solid objects.
+            // Redrawn, the character would cover them, so they're drawn after it too: their renderers draw
+            // with copies of their materials one queue later, for this frame only.
+            foreach (var renderer in view.SeeThrough)
+            {
+                if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy ||
+                    renderer.forceRenderingOff)
+                    continue;
+
+                var originals = renderer.sharedMaterials;
+                var copies = new Material[originals.Length];
+                for (var i = 0; i < originals.Length; i++) copies[i] = Copy(originals[i], renderQueue + 1);
+                renderer.sharedMaterials = copies;
+                Swapped.Add(new KeyValuePair<Renderer, Material[]>(renderer, originals));
+            }
+
             // Twins of meshes the character no longer has.
             foreach (var pair in _twins)
             {
@@ -70,6 +90,17 @@ namespace SbgVr.Hud
             }
 
             _gone.Clear();
+        }
+
+        /// <summary>Puts back the see-through parts' own materials once the frame has been drawn.</summary>
+        internal static void RestoreSeeThrough()
+        {
+            foreach (var pair in Swapped)
+            {
+                if (pair.Key != null) pair.Key.sharedMaterials = pair.Value;
+            }
+
+            Swapped.Clear();
         }
 
         /// <summary>Stops drawing the character again.</summary>
@@ -92,6 +123,13 @@ namespace SbgVr.Hud
             {
                 if (copy != null) Object.Destroy(copy);
             }
+
+            foreach (var copy in _seeThroughCopies.Values)
+            {
+                if (copy != null) Object.Destroy(copy);
+            }
+
+            _seeThroughCopies.Clear();
 
             _twins.Clear();
             _copies.Clear();
@@ -222,21 +260,31 @@ namespace SbgVr.Hud
         /// </summary>
         private Material Copy(Material original)
         {
+            return CopyAt(original, _renderQueue, _copies);
+        }
+
+        private Material Copy(Material original, int renderQueue)
+        {
+            return CopyAt(original, renderQueue, _seeThroughCopies);
+        }
+
+        private Material CopyAt(Material original, int renderQueue, Dictionary<Material, Material> copies)
+        {
             if (original == null) return null;
 
-            if (!_copies.TryGetValue(original, out var copy) || copy == null)
+            if (!copies.TryGetValue(original, out var copy) || copy == null)
             {
                 copy = new Material(original) { name = $"{original.name} (SBG VR occluder)" };
-                _copies[original] = copy;
+                copies[original] = copy;
             }
-            else if (!_copiedFrame.TryGetValue(original, out var frame) || frame != Time.frameCount)
+            else if (!_copiedFrame.TryGetValue(copy, out var frame) || frame != Time.frameCount)
             {
                 if (copy.shader != original.shader) copy.shader = original.shader;
                 copy.CopyPropertiesFromMaterial(original);
             }
 
-            _copiedFrame[original] = Time.frameCount;
-            copy.renderQueue = _renderQueue;
+            _copiedFrame[copy] = Time.frameCount;
+            copy.renderQueue = renderQueue;
             return copy;
         }
     }

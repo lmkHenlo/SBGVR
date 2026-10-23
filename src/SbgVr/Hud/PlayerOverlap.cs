@@ -30,6 +30,12 @@ namespace SbgVr.Hud
             /// </summary>
             internal readonly List<Renderer> Renderers = new List<Renderer>();
 
+            /// <summary>
+            /// The character's see-through parts (a shield or team emblem on its chest, glows, effects), which
+            /// are drawn after the scene's solid objects and so would end up under a redrawn character.
+            /// </summary>
+            internal readonly List<Renderer> SeeThrough = new List<Renderer>();
+
             /// <summary>The visible meshes' areas in view, this frame.</summary>
             internal readonly List<Rect> Areas = new List<Rect>();
 
@@ -127,15 +133,20 @@ namespace SbgVr.Hud
         private static void FindRenderers(PlayerView view)
         {
             view.Renderers.Clear();
-            view.Player.GetComponentsInChildren(false, Found);
+            view.SeeThrough.Clear();
+            // Inactive ones too: a shield or effect is often switched on later, and is checked when drawn.
+            view.Player.GetComponentsInChildren(true, Found);
             foreach (var renderer in Found)
             {
-                if (!(renderer is SkinnedMeshRenderer || renderer is MeshRenderer)) continue;
-
-                // See-through parts (shields, glows) don't hide what's behind them.
+                // See-through parts (shields, glows, effects) don't hide what's behind them.
                 var material = renderer.sharedMaterial;
-                if (material != null && material.renderQueue > (int)RenderQueue.GeometryLast) continue;
-                view.Renderers.Add(renderer);
+                if (material != null && material.renderQueue > (int)RenderQueue.GeometryLast)
+                {
+                    view.SeeThrough.Add(renderer);
+                    continue;
+                }
+
+                if (renderer is SkinnedMeshRenderer || renderer is MeshRenderer) view.Renderers.Add(renderer);
             }
 
             Found.Clear();
