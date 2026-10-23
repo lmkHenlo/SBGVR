@@ -1,0 +1,8 @@
+# Normalise text files to LF in the repository.
+* text=auto
+
+*.ps1 text eol=crlf
+*.dll binary
+*.png binary
+*.bmp binary
+*.tpk binary
