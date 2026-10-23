@@ -121,6 +121,15 @@ namespace SbgVr.Diagnostics
                 {
                     if (feature == null) continue;
                     Info($"    feature {feature.GetType().FullName} '{feature.name}' active={feature.isActive}");
+                    if (feature is UnityEngine.Rendering.Universal.RenderObjects renderObjects)
+                    {
+                        // What it draws and when: one drawn after transparents also comes after the VR UI.
+                        var settings = renderObjects.settings;
+                        var filter = settings.filterSettings;
+                        Info($"      event={settings.Event} queue={filter.RenderQueueType} layers=0x{filter.LayerMask.value:X8} " +
+                             $"override material={(settings.overrideMaterial != null ? settings.overrideMaterial.name : "none")} " +
+                             $"depth override={settings.overrideDepthState} test={settings.depthCompareFunction} write={settings.enableWrite}");
+                    }
                 }
             }
         }
