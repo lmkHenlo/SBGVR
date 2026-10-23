@@ -1,9 +1,10 @@
 // SBG VR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
+using System;
 using BepInEx;
-using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
 using UnityEngine;
 
 namespace SbgVr
@@ -20,38 +21,84 @@ namespace SbgVr
         internal const string UuvrGuid = "raicuparta.uuvr-modern";
 
         internal static ManualLogSource Log;
-
-        internal static ConfigEntry<bool> DiagnosticsEnabled;
-        internal static ConfigEntry<float> PerformanceLogInterval;
+        internal static Harmony Harmony;
 
         private void Awake()
         {
             Log = Logger;
-            BindConfig();
+            Settings.Bind(Config);
+            Harmony = new Harmony(Guid);
 
-            if (DiagnosticsEnabled.Value)
-            {
-                var host = new GameObject("SBG VR");
-                host.hideFlags = HideFlags.HideAndDontSave;
-                DontDestroyOnLoad(host);
-                host.AddComponent<Diagnostics.VrDiagnostics>();
-                Log.LogInfo("[ok] Diagnostics");
-            }
+            // One persistent object for SBG VR's own components.
+            var host = new GameObject("SBG VR");
+            host.hideFlags = HideFlags.HideAndDontSave;
+            DontDestroyOnLoad(host);
+            host.AddComponent<VrStateTracker>();
 
-            Log.LogInfo(DiagnosticsEnabled.Value
+            if (Settings.DiagnosticsEnabled.Value)
+                Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
+
+            Log.LogInfo(Settings.DiagnosticsEnabled.Value
                 ? $"{Name} {Version} loaded. Diagnostics are on: VR, camera and renderer details go to this log."
                 : $"{Name} {Version} loaded.");
         }
 
-        private void BindConfig()
+        /// <summary>
+        /// Applies one feature's Harmony patches. A feature whose patch fails is removed again and logged, and
+        /// the other features keep working.
+        /// </summary>
+        private static bool Patch(string feature, Type patchClass)
         {
-            DiagnosticsEnabled = Config.Bind("Diagnostics", "Enabled", true,
-                "Write VR, camera and renderer details to the BepInEx log (LogOutput.log), so problems in the " +
-                "headset can be tracked down from the log. Only changes are logged, not every frame.");
-            PerformanceLogInterval = Config.Bind("Diagnostics", "PerformanceLogInterval", 30f,
-                new ConfigDescription(
-                    "Seconds between frame rate lines in the log while VR is running. 0 = never.",
-                    new AcceptableValueRange<float>(0f, 600f)));
+            try
+            {
+                Harmony.CreateClassProcessor(patchClass).Patch();
+                Log.LogInfo($"[ok] {feature}");
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Log.LogError($"[FAILED] {feature}: {exception.GetBaseException().Message}. This feature is off; the rest of SBG VR works as before.");
+                try
+                {
+                    UnpatchClass(patchClass);
+                }
+                catch (Exception unpatchException)
+                {
+                    Log.LogWarning($"Couldn't fully remove the patches for {feature}: {unpatchException.Message}");
+                }
+
+                return false;
+            }
+        }
+
+        private static void UnpatchClass(Type patchClass)
+        {
+            foreach (var original in Harmony.GetPatchedMethods())
+            {
+                var info = Harmony.GetPatchInfo(original);
+                foreach (var patch in info.Prefixes) Remove(original, patch);
+                foreach (var patch in info.Postfixes) Remove(original, patch);
+                foreach (var patch in info.Transpilers) Remove(original, patch);
+            }
+
+            void Remove(System.Reflection.MethodBase original, HarmonyLib.Patch patch)
+            {
+                if (patch.owner == Guid && patch.PatchMethod.DeclaringType == patchClass)
+                    Harmony.Unpatch(original, patch.PatchMethod);
+            }
+        }
+
+        private static void Add(GameObject host, string feature, Type component)
+        {
+            try
+            {
+                host.AddComponent(component);
+                Log.LogInfo($"[ok] {feature}");
+            }
+            catch (Exception exception)
+            {
+                Log.LogError($"[FAILED] {feature}: {exception.GetBaseException().Message}");
+            }
         }
     }
 }

@@ -244,7 +244,7 @@ namespace SbgVr.Diagnostics
 
         private void TrackFrameRate()
         {
-            var interval = Plugin.PerformanceLogInterval.Value;
+            var interval = Settings.PerformanceLogInterval.Value;
             if (!_vrRunning || interval <= 0f)
             {
                 _frames = 0;
