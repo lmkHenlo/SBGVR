@@ -122,6 +122,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Remove `uuvr/lib` | The build uses the game's assemblies instead. |
 | Pick the UI's camera again when the current one stops rendering | The main menu switches between seven cameras of equal depth; the floating screen kept following one that was switched off, and the menu disappeared. |
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
+| Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
 | Add `VrCameraOffset.RecenterRotation` | Lets SBG VR recentre the view. Identity (the default) keeps upstream behaviour. |
 
 **SBG VR** (`src/SbgVr`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen, and each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
@@ -168,7 +169,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
 1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.9 loaded` appears, and every SBG VR feature line starts with `[ok]`.
 2. Main menu: the game shows in the headset and follows your head; the menu stays readable while the background scenes change; each scene holds still; the fade between scenes darkens the whole view behind the menu; the mouse cursor is visible and clicks land where it points.
-3. Settings, lobby and match setup menus work. Joining or leaving a match fades the whole view.
+3. Settings, lobby and match setup menus work, and item effects (lightning, for one) don't show through them. Joining or leaving a match fades the whole view.
 4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
 5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen. Opening a menu (Match Setup, say) covers the markers behind it, including interaction prompts such as Set Up Match. A player character, including yours, covers the parts of markers behind it, and markers in front of a character stay on top of it; hills and trees still don't hide markers. Name tags aren't covered by their own players. A shield or emblem on a character stays steady while markers pass behind it.
 6. No black areas over nearby scenery or your character when you look around or move. Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes and doesn't smear or flicker when you turn your head. The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size). With `AmbientOcclusion` off, the frame rate goes up.
