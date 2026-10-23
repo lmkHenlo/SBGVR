@@ -35,6 +35,7 @@ namespace SbgVr
             DontDestroyOnLoad(host);
             host.AddComponent<VrStateTracker>();
 
+            Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
 
