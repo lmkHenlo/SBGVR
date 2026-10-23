@@ -41,6 +41,7 @@ namespace SbgVr
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
+            Add(host, "Recenter key", typeof(Comfort.Recenter));
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
 
