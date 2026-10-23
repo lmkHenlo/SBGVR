@@ -1,6 +1,7 @@
 // SBG VR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
+using Game.Rendering.Blur;
 using Game.Rendering.CRT;
 using Game.Rendering.FlashFrame;
 using HarmonyLib;
@@ -16,6 +17,9 @@ namespace SbgVr.Comfort
     /// <item>Flash frames (VR Comfort.FlashFrames): a full-view flash with a doubled picture.</item>
     /// <item>The CRT effect (photo camera and the CRT graphics option), always: its bulge warps each eye
     /// separately.</item>
+    /// <item>The menu blur, always: the pause menu (and the settings opened from it) blurs the camera's
+    /// picture. On a flat screen the menu is drawn over that afterwards; in VR, UUVR's floating screen is part
+    /// of the camera's picture, so the menu itself was blurred and unreadable.</item>
     /// </list>
     /// </summary>
     [HarmonyPatch]
@@ -38,6 +42,13 @@ namespace SbgVr.Comfort
         [HarmonyPatch(typeof(CRTFeature), nameof(CRTFeature.AddRenderPasses))]
         [HarmonyPrefix]
         private static bool CrtAddRenderPasses()
+        {
+            return !VrState.IsRunning;
+        }
+
+        [HarmonyPatch(typeof(BlurFeature), nameof(BlurFeature.AddRenderPasses))]
+        [HarmonyPrefix]
+        private static bool BlurAddRenderPasses()
         {
             return !VrState.IsRunning;
         }

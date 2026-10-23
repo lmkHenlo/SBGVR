@@ -36,7 +36,7 @@ namespace SbgVr
             host.AddComponent<VrStateTracker>();
 
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
-            Patch("Impact and flash frames, CRT effect", typeof(Comfort.ScreenEffectPatches));
+            Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();

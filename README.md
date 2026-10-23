@@ -127,7 +127,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Feature | Files | How |
 | --- | --- | --- |
 | Screen shake | `Comfort/ScreenShakePatches.cs` | Transpilers on `CameraModuleController.UpdateShake` and `CanShakeAtAll` multiply the game's shake setting by `ScreenShake`. |
-| Screen effects | `Comfort/ScreenEffectPatches.cs` | Prefixes skip `ImpactFrameController.PlayImpactFrame`, `FlashFrameFeature.AddRenderPasses` and `CRTFeature.AddRenderPasses`. |
+| Screen effects | `Comfort/ScreenEffectPatches.cs` | Prefixes skip `ImpactFrameController.PlayImpactFrame`, `FlashFrameFeature.AddRenderPasses`, `CRTFeature.AddRenderPasses` and `BlurFeature.AddRenderPasses` (the pause menu's blur, which in VR blurred the floating screen too). |
 | Camera transitions | `Comfort/CameraTransitionPatches.cs` | A prefix on `CameraModuleController.TransitionToInternal` shortens or zeroes the duration. |
 | Menu background | `Comfort/MenuBackground.cs` | Holds each `MainMenuScenario` camera halfway between its two pan points. |
 | Full-view fades | `Fades/` | Hides `ColorOverlay`'s image and the main menu's overlay, and draws their colour on spheres around the camera, over and behind the floating screen. |
@@ -138,7 +138,7 @@ It also logs diagnostics, each kind once and again when it changes: the game, gr
 
 ## Known issues
 
-- **0.2.0 is untested in a headset.** It fixes what testing 0.1.0 found; the test plan below covers the new features.
+- **0.2.x is being tested in a headset.** It fixes what testing 0.1.0 found; the test plan below covers the new features.
 - **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet.
 - **Game folder files.** The patcher writes into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`. They aren't used without the mod and can be deleted.
 - **MaxFOVSlider** isn't handled yet. Disable it while using VR.
@@ -162,12 +162,12 @@ The version is in three places, and the build fails if they differ: `SbgVrVersio
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.0 loaded` appears, and every SBG VR feature line starts with `[ok]`.
+1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.1 loaded` appears, and every SBG VR feature line starts with `[ok]`.
 2. Main menu: the game shows in the headset and follows your head; the menu stays readable while the background scenes change; each scene holds still; the fade between scenes darkens the whole view behind the menu; the mouse cursor is visible and clicks land where it points.
 3. Settings, lobby and match setup menus work. Joining or leaving a match fades the whole view.
 4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
 5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen.
-6. Explosions near you don't flash the view or shake the camera.
+6. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
 7. F4 recentres the view; F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
 8. The frame rate lines in the log are close to the headset's refresh rate.
 
