@@ -38,6 +38,8 @@ namespace SbgVr
         internal static ConfigEntry<float> MarkerScale;
         internal static ConfigEntry<float> MarkerViewAngle;
 
+        internal static ConfigEntry<bool> AmbientOcclusion;
+
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
 
@@ -83,6 +85,12 @@ namespace SbgVr
                     "Icons for targets within this many degrees of straight ahead are drawn in the world; " +
                     "targets further round get the game's arrow at the edge of the floating screen.",
                     new AcceptableValueRange<float>(30f, 120f)));
+
+            const string graphics = "VR Graphics";
+            AmbientOcclusion = config.Bind(graphics, "AmbientOcclusion", true,
+                "The game's ambient occlusion (soft shading where surfaces meet) in VR. It costs more than on a " +
+                "flat screen: each eye is drawn separately, at the headset's resolution. Off = none in VR; the " +
+                "game's own setting still applies on a flat screen.");
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,
