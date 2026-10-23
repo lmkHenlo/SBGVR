@@ -23,6 +23,11 @@ public class UuvrCore: MonoBehaviour
     private PropertyInfo? _refreshRateProperty;
     private VrTogglerManager? _vrTogglerManager;
 
+#if MONO
+    // SBG VR: Unity destroys every object while the game quits; don't rebuild UUVR then.
+    private static bool _isQuitting;
+#endif
+
     public static void Create()
     {
         new GameObject("UUVR").AddComponent<UuvrCore>();
@@ -30,6 +35,10 @@ public class UuvrCore: MonoBehaviour
 
     private void Awake()
     {
+#if MONO
+        Application.quitting -= OnApplicationQuitting;
+        Application.quitting += OnApplicationQuitting;
+#endif
         DontDestroyOnLoad(gameObject);
         gameObject.AddComponent<VrCameraManager>();
         
@@ -37,8 +46,18 @@ public class UuvrCore: MonoBehaviour
         // UuvrBehaviour.Create<UuvrInput>(transform);
     }
 
+#if MONO
+    private static void OnApplicationQuitting()
+    {
+        _isQuitting = true;
+    }
+#endif
+
     private void OnDestroy()
     {
+#if MONO
+        if (_isQuitting) return;
+#endif
         Debug.Log("UUVR has been destroyed. This shouldn't have happened. Recreating...");
         
         Create();
