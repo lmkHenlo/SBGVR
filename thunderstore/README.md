@@ -2,7 +2,7 @@
 
 Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
-> **Experimental.** SBG VR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.9 is a test build: expect rough edges.
+> **Experimental.** SBG VR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.10 is a test build: expect rough edges.
 
 ## What it does
 
