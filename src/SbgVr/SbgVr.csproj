@@ -19,4 +19,12 @@
     <Copyright>Copyright (c) 2026 lmkHenlo</Copyright>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Built first by SBG_VR.proj; shipped by the package, so not copied here. -->
+    <Reference Include="Uuvr">
+      <HintPath>$(StageDir)plugins\Uuvr.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
 </Project>
