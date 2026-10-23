@@ -186,6 +186,10 @@ namespace SbgVr.Fades
                 _renderer = _object.GetComponent<Renderer>();
                 _renderer.shadowCastingMode = ShadowCastingMode.Off;
                 _renderer.receiveShadows = false;
+                // Sorted with the floating screen, after every other transparent object, so effects with a
+                // higher sorting order can't show through a fade; the render queue puts it behind or over the
+                // floating screen.
+                Uuvr.VrUi.UiSorting.DrawLast(_renderer);
 
                 // The same UI shader UUVR draws its floating screen with, which is known to render in this game's
                 // VR setup. Culling is off in it, so the sphere is visible from inside.
