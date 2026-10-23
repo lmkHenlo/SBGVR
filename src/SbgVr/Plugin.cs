@@ -38,6 +38,7 @@ namespace SbgVr
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             Patch("Impact and flash frames, CRT effect", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
+            Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
 
