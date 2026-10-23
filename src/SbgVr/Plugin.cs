@@ -44,7 +44,10 @@ namespace SbgVr
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
+            {
                 Hud.WorldMarker.Initialize();
+                Hud.MarkerOcclusion.Initialize();
+            }
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Recenter key", typeof(Comfort.Recenter));
             if (Settings.DiagnosticsEnabled.Value)

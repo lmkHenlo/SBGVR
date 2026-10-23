@@ -8,53 +8,142 @@ using UnityEngine.Rendering;
 namespace SbgVr.Hud
 {
     /// <summary>
-    /// Where player characters appear in the view, for VR HUD.HideMarkersOverPlayers.
+    /// Where the player characters are in view, for <see cref="MarkerOcclusion"/>.
     ///
-    /// Positions are in the camera's tangent space: a point's sideways and upward offsets divided by its
-    /// distance ahead. A marker and a character overlap in view exactly when their tangent-space rectangles
-    /// do, whichever way the head is turned. Each character is the set of its mesh renderers' bounding
-    /// boxes, projected once per frame; a single box around the whole character would also cover the space
-    /// around its arms and club.
+    /// Areas are in the camera's tangent space: a point's sideways and upward offsets divided by its distance
+    /// ahead. A marker and a character overlap in view exactly when their tangent-space areas do, whichever
+    /// way the head is turned. A character's area is the set of its meshes' bounding boxes; a single box
+    /// around the whole character would also cover the space between its arms and club.
     /// </summary>
     internal static class PlayerOverlap
     {
         private const float RendererRefreshSeconds = 1f;
         private const float MinimumDepth = 0.01f;
 
-        private struct Area
+        internal sealed class PlayerView
         {
             internal PlayerInfo Player;
-            internal Rect Rect;
+
+            /// <summary>
+            /// The character's solid meshes: body, clothes, cosmetics and what it holds. Not effects or
+            /// see-through parts.
+            /// </summary>
+            internal readonly List<Renderer> Renderers = new List<Renderer>();
+
+            /// <summary>The visible meshes' areas in view, this frame.</summary>
+            internal readonly List<Rect> Areas = new List<Rect>();
+
+            /// <summary>Distance from the camera to the middle of the character, this frame.</summary>
+            internal float Distance;
+
+            internal bool Overlaps(Rect area)
+            {
+                foreach (var rect in Areas)
+                {
+                    if (rect.Overlaps(area)) return true;
+                }
+
+                return false;
+            }
         }
 
-        private static readonly List<Area> Areas = new List<Area>();
-        private static readonly List<PlayerInfo> Players = new List<PlayerInfo>();
-        private static readonly Dictionary<PlayerInfo, List<Renderer>> RenderersByPlayer = new Dictionary<PlayerInfo, List<Renderer>>();
+        private static readonly Dictionary<PlayerInfo, PlayerView> Views = new Dictionary<PlayerInfo, PlayerView>();
+        private static readonly List<PlayerView> Visible = new List<PlayerView>();
+        private static readonly List<PlayerInfo> Gone = new List<PlayerInfo>();
         private static readonly List<Renderer> Found = new List<Renderer>();
         private static readonly Vector3[] Corners = new Vector3[8];
-
-        private static int _frame = -1;
-        private static Camera _camera;
         private static float _nextRefresh;
 
         /// <summary>
-        /// True when <paramref name="area"/> (tangent space of <paramref name="camera"/>) overlaps any player
-        /// character other than <paramref name="owner"/>.
+        /// Every player character with a visible mesh in front of <paramref name="camera"/>, with its areas and
+        /// distance for this frame.
         /// </summary>
-        internal static bool Covers(Camera camera, Rect area, PlayerInfo owner)
+        internal static List<PlayerView> Update(Camera camera)
         {
-            Update(camera);
-            foreach (var playerArea in Areas)
+            Visible.Clear();
+
+            var refresh = Time.unscaledTime >= _nextRefresh;
+            if (refresh) _nextRefresh = Time.unscaledTime + RendererRefreshSeconds;
+
+            foreach (var player in Views.Keys)
             {
-                if (playerArea.Player != owner && playerArea.Rect.Overlaps(area)) return true;
+                if (player == null) Gone.Add(player);
             }
 
-            return false;
+            foreach (var player in Gone) Views.Remove(player);
+            Gone.Clear();
+
+            Consider(camera, GameManager.LocalPlayerInfo, refresh);
+            var remotePlayers = GameManager.RemotePlayers;
+            if (remotePlayers != null)
+            {
+                foreach (var player in remotePlayers) Consider(camera, player, refresh);
+            }
+
+            return Visible;
+        }
+
+        private static void Consider(Camera camera, PlayerInfo player, bool refresh)
+        {
+            if (player == null) return;
+
+            if (!Views.TryGetValue(player, out var view))
+            {
+                view = new PlayerView { Player = player };
+                Views[player] = view;
+                refresh = true;
+            }
+
+            if (refresh) FindRenderers(view);
+
+            view.Areas.Clear();
+            var cameraTransform = camera.transform;
+            var bounds = default(Bounds);
+            var hasBounds = false;
+            foreach (var renderer in view.Renderers)
+            {
+                if (!IsDrawn(renderer)) continue;
+
+                var rendererBounds = renderer.bounds;
+                if (!TryProject(cameraTransform, rendererBounds, out var rect)) continue;
+
+                view.Areas.Add(rect);
+                if (hasBounds) bounds.Encapsulate(rendererBounds);
+                else bounds = rendererBounds;
+                hasBounds = true;
+            }
+
+            if (!hasBounds) return;
+            view.Distance = Vector3.Distance(cameraTransform.position, bounds.center);
+            Visible.Add(view);
+        }
+
+        internal static bool IsDrawn(Renderer renderer)
+        {
+            return renderer != null && renderer.enabled && renderer.gameObject.activeInHierarchy &&
+                   !renderer.forceRenderingOff && renderer.shadowCastingMode != ShadowCastingMode.ShadowsOnly;
+        }
+
+        private static void FindRenderers(PlayerView view)
+        {
+            view.Renderers.Clear();
+            view.Player.GetComponentsInChildren(false, Found);
+            foreach (var renderer in Found)
+            {
+                if (!(renderer is SkinnedMeshRenderer || renderer is MeshRenderer)) continue;
+
+                // See-through parts (shields, glows) don't hide what's behind them.
+                var material = renderer.sharedMaterial;
+                if (material != null && material.renderQueue > (int)RenderQueue.GeometryLast) continue;
+                view.Renderers.Add(renderer);
+            }
+
+            Found.Clear();
         }
 
         /// <summary>
-        /// Adds a world-space point to a tangent-space rectangle. Returns false for a point at or behind the
-        /// camera, which has no place on screen.
+        /// Adds a world-space point to a tangent-space area. Returns false for a point at or behind the camera,
+        /// which has no place on screen.
         /// </summary>
         internal static bool Encapsulate(Transform camera, Vector3 worldPoint, ref Rect rect, ref bool empty)
         {
@@ -78,62 +167,6 @@ namespace SbgVr.Hud
             return true;
         }
 
-        private static void Update(Camera camera)
-        {
-            if (_frame == Time.frameCount && _camera == camera) return;
-            _frame = Time.frameCount;
-            _camera = camera;
-            Areas.Clear();
-
-            Players.Clear();
-            if (GameManager.LocalPlayerInfo != null) Players.Add(GameManager.LocalPlayerInfo);
-            var remotePlayers = GameManager.RemotePlayers;
-            if (remotePlayers != null)
-            {
-                foreach (var player in remotePlayers)
-                {
-                    if (player != null) Players.Add(player);
-                }
-            }
-
-            if (Time.unscaledTime >= _nextRefresh)
-            {
-                _nextRefresh = Time.unscaledTime + RendererRefreshSeconds;
-                RenderersByPlayer.Clear();
-            }
-
-            var cameraTransform = camera.transform;
-            foreach (var player in Players)
-            {
-                foreach (var renderer in RenderersOf(player))
-                {
-                    if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy ||
-                        renderer.forceRenderingOff || renderer.shadowCastingMode == ShadowCastingMode.ShadowsOnly)
-                        continue;
-
-                    if (TryProject(cameraTransform, renderer.bounds, out var rect))
-                        Areas.Add(new Area { Player = player, Rect = rect });
-                }
-            }
-        }
-
-        /// <summary>The character's meshes: its body, clothes and cosmetics, and what it holds. Not effects.</summary>
-        private static List<Renderer> RenderersOf(PlayerInfo player)
-        {
-            if (RenderersByPlayer.TryGetValue(player, out var renderers)) return renderers;
-
-            renderers = new List<Renderer>();
-            player.GetComponentsInChildren(false, Found);
-            foreach (var renderer in Found)
-            {
-                if (renderer is SkinnedMeshRenderer || renderer is MeshRenderer) renderers.Add(renderer);
-            }
-
-            Found.Clear();
-            RenderersByPlayer[player] = renderers;
-            return renderers;
-        }
-
         private static bool TryProject(Transform camera, Bounds bounds, out Rect rect)
         {
             var min = bounds.min;
@@ -151,7 +184,7 @@ namespace SbgVr.Hud
             var empty = true;
             foreach (var corner in Corners)
             {
-                // A box reaching behind the camera can't be placed on screen; skip it rather than guess.
+                // A box reaching behind the camera can't be placed on screen; leave it out rather than guess.
                 if (!Encapsulate(camera, corner, ref rect, ref empty)) return false;
             }
 

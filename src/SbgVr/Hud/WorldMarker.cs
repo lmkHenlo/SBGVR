@@ -24,6 +24,9 @@ namespace SbgVr.Hud
     /// While away from the HUD the marker still follows it: the canvas lives in the HUD's scene (so it is
     /// unloaded with it), copies the HUD's visibility and fading, and the marker is destroyed if the HUD
     /// object it came from is.
+    ///
+    /// Each marker has its own copy of the on-top material, so <see cref="MarkerOcclusion"/> can give it its
+    /// own place in the drawing order relative to the player characters in front of it.
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -31,9 +34,14 @@ namespace SbgVr.Hud
         // floating screen cover markers the way the game's menus cover its HUD.
         private const int QueuesBeforeFloatingScreen = 10;
         private const float FloatingScreenWidthPerScale = 1.8f;
-        private const float OverPlayerFadeSeconds = 0.12f;
+
+        /// <summary>Markers currently drawn in the world.</summary>
+        internal static readonly List<WorldMarker> InWorld = new List<WorldMarker>();
 
         private static Material _onTopMaterial;
+
+        private Material _markerMaterial;
+        private int _renderQueue = -1;
 
         private Transform _rect;
         private GameObject _anchor;
@@ -49,8 +57,16 @@ namespace SbgVr.Hud
         private readonly List<KeyValuePair<TMP_Text, Material>> _originalFontMaterials = new List<KeyValuePair<TMP_Text, Material>>();
         private readonly List<Graphic> _visibleGraphics = new List<Graphic>();
         private readonly Vector3[] _corners = new Vector3[4];
-        private float _overPlayerAlpha = 1f;
-        private bool _justPlaced;
+
+        /// <summary>The player the marker belongs to (a name tag's or teammate icon's), or null.</summary>
+        internal PlayerInfo Owner { get; private set; }
+
+        /// <summary>Where the marker is drawn this frame.</summary>
+        internal Vector3 Position => _anchor != null ? _anchor.transform.position : transform.position;
+
+        /// <summary>True when the marker is drawn over scenery and can be seen this frame.</summary>
+        internal bool DrawnOnTop => _inWorld && _materialsSwapped && _canvas != null && _canvas.enabled &&
+                                    _canvasGroup.alpha > 0f;
 
         internal static void Initialize()
         {
@@ -81,12 +97,15 @@ namespace SbgVr.Hud
                 worldMarker = marker.gameObject.AddComponent<WorldMarker>();
             }
 
-            worldMarker.PlaceInternal(worldPosition, inWorld, owner);
+            worldMarker.Owner = owner;
+            worldMarker.PlaceInternal(worldPosition, inWorld);
         }
 
         private void OnDestroy()
         {
+            InWorld.Remove(this);
             if (_anchor != null) Destroy(_anchor);
+            if (_markerMaterial != null) Destroy(_markerMaterial);
         }
 
         private void OnTransformParentChanged()
@@ -96,6 +115,7 @@ namespace SbgVr.Hud
             if (!_inWorld || (_anchor != null && _rect.parent == _anchor.transform)) return;
             RestoreMaterials();
             _inWorld = false;
+            InWorld.Remove(this);
         }
 
         private void LateUpdate()
@@ -105,7 +125,7 @@ namespace SbgVr.Hud
                 Destroy(gameObject);
         }
 
-        private void PlaceInternal(Vector3 worldPosition, bool inWorld, PlayerInfo owner)
+        private void PlaceInternal(Vector3 worldPosition, bool inWorld)
         {
             if (_rect == null) _rect = transform;
             var camera = Enabled ? Fades.FullViewFade.ViewCamera() : null;
@@ -118,24 +138,24 @@ namespace SbgVr.Hud
             if (!_inWorld || _rect.parent != _anchor.transform) MoveToWorld();
             UpdateMaterials();
             MirrorHudVisibility();
-            Position(camera, worldPosition);
-            HideOverPlayers(camera, owner);
+            PlaceAnchor(camera, worldPosition);
         }
 
         /// <summary>
-        /// VR HUD.HideMarkersOverPlayers: fades the marker out while it's drawn over a player character, and
-        /// back in once it isn't, so markers don't cover the players. Runs after <see cref="Position"/>, so
-        /// the marker's graphics are where they'll be drawn this frame.
+        /// Draws the marker at <paramref name="renderQueue"/>; <see cref="TopRenderQueue"/> unless a player
+        /// character in front of it has to be drawn after it.
         /// </summary>
-        private void HideOverPlayers(Camera camera, PlayerInfo owner)
+        internal void SetRenderQueue(int renderQueue)
         {
-            var hidden = Settings.HideMarkersOverPlayers.Value && _canvas.enabled && IsOverPlayer(camera, owner);
-            var target = hidden ? 0f : 1f;
-            _overPlayerAlpha = _justPlaced
-                ? target
-                : Mathf.MoveTowards(_overPlayerAlpha, target, Time.unscaledDeltaTime / OverPlayerFadeSeconds);
-            _justPlaced = false;
-            _canvasGroup.alpha *= _overPlayerAlpha;
+            if (renderQueue == _renderQueue || !_materialsSwapped) return;
+            _renderQueue = renderQueue;
+            if (_markerMaterial != null) _markerMaterial.renderQueue = renderQueue;
+            foreach (var pair in _originalFontMaterials)
+            {
+                if (pair.Key == null) continue;
+                var onTop = pair.Key.fontSharedMaterial;
+                if (onTop != null && onTop != pair.Value) onTop.renderQueue = renderQueue;
+            }
         }
 
         /// <summary>
@@ -162,11 +182,13 @@ namespace SbgVr.Hud
             return true;
         }
 
-        private bool IsOverPlayer(Camera camera, PlayerInfo owner)
+        /// <summary>
+        /// The area the marker covers in view, in the camera's tangent space (see <see cref="PlayerOverlap"/>):
+        /// the union of its visible graphics. False when it covers nothing or reaches behind the camera.
+        /// </summary>
+        internal bool TryGetArea(Transform cameraTransform, out Rect area)
         {
-            // The area the marker covers in view: the union of its visible graphics.
-            var cameraTransform = camera.transform;
-            var area = default(Rect);
+            area = default;
             var empty = true;
             GetComponentsInChildren(false, _visibleGraphics);
             foreach (var graphic in _visibleGraphics)
@@ -184,7 +206,7 @@ namespace SbgVr.Hud
             }
 
             _visibleGraphics.Clear();
-            return !empty && PlayerOverlap.Covers(camera, area, owner);
+            return !empty;
         }
 
         private void MoveToWorld()
@@ -207,13 +229,14 @@ namespace SbgVr.Hud
 
             _rect.SetParent(_anchor.transform, false);
             _inWorld = true;
-            _justPlaced = true;
+            if (!InWorld.Contains(this)) InWorld.Add(this);
         }
 
         private void MoveToHud()
         {
             RestoreMaterials();
             _inWorld = false;
+            InWorld.Remove(this);
             if (_anchor == null || _rect.parent != _anchor.transform) return;
 
             // This frame the game already placed the marker for the HUD, in screen coordinates; keep that.
@@ -269,7 +292,7 @@ namespace SbgVr.Hud
             _canvasGroup.alpha = alpha;
         }
 
-        private void Position(Camera camera, Vector3 worldPosition)
+        private void PlaceAnchor(Camera camera, Vector3 worldPosition)
         {
             var cameraTransform = camera.transform;
             var toTarget = worldPosition - cameraTransform.position;
@@ -306,8 +329,8 @@ namespace SbgVr.Hud
 
         /// <summary>
         /// World-space UI is depth tested, so scenery would hide markers that the game draws over everything.
-        /// With MarkersOnTop the marker's graphics use a copy of the UI material that ignores depth, drawn after
-        /// the scene but before the floating screen.
+        /// With MarkersOnTop the marker's graphics use the marker's own copy of a UI material that ignores
+        /// depth, drawn after the scene but before the floating screen.
         /// </summary>
         private void UpdateMaterials()
         {
@@ -317,13 +340,15 @@ namespace SbgVr.Hud
                 return;
             }
 
-            var renderQueue = OnTopRenderQueue();
-            _onTopMaterial.renderQueue = renderQueue;
-
             var graphics = GetComponentsInChildren<Graphic>(true);
             if (_materialsSwapped && graphics.Length == _graphicCount) return;
 
             RestoreMaterials();
+            var renderQueue = TopRenderQueue;
+            _renderQueue = renderQueue;
+            if (_markerMaterial == null)
+                _markerMaterial = new Material(_onTopMaterial) { name = $"SBG VR marker ({name})" };
+            _markerMaterial.renderQueue = renderQueue;
             _graphicCount = graphics.Length;
             foreach (var graphic in graphics)
             {
@@ -343,16 +368,24 @@ namespace SbgVr.Hud
                 var material = graphic.material;
                 if (material != null && material.shader != _onTopMaterial.shader) continue;
                 _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
-                graphic.material = _onTopMaterial;
+                graphic.material = _markerMaterial;
             }
 
             _materialsSwapped = true;
         }
 
-        private static int OnTopRenderQueue()
+        /// <summary>
+        /// Where markers drawn over scenery go in the drawing order: after the scene and its effects, just
+        /// before UUVR's floating screen.
+        /// </summary>
+        internal static int TopRenderQueue
         {
-            var floatingScreenQueue = ModConfiguration.Instance.VrUiRenderQueue.Value;
-            return Mathf.Max((int)RenderQueue.Transparent, floatingScreenQueue - QueuesBeforeFloatingScreen);
+            get
+            {
+                var floatingScreenQueue = ModConfiguration.Instance.VrUiRenderQueue.Value;
+                return Mathf.Max((int)RenderQueue.Transparent + MarkerOcclusion.QueueSlots + 1,
+                    floatingScreenQueue - QueuesBeforeFloatingScreen);
+            }
         }
 
         private void RestoreMaterials()
@@ -374,6 +407,7 @@ namespace SbgVr.Hud
             _originalFontMaterials.Clear();
             _materialsSwapped = false;
             _graphicCount = 0;
+            _renderQueue = -1;
         }
     }
 }
