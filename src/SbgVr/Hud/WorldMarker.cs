@@ -25,8 +25,8 @@ namespace SbgVr.Hud
     /// unloaded with it), copies the HUD's visibility and fading, and the marker is destroyed if the HUD
     /// object it came from is.
     ///
-    /// <see cref="MarkerOcclusion"/> gives each marker its own place in the drawing order, relative to the
-    /// player characters in front of it, by switching its graphics to on-top materials for that render queue.
+    /// <see cref="MarkerOcclusion"/> tells each marker which player characters are in front of it; the
+    /// marker skips the pixels those characters cover (marked in the stencil buffer).
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -47,12 +47,13 @@ namespace SbgVr.Hud
         private static readonly Dictionary<int, Material> UiMaterials = new Dictionary<int, Material>();
         private static readonly Dictionary<(Material, int), Material> FontMaterials = new Dictionary<(Material, int), Material>();
 
-        // Copies of the materials markers are actually drawn with, by the drawn material and render queue,
-        // and back to the material each copy was made from.
-        private static readonly Dictionary<(Material, int), Material> DrawnCopies = new Dictionary<(Material, int), Material>();
+        // Copies of the materials markers are actually drawn with, by the drawn material, render queue and
+        // covering stencil mask, and back to the material each copy was made from.
+        private static readonly Dictionary<(Material, int, int), Material> DrawnCopies = new Dictionary<(Material, int, int), Material>();
         private static readonly Dictionary<Material, Material> DrawnCopySources = new Dictionary<Material, Material>();
 
         private int _renderQueue = -1;
+        private int _coveringMask;
 
         private Transform _rect;
         private GameObject _anchor;
@@ -152,24 +153,22 @@ namespace SbgVr.Hud
         }
 
         /// <summary>
-        /// Draws the marker at <paramref name="renderQueue"/>; <see cref="TopRenderQueue"/> unless a player
-        /// character in front of it has to be drawn after it. Takes effect in
-        /// <see cref="EnforceDrawnMaterials"/>.
+        /// The stencil bits of the player characters in front of the marker this frame (0 for none); the
+        /// marker isn't drawn where any of them is set. Takes effect in <see cref="EnforceDrawnMaterials"/>.
         /// </summary>
-        internal void SetRenderQueue(int renderQueue)
+        internal void SetCoveringMask(int mask)
         {
-            if (_materialsSwapped) _renderQueue = renderQueue;
+            _coveringMask = mask;
         }
 
         /// <summary>
-        /// Makes every part of the marker draw at its render queue, ignoring depth, by setting the material
-        /// each canvas renderer actually draws with. Called once a frame after the UI has been rebuilt and
-        /// before it's drawn.
+        /// Makes every part of the marker draw at its render queue, ignoring depth and skipping the pixels of
+        /// the characters in front of it, by setting the material each canvas renderer actually draws with.
+        /// Called once a frame after the UI has been rebuilt and before it's drawn.
         ///
         /// Setting the graphics' own materials isn't enough. What's drawn is the material after UI masks and
         /// mask plugins (SoftMask) have swapped in copies of their own, which they make once and keep; and the
-        /// game can set a label's font material again at any time. Text kept drawing over players that way,
-        /// at a queue that came before them.
+        /// game can set a label's font material again at any time.
         /// </summary>
         internal void EnforceDrawnMaterials()
         {
@@ -186,7 +185,7 @@ namespace SbgVr.Hud
                     var drawn = canvasRenderer.GetMaterial(i);
                     if (drawn == null) continue;
 
-                    var wanted = DrawnCopy(drawn, _renderQueue);
+                    var wanted = DrawnCopy(drawn, _renderQueue, _coveringMask);
                     if (wanted != drawn) canvasRenderer.SetMaterial(wanted, i);
                 }
             }
@@ -195,22 +194,29 @@ namespace SbgVr.Hud
         }
 
         /// <summary>
-        /// <paramref name="drawn"/>, or a copy of the material it was made from, that ignores depth and draws
-        /// at <paramref name="renderQueue"/>.
+        /// A copy of the material <paramref name="drawn"/> was made from that ignores depth, draws at
+        /// <paramref name="renderQueue"/> and, with a non-zero <paramref name="coveringMask"/>, only where none
+        /// of those stencil bits is set. Masks (UI masks also use the stencil buffer) are left as they are when
+        /// nothing covers the marker.
         /// </summary>
-        private static Material DrawnCopy(Material drawn, int renderQueue)
+        private static Material DrawnCopy(Material drawn, int renderQueue, int coveringMask)
         {
-            if (drawn.renderQueue == renderQueue && (!drawn.HasProperty(ZTestProperty) ||
-                                                     drawn.GetInt(ZTestProperty) == (int)CompareFunction.Always))
-                return drawn;
-
             var source = DrawnCopySources.TryGetValue(drawn, out var original) && original != null ? original : drawn;
-            if (DrawnCopies.TryGetValue((source, renderQueue), out var copy) && copy != null) return copy;
+            if (DrawnCopies.TryGetValue((source, renderQueue, coveringMask), out var copy) && copy != null) return copy;
 
-            copy = new Material(source) { name = $"{source.name} (SBG VR marker {renderQueue})" };
+            copy = new Material(source) { name = $"{source.name} (SBG VR marker {renderQueue}/{coveringMask})" };
             if (copy.HasProperty(ZTestProperty)) copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
+            if (coveringMask != 0 && copy.HasProperty("_StencilComp"))
+            {
+                copy.SetInt("_Stencil", 0);
+                copy.SetInt("_StencilComp", (int)CompareFunction.Equal);
+                copy.SetInt("_StencilReadMask", coveringMask);
+                copy.SetInt("_StencilOp", (int)StencilOp.Keep);
+                copy.SetInt("_StencilWriteMask", 0);
+            }
+
             copy.renderQueue = renderQueue;
-            DrawnCopies[(source, renderQueue)] = copy;
+            DrawnCopies[(source, renderQueue, coveringMask)] = copy;
             DrawnCopySources[copy] = source;
             return copy;
         }
@@ -465,8 +471,7 @@ namespace SbgVr.Hud
             get
             {
                 var floatingScreenQueue = ModConfiguration.Instance.VrUiRenderQueue.Value;
-                return Mathf.Max((int)RenderQueue.Transparent + MarkerOcclusion.QueueSlots + 1,
-                    floatingScreenQueue - QueuesBeforeFloatingScreen);
+                return Mathf.Max((int)RenderQueue.Transparent + 1, floatingScreenQueue - QueuesBeforeFloatingScreen);
             }
         }
 

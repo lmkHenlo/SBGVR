@@ -89,7 +89,7 @@ namespace SbgVr
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
-                "to. Characters in front of a marker are drawn a second time to do this.");
+                "to.");
 
             const string graphics = "VR Graphics";
             AmbientOcclusion = config.Bind(graphics, "AmbientOcclusion", true,

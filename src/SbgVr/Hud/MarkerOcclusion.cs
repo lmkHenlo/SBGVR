@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 namespace SbgVr.Hud
@@ -12,22 +11,22 @@ namespace SbgVr.Hud
     /// VR HUD.PlayersCoverMarkers: player characters cover the markers behind them, while scenery still
     /// doesn't (VR HUD.MarkersOnTop).
     ///
-    /// Markers ignore depth so scenery can't hide them, which means nothing can: they're drawn after the
-    /// scene. So each frame, after the UI is rebuilt and before anything is drawn, the markers and the characters in front of them are
-    /// put in drawing order from far to near, like a painter, using render queues just below the markers'
-    /// usual one: a marker is drawn, then any character nearer than it is drawn again over it
-    /// (<see cref="PlayerOccluder"/>), then nearer markers, and so on. Only characters that are in front of a
-    /// marker they overlap in view are drawn again; the rest of the frame is unchanged.
+    /// Markers ignore depth so scenery can't hide them, which means nothing can. So each frame, after the UI
+    /// is rebuilt and before anything is drawn:
+    /// <list type="number">
+    /// <item>Each character that's nearer than a marker it overlaps in view gets a bit of the stencil buffer,
+    /// and <see cref="PlayerOccluder"/> sets that bit wherever the character is visible.</item>
+    /// <item>Each marker skips pixels with the bits of the characters in front of it, so those characters
+    /// show through as if the marker were behind them.</item>
+    /// </list>
+    /// The characters themselves are drawn once, as usual; nothing about how they look changes.
     ///
     /// A name tag or teammate icon isn't covered by the player it belongs to.
     /// </summary>
     internal static class MarkerOcclusion
     {
-        /// <summary>
-        /// Render queues used below the markers' usual one: two per marker or character in order, the second
-        /// for a character's see-through parts, drawn over the character again.
-        /// </summary>
-        internal const int QueueSlots = 80;
+        /// <summary>One stencil bit per covering character; more than this many share bits.</summary>
+        private const int StencilBits = 8;
 
         private struct MarkerInView
         {
@@ -36,20 +35,12 @@ namespace SbgVr.Hud
             internal float Distance;
         }
 
-        private struct Item
-        {
-            internal float Distance;
-            internal WorldMarker Marker;
-            internal PlayerOverlap.PlayerView Player;
-        }
-
         private static readonly Dictionary<PlayerInfo, PlayerOccluder> Occluders = new Dictionary<PlayerInfo, PlayerOccluder>();
         private static readonly List<MarkerInView> Markers = new List<MarkerInView>();
-        private static readonly List<Item> Items = new List<Item>();
-        private static readonly HashSet<WorldMarker> CoveredMarkers = new HashSet<WorldMarker>();
-        private static readonly HashSet<PlayerOverlap.PlayerView> CoveringPlayers = new HashSet<PlayerOverlap.PlayerView>();
+        private static readonly List<PlayerOverlap.PlayerView> Covering = new List<PlayerOverlap.PlayerView>();
+        private static readonly Dictionary<WorldMarker, int> Masks = new Dictionary<WorldMarker, int>();
+        private static readonly Dictionary<PlayerOverlap.PlayerView, int> Bits = new Dictionary<PlayerOverlap.PlayerView, int>();
         private static readonly HashSet<PlayerInfo> Drawn = new HashSet<PlayerInfo>();
-        private static readonly Dictionary<WorldMarker, int> Queues = new Dictionary<WorldMarker, int>();
         private static readonly List<PlayerInfo> Gone = new List<PlayerInfo>();
 
         internal static void Initialize()
@@ -58,34 +49,19 @@ namespace SbgVr.Hud
             // event; it's created first here, so it runs first) and before anything is drawn.
             _ = CanvasUpdateRegistry.instance;
             Canvas.willRenderCanvases += OnWillRenderCanvases;
-            RenderPipelineManager.endContextRendering += OnEndContextRendering;
-        }
-
-        /// <summary>
-        /// Once the headset's view has been drawn, puts back the materials of characters' see-through parts.
-        /// (Also done at the start of the next frame, in case it wasn't drawn.)
-        /// </summary>
-        private static void OnEndContextRendering(ScriptableRenderContext context, List<Camera> cameras)
-        {
-            var view = Fades.FullViewFade.ViewCamera();
-            if (view == null || cameras.Contains(view)) PlayerOccluder.RestoreSeeThrough();
         }
 
         private static void OnWillRenderCanvases()
         {
-            PlayerOccluder.RestoreSeeThrough();
-
-            var top = WorldMarker.TopRenderQueue;
             var camera = WorldMarker.Enabled && Settings.MarkersOnTop.Value && Settings.PlayersCoverMarkers.Value
                 ? Fades.FullViewFade.ViewCamera()
                 : null;
 
             Markers.Clear();
-            Items.Clear();
-            CoveredMarkers.Clear();
-            CoveringPlayers.Clear();
+            Covering.Clear();
+            Masks.Clear();
+            Bits.Clear();
             Drawn.Clear();
-            Queues.Clear();
 
             var cameraTransform = camera != null ? camera.transform : null;
             foreach (var marker in WorldMarker.InWorld)
@@ -103,56 +79,55 @@ namespace SbgVr.Hud
 
             if (Markers.Count > 0)
             {
+                // Characters in front of a marker they overlap, nearest first: if there are more than there
+                // are stencil bits, the nearest get their own.
                 foreach (var player in PlayerOverlap.Update(camera))
                 {
                     foreach (var marker in Markers)
                     {
-                        if (player.Player == marker.Marker.Owner || player.Distance >= marker.Distance ||
-                            !player.Overlaps(marker.Area))
-                            continue;
-
-                        if (CoveringPlayers.Add(player))
-                            Items.Add(new Item { Distance = player.Distance, Player = player });
-                        if (CoveredMarkers.Add(marker.Marker))
-                            Items.Add(new Item { Distance = marker.Distance, Marker = marker.Marker });
+                        if (IsCovering(player, marker))
+                        {
+                            Covering.Add(player);
+                            break;
+                        }
                     }
                 }
-            }
 
-            // Far to near; at equal distance the marker first, so the character covers it.
-            Items.Sort((a, b) =>
-            {
-                var order = b.Distance.CompareTo(a.Distance);
-                if (order != 0) return order;
-                return (a.Marker != null ? 0 : 1).CompareTo(b.Marker != null ? 0 : 1);
-            });
-
-            for (var i = 0; i < Items.Count; i++)
-            {
-                var queue = top - QueueSlots + 2 * Mathf.Min(i, QueueSlots / 2 - 1);
-                var item = Items[i];
-                if (item.Marker != null)
+                Covering.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+                for (var i = 0; i < Covering.Count; i++)
                 {
-                    Queues[item.Marker] = queue;
-                    continue;
+                    var player = Covering[i];
+                    var bit = 1 << Mathf.Min(i, StencilBits - 1);
+                    Bits[player] = bit;
+
+                    if (!Occluders.TryGetValue(player.Player, out var occluder))
+                    {
+                        occluder = new PlayerOccluder();
+                        Occluders[player.Player] = occluder;
+                    }
+
+                    occluder.Draw(player, bit);
+                    Drawn.Add(player.Player);
                 }
 
-                var player = item.Player.Player;
-                if (!Occluders.TryGetValue(player, out var occluder))
+                foreach (var marker in Markers)
                 {
-                    occluder = new PlayerOccluder();
-                    Occluders[player] = occluder;
-                }
+                    var mask = 0;
+                    foreach (var player in Covering)
+                    {
+                        if (IsCovering(player, marker)) mask |= Bits[player];
+                    }
 
-                occluder.Draw(item.Player, queue);
-                Drawn.Add(player);
+                    if (mask != 0) Masks[marker.Marker] = mask;
+                }
             }
 
-            // Every marker, covered or not: its queue for this frame, then the materials it's drawn with.
+            // Every marker, covered or not: which characters cover it this frame, then the materials it's
+            // drawn with.
             foreach (var marker in WorldMarker.InWorld)
             {
                 if (marker == null) continue;
-                marker.SetRenderQueue(Queues.TryGetValue(marker, out var queue) ? queue : top);
+                marker.SetCoveringMask(Masks.TryGetValue(marker, out var mask) ? mask : 0);
                 marker.EnforceDrawnMaterials();
             }
 
@@ -169,6 +144,12 @@ namespace SbgVr.Hud
             }
 
             Gone.Clear();
+        }
+
+        private static bool IsCovering(PlayerOverlap.PlayerView player, MarkerInView marker)
+        {
+            return player.Player != marker.Marker.Owner && player.Distance < marker.Distance &&
+                   player.Overlaps(marker.Area);
         }
     }
 }
