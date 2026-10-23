@@ -74,6 +74,7 @@ public class VrUiManager : UuvrBehaviour
         {
             _vrUiRenderer.material.shader = GetVrUiShader();
             _vrUiRenderer.material.renderQueue = ModConfiguration.Instance.VrUiRenderQueue.Value;
+            UiSorting.DrawLast(_vrUiRenderer);
         }
 
         UpdateFollowTarget();
