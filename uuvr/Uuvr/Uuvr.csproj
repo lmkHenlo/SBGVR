@@ -10,13 +10,10 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
         <DebugType>none</DebugType>
-        <OutputPath>$(BepInExDir)\mods\$(UnityBackendFolderName)\uuvr-$(UnityBackend)-$(UnityGeneration)\plugins</OutputPath>
+        <OutputPath>$(StageDir)plugins</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="..\lib\$(UnityBackend)\$(UnityGeneration)\*.dll">
-            <Private>False</Private>
-        </Reference>
         <Content Include="Assets\**" >
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
@@ -37,9 +34,6 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'modern-mono' ">
         <TargetFramework>net48</TargetFramework>
     </PropertyGroup>
-    <ItemGroup Condition=" '$(UnityBackend)' == 'mono' ">
-        <PackageReference Include="BepInEx.Core" Version="5.4.16" />
-    </ItemGroup>
 
     <!--  Modern  -->
     <ItemGroup Condition=" '$(UnityGeneration)' == 'modern' ">

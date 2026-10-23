@@ -21,6 +21,7 @@
       .NET Framework reference assemblies, so the build needs nothing from NuGet.
     -->
     <FrameworkPathOverride>$(ManagedDir)</FrameworkPathOverride>
+    <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
 
     <!-- Everything the Thunderstore package contains is staged here before zipping. -->

@@ -10,20 +10,14 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
         <DebugType>none</DebugType>
-        <OutputPath>$(BepInExDir)\mods\$(UnityBackendFolderName)\uuvr-$(UnityBackend)-$(UnityGeneration)\plugins</OutputPath>
+        <OutputPath>$(StageDir)plugins</OutputPath>
         <TargetFramework>net48</TargetFramework>
         <RootNamespace>UuvrOpenXr</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="..\lib\$(UnityBackend)\$(UnityGeneration)\*.dll">
-            <Private>False</Private>
-        </Reference>
     </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="BepInEx.Core" Version="5.4.16" />
-    </ItemGroup>
 
 
 

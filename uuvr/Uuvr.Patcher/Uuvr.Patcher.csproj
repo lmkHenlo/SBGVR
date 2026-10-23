@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net35</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <Nullable>enable</Nullable>
         <Configurations>legacy-il2cpp;modern-il2cpp;legacy-mono;modern-mono</Configurations>
         <Platforms>AnyCPU</Platforms>
@@ -10,7 +10,7 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
         <DebugType>none</DebugType>
-        <OutputPath>$(BepInExDir)\mods\$(UnityBackendFolderName)\uuvr-$(UnityBackend)-$(UnityGeneration)\patchers</OutputPath>
+        <OutputPath>$(StageDir)patchers</OutputPath>
         <RootNamespace>UuvrPatcher</RootNamespace>
     </PropertyGroup>
     
@@ -37,6 +37,9 @@
 
     <!--  Mono  -->
     <ItemGroup Condition=" '$(UnityBackend)' == 'mono' ">
-        <PackageReference Include="Mono.Cecil" Version="0.10.4" IncludeAssets="compile" />
+        <Reference Include="Mono.Cecil">
+            <HintPath>$(BepInExDir)\core\Mono.Cecil.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
     </ItemGroup>
 </Project>
