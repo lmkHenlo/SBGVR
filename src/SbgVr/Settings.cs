@@ -38,6 +38,7 @@ namespace SbgVr
         internal static ConfigEntry<float> MarkerScale;
         internal static ConfigEntry<float> MarkerViewAngle;
         internal static ConfigEntry<bool> PlayersCoverMarkers;
+        internal static ConfigEntry<bool> WorldSpaceReticles;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
 
@@ -86,6 +87,9 @@ namespace SbgVr
                     "Icons for targets within this many degrees of straight ahead are drawn in the world; " +
                     "targets further round get the game's arrow at the edge of the floating screen.",
                     new AcceptableValueRange<float>(30f, 120f)));
+            WorldSpaceReticles = config.Bind(hud, "WorldSpaceReticles", true,
+                "Draw weapon reticles in the world at the point you're aiming at, so both eyes see them on the " +
+                "target. Off = on UUVR's floating screen, where they look doubled against a distant target.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +

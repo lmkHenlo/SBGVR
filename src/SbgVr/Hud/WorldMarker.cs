@@ -54,6 +54,8 @@ namespace SbgVr.Hud
 
         private int _renderQueue = -1;
         private int _coveringMask;
+        private bool _isReticle;
+        private Canvas _hudCanvas;
 
         private Transform _rect;
         private GameObject _anchor;
@@ -96,9 +98,12 @@ namespace SbgVr.Hud
         /// Draws <paramref name="marker"/> at <paramref name="worldPosition"/> when <paramref name="inWorld"/> is
         /// true, or returns it to the HUD. Call after the game has positioned the marker for this frame.
         /// <paramref name="owner"/> is the player the marker belongs to (a name tag's or teammate icon's), whose
-        /// own character doesn't hide it.
+        /// own character doesn't hide it. A <paramref name="reticle"/> keeps its size on the floating screen
+        /// whatever VR HUD.MarkerScale is, and is held in a rectangle the size of its HUD canvas, so parts laid
+        /// out against the screen's edges keep their places.
         /// </summary>
-        internal static void Place(Component marker, Vector3 worldPosition, bool inWorld, PlayerInfo owner = null)
+        internal static void Place(Component marker, Vector3 worldPosition, bool inWorld, PlayerInfo owner = null,
+            bool reticle = false)
         {
             if (marker == null) return;
 
@@ -110,6 +115,7 @@ namespace SbgVr.Hud
             }
 
             worldMarker.Owner = owner;
+            worldMarker._isReticle = reticle;
             worldMarker.PlaceInternal(worldPosition, inWorld);
         }
 
@@ -316,6 +322,8 @@ namespace SbgVr.Hud
                 _hudParent = _rect.parent;
                 _hudSiblingIndex = _rect.GetSiblingIndex();
                 _hadHudParent = _hudParent != null;
+                var canvas = _hudParent != null ? _hudParent.GetComponentInParent<Canvas>(true) : null;
+                _hudCanvas = canvas != null ? canvas.rootCanvas : null;
             }
 
             if (_hudParent != null && _anchor.scene != _hudParent.gameObject.scene)
@@ -405,6 +413,9 @@ namespace SbgVr.Hud
                 cameraTransform.position + direction * distance,
                 Quaternion.LookRotation(direction, cameraTransform.up));
             _anchor.transform.localScale = Vector3.one * (MetresPerHudUnitAtOneMetre() * distance);
+            ((RectTransform)_anchor.transform).sizeDelta = _isReticle && _hudCanvas != null
+                ? ((RectTransform)_hudCanvas.transform).rect.size
+                : Vector2.zero;
 
             _rect.localPosition = Vector3.zero;
             _rect.localRotation = Quaternion.identity;
@@ -415,13 +426,16 @@ namespace SbgVr.Hud
         /// did on UUVR's floating screen (which is 1.8 m x scale wide at its configured distance and shows the
         /// game window's full width).
         /// </summary>
-        private static float MetresPerHudUnitAtOneMetre()
+        private float MetresPerHudUnitAtOneMetre()
         {
             var config = ModConfiguration.Instance;
             var screenWidthMetres = FloatingScreenWidthPerScale * config.VrUiScale.Value;
             var screenDistance = Mathf.Max(0.1f, Mathf.Abs(config.VrUiPosition.Value.z));
-            var hudScale = GameplayScreenspaceUiCanvas.Canvas != null ? GameplayScreenspaceUiCanvas.Canvas.scaleFactor : 1f;
-            return hudScale * screenWidthMetres / Mathf.Max(1, Screen.width) / screenDistance * Settings.MarkerScale.Value;
+            // The scale of the canvas the marker came from: one canvas unit is that many screen pixels.
+            var canvas = _hudCanvas != null ? _hudCanvas : GameplayScreenspaceUiCanvas.Canvas;
+            var hudScale = canvas != null ? canvas.scaleFactor : 1f;
+            var scale = _isReticle ? 1f : Settings.MarkerScale.Value;
+            return hudScale * screenWidthMetres / Mathf.Max(1, Screen.width) / screenDistance * scale;
         }
 
         /// <summary>

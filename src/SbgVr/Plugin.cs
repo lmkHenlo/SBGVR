@@ -47,6 +47,7 @@ namespace SbgVr
             {
                 Hud.WorldMarker.Initialize();
                 Hud.MarkerOcclusion.Initialize();
+                Add(host, "World-space reticles", typeof(Hud.WorldReticles));
             }
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Recenter key", typeof(Comfort.Recenter));

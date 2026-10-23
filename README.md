@@ -92,6 +92,7 @@ Settings live in `BepInEx\config`. In r2modman, open them with **Config editor**
 | `com.sbgvr.cfg` | `VR HUD` → `MarkersOnTop` | `true` | Draw world-space markers over scenery, like the game does. Menus on the floating screen still cover them. |
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerScale` | `1` | Size of world-space markers (0.25–4); 1 = their size on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerViewAngle` | `70` | Degrees from straight ahead within which icons stay in the world; further round they become edge arrows (30–120). |
+| `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceReticles` | `true` | Draw weapon reticles in the world at the point you're aiming at, instead of on the floating screen where they look doubled. |
 | `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
@@ -136,6 +137,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Menu background | `Comfort/MenuBackground.cs` | Holds each `MainMenuScenario` camera halfway between its two pan points. |
 | Full-view fades | `Fades/` | Hides `ColorOverlay`'s image and the main menu's overlay, and draws their colour on spheres around the camera, over and behind the floating screen. |
 | Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
+| World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player, and moves `ReticleManager`'s reticles into the world at the hit point (50 m if it hits nothing, kept between 2 m and 150 m), gliding between distances. They use `WorldMarker` with a holder the size of their HUD canvas and keep their floating-screen size. |
 | World-space markers | `Hud/` | After `WorldspaceIconUi`, `NameTagUi` and `TargetReticleUi` lay out a marker, `WorldMarker` moves its UI objects under a world-space canvas at the target, scaled to their size on the floating screen. They return to the HUD when off screen. Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view (`PlayerOverlap`) and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible, by drawing its meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker then skips pixels with the bits of the characters in front of it. The characters are drawn once, as usual. Each marker part gets this through the material its canvas renderer actually draws with, set after masks and the game have set theirs. |
 
 It also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
@@ -143,7 +145,7 @@ It also logs diagnostics, each kind once and again when it changes: the game, gr
 ## Known issues
 
 - **0.2.x is being tested in a headset.** It fixes what testing 0.1.0 found; the test plan below covers the new features.
-- **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet.
+- **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet, and the railgun's zoomed aim shows its reticle without zooming.
 - **Game folder files.** The patcher writes into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`. They aren't used without the mod and can be deleted.
 - **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR, and SteamVR docks that screen into its dashboard when the game becomes a VR app or stalls while loading. There's no API for the mod to close the dashboard. Turn the theatre off: in Steam, right-click Super Battle Golf → Properties → General, untick **Use Desktop Game Theatre while SteamVR is active**; or, for every game, SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.
 - **MaxFOVSlider** isn't handled yet. Disable it while using VR.
@@ -172,10 +174,11 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 3. Settings, lobby and match setup menus work, and item effects (lightning, for one) don't show through them. Joining or leaving a match fades the whole view.
 4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
 5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen. Opening a menu (Match Setup, say) covers the markers behind it, including interaction prompts such as Set Up Match. A player character, including yours, covers the parts of markers behind it, and markers in front of a character stay on top of it; hills and trees still don't hide markers. Name tags aren't covered by their own players. A shield or emblem on a character stays steady while markers pass behind it.
-6. No black areas over nearby scenery or your character when you look around or move. Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes and doesn't smear or flicker when you turn your head. The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size). With `AmbientOcclusion` off, the frame rate goes up.
-7. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
-8. F4 recentres the view; F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
-9. The frame rate lines in the log are close to the headset's refresh rate.
+6. Weapon reticles (dueling pistol, elephant gun, rocket launcher, freeze bomb, flash camera, thunderstorm, railgun) sit on what you're aiming at, single and sharp, not doubled; sweeping the aim from near to far moves them smoothly in depth. The railgun's zoomed reticle doesn't zoom the view in VR.
+7. No black areas over nearby scenery or your character when you look around or move. Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes and doesn't smear or flicker when you turn your head. The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size). With `AmbientOcclusion` off, the frame rate goes up.
+8. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
+9. F4 recentres the view; F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
+10. The frame rate lines in the log are close to the headset's refresh rate.
 
 Send `LogOutput.log` from the session with notes on each step.
 
