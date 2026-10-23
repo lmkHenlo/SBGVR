@@ -28,7 +28,7 @@ Super Battle Golf is a Unity 6 game (6000.3) on the Mono scripting backend with 
 
 UUVR is installed with [Rai Pal](https://pal.raicuparta.com), which works per game but isn't a Thunderstore mod manager. SBG VR puts UUVR into a Thunderstore package that r2modman can install next to other Super Battle Golf mods, builds it against the game's own assemblies, and adds a plugin (`com.sbgvr`) for Super Battle Golf fixes.
 
-Version 0.1.0 is a baseline: UUVR with only the changes needed to build and package it for this game, plus diagnostic logging. Testing it in a headset decides which Super Battle Golf fixes come next.
+Version 0.1.0 was a baseline: UUVR with only the changes needed to build and package it for this game, plus diagnostic logging. Version 0.2.0 adds the first Super Battle Golf fixes and VR settings, based on testing 0.1.0 in a headset: the main menu, fades, HUD markers and comfort options.
 
 ### See Also
 
@@ -71,7 +71,7 @@ Super Battle Golf/
 
 ## Usage
 
-Start the VR runtime, then the game. UUVR turns VR on at startup; **F3** turns it off and on.
+Start the VR runtime, then the game. UUVR turns VR on at startup; **F3** turns it off and on. **F4** recentres the view (sets the direction you're facing as straight ahead).
 
 Settings live in `BepInEx\config`. In r2modman, open them with **Config editor**.
 
@@ -81,8 +81,21 @@ Settings live in `BepInEx\config`. In r2modman, open them with **Config editor**
 | `raicuparta.uuvr-modern.cfg` | `Camera` → `Camera Tracking Mode` | `RelativeTransform` | How the game camera follows the headset: `Absolute`, `RelativeMatrix`, `RelativeTransform` or `Child`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `UI Patch Mode` | `Mirror` | How the 2D interface reaches the floating screen: `None`, `Mirror` or `CanvasRedirect`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `Preferred UI Plane Render Mode` | `InWorld` | `InWorld` (scenery can cover it) or `OverlayCamera` (always on top). |
+| `com.sbgvr.cfg` | `VR Comfort` → `ScreenShake` | `0` | Camera shake in VR as a share of the game's (0–1). |
+| `com.sbgvr.cfg` | `VR Comfort` → `ImpactFrames` | `false` | Show impact frames (explosion flashes) in VR. |
+| `com.sbgvr.cfg` | `VR Comfort` → `FlashFrames` | `false` | Show flash frames in VR. |
+| `com.sbgvr.cfg` | `VR Comfort` → `CameraTransitions` | `Fast` | Camera moves between views: `Game`, `Fast` (about a third of the time) or `Instant` (a cut). |
+| `com.sbgvr.cfg` | `VR Comfort` → `MenuBackground` | `Still` | Main menu background scenes: `Moving` (the game's pans) or `Still`. |
+| `com.sbgvr.cfg` | `VR Comfort` → `FullViewFades` | `true` | Fade the whole view, not only the floating screen, when the game fades. |
+| `com.sbgvr.cfg` | `VR Comfort` → `RecenterKey` | `F4` | Key that recentres the view. `None` = no key. |
+| `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceMarkers` | `true` | Draw icons, name tags and the reticle in the world at their target, at the right depth for each eye. |
+| `com.sbgvr.cfg` | `VR HUD` → `MarkersOnTop` | `true` | Draw world-space markers over scenery, like the game does. |
+| `com.sbgvr.cfg` | `VR HUD` → `MarkerScale` | `1` | Size of world-space markers (0.25–4); 1 = their size on the floating screen. |
+| `com.sbgvr.cfg` | `VR HUD` → `MarkerViewAngle` | `70` | Degrees from straight ahead within which icons stay in the world; further round they become edge arrows (30–120). |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs. `0` = never. |
+
+SBG VR's settings only change the game while VR is running; the game's own settings and save file are never changed. Change them with the game closed: BepInEx reads the file when the game starts.
 
 UUVR's README lists every UUVR setting. If the headset stays black, switch `Preferred VR APi` first, then `Camera Tracking Mode`.
 
@@ -105,12 +118,28 @@ Changes made to UUVR in this repository, each in its own commit:
 | Fix the patcher's clean-up list (`ucrtbased`) and add `OVRPlugin` | The old entry never matched, and both files are no longer shipped. |
 | Remove the x86 libraries, `ucrtbased.dll` and `OVRPlugin.dll` | The game is 64-bit, and nothing imports or loads the other two. `ucrtbased.dll` is Microsoft's debug runtime, which isn't redistributable. |
 | Remove `uuvr/lib` | The build uses the game's assemblies instead. |
+| Pick the UI's camera again when the current one stops rendering | The main menu switches between seven cameras of equal depth; the floating screen kept following one that was switched off, and the menu disappeared. |
+| Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
+| Add `VrCameraOffset.RecenterRotation` | Lets SBG VR recentre the view. Identity (the default) keeps upstream behaviour. |
 
-**SBG VR** (`src/SbgVr`, plugin ID `com.sbgvr`) depends on UUVR and, in 0.1.0, only logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
+**SBG VR** (`src/SbgVr`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen, and each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
+
+| Feature | Files | How |
+| --- | --- | --- |
+| Screen shake | `Comfort/ScreenShakePatches.cs` | Transpilers on `CameraModuleController.UpdateShake` and `CanShakeAtAll` multiply the game's shake setting by `ScreenShake`. |
+| Screen effects | `Comfort/ScreenEffectPatches.cs` | Prefixes skip `ImpactFrameController.PlayImpactFrame`, `FlashFrameFeature.AddRenderPasses` and `CRTFeature.AddRenderPasses`. |
+| Camera transitions | `Comfort/CameraTransitionPatches.cs` | A prefix on `CameraModuleController.TransitionToInternal` shortens or zeroes the duration. |
+| Menu background | `Comfort/MenuBackground.cs` | Holds each `MainMenuScenario` camera halfway between its two pan points. |
+| Full-view fades | `Fades/` | Hides `ColorOverlay`'s image and the main menu's overlay, and draws their colour on spheres around the camera, over and behind the floating screen. |
+| Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
+| World-space markers | `Hud/` | After `WorldspaceIconUi`, `NameTagUi` and `TargetReticleUi` lay out a marker, `WorldMarker` moves its UI objects under a world-space canvas at the target, scaled to their size on the floating screen. They return to the HUD when off screen. |
+
+It also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
 ## Known issues
 
-- **Untested in a headset.** 0.1.0 is the first build; expect the game's screen effects, markers and HUD to need fixes.
+- **0.2.0 is untested in a headset.** It fixes what testing 0.1.0 found; the test plan below covers the new features.
+- **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet.
 - **Game folder files.** The patcher writes into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`. They aren't used without the mod and can be deleted.
 - **MaxFOVSlider** isn't handled yet. Disable it while using VR.
 - **No motion controllers.** UUVR doesn't support them.
@@ -133,13 +162,14 @@ The version is in three places, and the build fails if they differ: `SbgVrVersio
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, and `SBG VR 0.1.0 loaded` appears.
-2. Main menu: the game shows in the headset and follows your head; the menu is readable on the floating screen; the mouse cursor is visible and clicks land where it points.
-3. Settings, lobby and match setup menus work.
-4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart.
-5. Name tags, icons and the lock-on reticle sit over the right players.
-6. F3 turns VR off and on without errors.
-7. The frame rate lines in the log are close to the headset's refresh rate.
+1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR 0.2.0 loaded` appears, and every SBG VR feature line starts with `[ok]`.
+2. Main menu: the game shows in the headset and follows your head; the menu stays readable while the background scenes change; each scene holds still; the fade between scenes darkens the whole view behind the menu; the mouse cursor is visible and clicks land where it points.
+3. Settings, lobby and match setup menus work. Joining or leaving a match fades the whole view.
+4. A hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
+5. Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. Name tags and the interaction reticle too. Icons for targets behind you show as arrows at the edge of the floating screen.
+6. Explosions near you don't flash the view or shake the camera.
+7. F4 recentres the view; F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
+8. The frame rate lines in the log are close to the headset's refresh rate.
 
 Send `LogOutput.log` from the session with notes on each step.
 
@@ -151,7 +181,7 @@ SBG_VR/
 ├── NuGet.config              no package sources: the build is offline
 ├── SBG_VR.proj               builds everything and makes the Thunderstore zip
 ├── build.ps1                 Windows build wrapper
-├── src/SbgVr/                the SBG VR plugin (com.sbgvr)
+├── src/SbgVr/                the SBG VR plugin (com.sbgvr): Comfort/, Fades/, Hud/, Diagnostics/
 ├── thunderstore/             manifest.json, icon.png and the package README
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)
