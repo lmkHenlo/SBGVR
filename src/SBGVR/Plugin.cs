@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
@@ -7,14 +7,14 @@ using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
-namespace SbgVr
+namespace SBGVR
 {
     [BepInPlugin(Guid, Name, Version)]
     [BepInDependency(UuvrGuid, BepInDependency.DependencyFlags.HardDependency)]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "com.sbgvr";
-        public const string Name = "SBG VR";
+        public const string Name = "SBGVR";
         public const string Version = "0.2.14";
 
         /// <summary>UUVR's BepInEx plugin ID (the Unity 2020+ Mono build).</summary>
@@ -29,8 +29,8 @@ namespace SbgVr
             Settings.Bind(Config);
             Harmony = new Harmony(Guid);
 
-            // One persistent object for SBG VR's own components.
-            var host = new GameObject("SBG VR");
+            // One persistent object for SBGVR's own components.
+            var host = new GameObject("SBGVR");
             host.hideFlags = HideFlags.HideAndDontSave;
             DontDestroyOnLoad(host);
             host.AddComponent<VrStateTracker>();
@@ -74,7 +74,7 @@ namespace SbgVr
             }
             catch (Exception exception)
             {
-                Log.LogError($"[FAILED] {feature}: {exception.GetBaseException().Message}. This feature is off; the rest of SBG VR works as before.");
+                Log.LogError($"[FAILED] {feature}: {exception.GetBaseException().Message}. This feature is off; the rest of SBGVR works as before.");
                 try
                 {
                     UnpatchClass(patchClass);

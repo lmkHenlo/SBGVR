@@ -1,15 +1,15 @@
-# SBG VR _(SBG_VR)_
+# SBGVR
 
 [![license](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg?style=flat-square)](LICENSE)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.
 
-SBG VR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a Thunderstore mod for Super Battle Golf. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
+SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a Thunderstore mod for Super Battle Golf. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
-The Thunderstore package and the repository folder are named `SBG_VR` because Thunderstore package names can't contain spaces. Thunderstore shows the underscore as a space.
+The repository, its source archive and the Thunderstore package are all named `SBGVR`. Locally, the repository is kept in a folder named `source`, inside `sbgvr_master\master` next to its release files, the same layout as the maintainer's other mods. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
-SBG VR is experimental. No version has been published to Thunderstore yet: every version so far is a test build, installed from a local zip. [CHANGELOG.md](CHANGELOG.md) lists what each version changed.
+SBGVR is experimental. No version has been published to Thunderstore yet: every version so far is a test build, installed from a local zip. [CHANGELOG.md](CHANGELOG.md) lists what each version changed.
 
 ## Table of Contents
 
@@ -38,7 +38,7 @@ SBG VR is experimental. No version has been published to Thunderstore yet: every
 
 Super Battle Golf is a Unity 6 game (6000.3) on the Mono scripting backend with the Universal Render Pipeline (URP). It has no VR support. UUVR adds VR to Unity games without their source. For Unity 2020 and later, it ships Unity's XR plugin code and native VR libraries, then builds an XR loader at runtime and starts it.
 
-UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which works per game but isn't a Thunderstore mod manager. SBG VR does three things:
+UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which works per game but isn't a Thunderstore mod manager. SBGVR does three things:
 
 - It puts UUVR into a Thunderstore package that r2modman can install next to other Super Battle Golf mods.
 - It builds UUVR against the game's own assemblies.
@@ -58,7 +58,7 @@ UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which wor
 - A PC VR runtime: SteamVR, or another OpenXR runtime. With SteamVR (including Steam Link), set SteamVR as the OpenXR runtime in SteamVR's settings. It's on the OpenXR page or the Developer page, depending on the SteamVR version.
 - **Client-side only.** Only the VR player needs the mod. The host and other players need nothing.
 
-Both ways below install a zip made by [Building from source](#building-from-source): `artifacts\lmkHenlo-SBG_VR-<version>.zip`.
+Both ways below install a zip made by [Building from source](#building-from-source): `artifacts\lmkHenlo-SBGVR-<version>.zip`.
 
 ### With r2modman
 
@@ -70,12 +70,12 @@ Install BepInEx 5 into the game folder and start the game once. Then run this in
 
 ```powershell
 $game = "C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf"
-$zip = Get-ChildItem .\artifacts\lmkHenlo-SBG_VR-*.zip | Sort-Object LastWriteTime | Select-Object -Last 1
-$package = Join-Path $env:TEMP "SBG_VR"
+$zip = Get-ChildItem .\artifacts\lmkHenlo-SBGVR-*.zip | Sort-Object LastWriteTime | Select-Object -Last 1
+$package = Join-Path $env:TEMP "SBGVR"
 Expand-Archive $zip.FullName -DestinationPath $package -Force
-New-Item -ItemType Directory -Force "$game\BepInEx\plugins\SBG_VR", "$game\BepInEx\patchers\SBG_VR" | Out-Null
-Copy-Item "$package\plugins\*" "$game\BepInEx\plugins\SBG_VR" -Recurse -Force
-Copy-Item "$package\patchers\*" "$game\BepInEx\patchers\SBG_VR" -Recurse -Force
+New-Item -ItemType Directory -Force "$game\BepInEx\plugins\SBGVR", "$game\BepInEx\patchers\SBGVR" | Out-Null
+Copy-Item "$package\plugins\*" "$game\BepInEx\plugins\SBGVR" -Recurse -Force
+Copy-Item "$package\patchers\*" "$game\BepInEx\patchers\SBGVR" -Recurse -Force
 ```
 
 This gives:
@@ -84,12 +84,12 @@ This gives:
 Super Battle Golf/
 └── BepInEx/
     ├── patchers/
-    │   └── SBG_VR/
+    │   └── SBGVR/
     │       ├── Uuvr.Patcher.dll
     │       └── CopyToGame/...
     └── plugins/
-        └── SBG_VR/
-            ├── SbgVr.dll
+        └── SBGVR/
+            ├── SBGVR.dll
             ├── Uuvr.dll
             ├── Uuvr.XR.Management.dll
             ├── Uuvr.XR.OpenVR.dll
@@ -101,9 +101,11 @@ Super Battle Golf/
 
 Install the new zip the same way: import it in r2modman, or run the commands above again. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
 
+Coming from 0.2.14 or earlier, when the package was named `SBG_VR`: remove that mod first (in r2modman, or delete `BepInEx\plugins\SBG_VR` and `BepInEx\patchers\SBG_VR`), so the game doesn't end up with two copies. Your settings carry over, since the settings file is still `com.sbgvr.cfg`.
+
 ### Uninstalling
 
-Remove the mod in r2modman, or delete `BepInEx\plugins\SBG_VR` and `BepInEx\patchers\SBG_VR`.
+Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`.
 
 Each time the game starts, UUVR's patcher copies VR runtime files into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves them behind. They aren't used without the mod and can be deleted:
 
@@ -135,7 +137,7 @@ ScreenShake = 0.25
 AmbientOcclusion = false
 ```
 
-SBG VR's settings only change the game while VR is running. The game's own settings and save file are never changed.
+SBGVR's settings only change the game while VR is running. The game's own settings and save file are never changed.
 
 | File | Setting | Default | What it does |
 | --- | --- | --- | --- |
@@ -199,9 +201,9 @@ Changes made to UUVR in this repository, each in its own commit:
 | Pick the UI's camera again when the current one stops rendering | The main menu switches between seven cameras of equal depth. The floating screen kept following one that was switched off, and the menu disappeared. |
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
 | Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
-| Add `VrCameraOffset.RecenterRotation` | Lets SBG VR recentre the view. Identity (the default) keeps upstream behaviour. |
+| Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
 
-**SBG VR** (`src/SbgVr`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
+**SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
 
 | Feature | Files | How |
 | --- | --- | --- |
@@ -216,7 +218,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
 | World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
-SBG VR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
+SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
 ## Building from source
 
@@ -230,19 +232,19 @@ Requirements: the .NET SDK 8 or later, Super Battle Golf, and a BepInEx 5 folder
 ./build.ps1 -Configuration Debug
 ```
 
-`build.ps1` runs `dotnet build SBG_VR.proj`. That builds UUVR (its `modern-mono` configuration) and SBG VR, then, in Release, writes the Thunderstore package to `artifacts\lmkHenlo-SBG_VR-<version>.zip`. The path defaults are in `Directory.Build.props`: the Steam install folder, and r2modman's Default profile for BepInEx. `dotnet build SBG_VR.proj -t:Clean` deletes `artifacts\`.
+`build.ps1` runs `dotnet build SBGVR.proj`. That builds UUVR (its `modern-mono` configuration) and SBGVR, then, in Release, writes the Thunderstore package to `artifacts\lmkHenlo-SBGVR-<version>.zip`. The path defaults are in `Directory.Build.props`: the Steam install folder, and r2modman's Default profile for BepInEx. `dotnet build SBGVR.proj -t:Clean` deletes `artifacts\`.
 
 The version is in three places, and the build fails if they differ:
 
-- `SbgVrVersion` in `Directory.Build.props`
-- `Plugin.Version` in `src/SbgVr/Plugin.cs`
+- `SBGVRVersion` in `Directory.Build.props`
+- `Plugin.Version` in `src/SBGVR/Plugin.cs`
 - `version_number` in `thunderstore/manifest.json`
 
 ## Test plan
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBG VR <version> loaded` appears, and every SBG VR feature line starts with `[ok]`.
+1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`.
 2. Main menu:
    - The game shows in the headset and follows your head.
    - The menu stays readable while the background scenes change, and each scene holds still.
@@ -277,13 +279,13 @@ Send `LogOutput.log` from the session with notes on each step.
 ## Files
 
 ```text
-SBG_VR/
+SBGVR/
 ├── CHANGELOG.md              changes in each version
 ├── Directory.Build.props     game and BepInEx paths, shared references, version
 ├── NuGet.config              no package sources: the build is offline
-├── SBG_VR.proj               builds everything and makes the Thunderstore zip
+├── SBGVR.proj                builds everything and makes the Thunderstore zip
 ├── build.ps1                 Windows build wrapper
-├── src/SbgVr/                the SBG VR plugin (com.sbgvr): Comfort/, Diagnostics/, Fades/, Hud/, Rendering/
+├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Diagnostics/, Fades/, Hud/, Rendering/
 ├── thunderstore/             manifest.json, icon.png and the package README
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)
@@ -292,7 +294,7 @@ SBG_VR/
 
 ## API
 
-SBG VR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it hard-depends on UUVR's `raicuparta.uuvr-modern`.
+SBGVR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it hard-depends on UUVR's `raicuparta.uuvr-modern`.
 
 ## Maintainers
 
@@ -305,7 +307,7 @@ SBG VR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it h
 
 ## Contributing
 
-Send questions and bug reports to [ps.meiisbei@gmail.com](mailto:ps.meiisbei@gmail.com). For a bug, include `BepInEx\LogOutput.log` from a session where it happened. SBG VR writes the VR and camera details needed to track it down.
+Send questions and bug reports to [ps.meiisbei@gmail.com](mailto:ps.meiisbei@gmail.com). For a bug, include `BepInEx\LogOutput.log` from a session where it happened. SBGVR writes the VR and camera details needed to track it down.
 
 Pull requests are accepted. The repository isn't public yet, so email to ask about contributing until it is. When you make changes:
 

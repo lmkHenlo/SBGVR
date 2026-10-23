@@ -1,11 +1,11 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SbgVr.Hud
+namespace SBGVR.Hud
 {
     /// <summary>
     /// VR HUD.PlayersCoverMarkers: player characters cover the markers behind them, while scenery still

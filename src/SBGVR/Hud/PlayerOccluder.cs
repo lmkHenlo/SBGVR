@@ -1,11 +1,11 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace SbgVr.Hud
+namespace SBGVR.Hud
 {
     /// <summary>
     /// Marks where one player character is visible, so markers behind it can leave those pixels alone.
@@ -97,7 +97,7 @@ namespace SbgVr.Hud
 
             material = new Material(Canvas.GetDefaultCanvasMaterial())
             {
-                name = $"SBG VR player marking ({stencilBit})",
+                name = $"SBGVR player marking ({stencilBit})",
                 renderQueue = MarkingRenderQueue,
             };
             material.SetInt("_ColorMask", 0);
@@ -118,7 +118,7 @@ namespace SbgVr.Hud
 
             if (_root == null)
             {
-                var root = new GameObject("SBG VR player marking") { hideFlags = HideFlags.HideAndDontSave };
+                var root = new GameObject("SBGVR player marking") { hideFlags = HideFlags.HideAndDontSave };
                 Object.DontDestroyOnLoad(root);
                 _root = root.transform;
             }

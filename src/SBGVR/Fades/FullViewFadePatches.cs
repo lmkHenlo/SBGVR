@@ -1,9 +1,9 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using HarmonyLib;
 
-namespace SbgVr.Fades
+namespace SBGVR.Fades
 {
     /// <summary>Routes the game's two screen fades to <see cref="FullViewFade"/> while VR runs.</summary>
     [HarmonyPatch]

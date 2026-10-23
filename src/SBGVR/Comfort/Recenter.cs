@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using UnityEngine;
@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using Uuvr.VrCamera;
 
-namespace SbgVr.Comfort
+namespace SBGVR.Comfort
 {
     /// <summary>
     /// VR Comfort.RecenterKey: turns the view so the direction you're facing becomes straight ahead, by

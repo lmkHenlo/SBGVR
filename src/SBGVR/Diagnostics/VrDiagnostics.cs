@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.XR;
 using UrpXrSystem = UnityEngine.Experimental.Rendering.XRSystem;
 
-namespace SbgVr.Diagnostics
+namespace SBGVR.Diagnostics
 {
     /// <summary>
     /// Writes what UUVR and the game's renderer are doing to the BepInEx log: the VR runtime's state,

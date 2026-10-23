@@ -1,10 +1,10 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using BepInEx.Configuration;
 using UnityEngine.InputSystem;
 
-namespace SbgVr
+namespace SBGVR
 {
     internal enum CameraTransitionMode
     {
@@ -20,7 +20,7 @@ namespace SbgVr
     }
 
     /// <summary>
-    /// Every SBG VR setting. VR settings only take effect while VR is running; the game's own
+    /// Every SBGVR setting. VR settings only take effect while VR is running; the game's own
     /// settings, and its save file, are never changed.
     /// </summary>
     internal static class Settings

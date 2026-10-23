@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <AssemblyName>SbgVr</AssemblyName>
-    <RootNamespace>SbgVr</RootNamespace>
+    <AssemblyName>SBGVR</AssemblyName>
+    <RootNamespace>SBGVR</RootNamespace>
     <LangVersion>10</LangVersion>
     <Nullable>disable</Nullable>
     <DebugType>embedded</DebugType>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputPath>$(StageDir)plugins\</OutputPath>
 
-    <Version>$(SbgVrVersion)</Version>
-    <Product>SBG VR</Product>
-    <AssemblyTitle>SbgVr</AssemblyTitle>
+    <Version>$(SBGVRVersion)</Version>
+    <Product>SBGVR</Product>
+    <AssemblyTitle>SBGVR</AssemblyTitle>
     <Description>Super Battle Golf fixes for the UUVR VR mod.</Description>
     <Authors>lmkHenlo</Authors>
     <Company>lmkHenlo</Company>
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Built first by SBG_VR.proj; shipped by the package, so not copied here. -->
+    <!-- Built first by SBGVR.proj; shipped by the package, so not copied here. -->
     <Reference Include="Uuvr">
       <HintPath>$(StageDir)plugins\Uuvr.dll</HintPath>
       <Private>false</Private>

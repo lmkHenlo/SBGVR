@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
-namespace SbgVr
+namespace SBGVR
 {
     /// <summary>
     /// Whether VR is running right now: a headset display is up and being rendered to. Follows UUVR's
-    /// F3 toggle, so every VR-only change in SBG VR switches off with it.
+    /// F3 toggle, so every VR-only change in SBGVR switches off with it.
     /// </summary>
     internal static class VrState
     {

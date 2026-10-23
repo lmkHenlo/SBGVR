@@ -1,5 +1,5 @@
 <#
-  Builds SBG VR and its Thunderstore package: artifacts\lmkHenlo-SBG_VR-<version>.zip
+  Builds SBGVR and its Thunderstore package: artifacts\lmkHenlo-SBGVR-<version>.zip
 
   Requirements: the .NET SDK 8 or later, the game, and a BepInEx 5 folder (by default the
   r2modman Default profile's). Nothing is downloaded: the build compiles against the game's
@@ -24,7 +24,7 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
 }
 
 # A trailing backslash would escape the closing quote when the path is passed to dotnet.
-$arguments = @('build', (Join-Path $PSScriptRoot 'SBG_VR.proj'), '-c', $Configuration, '-nologo')
+$arguments = @('build', (Join-Path $PSScriptRoot 'SBGVR.proj'), '-c', $Configuration, '-nologo')
 if ($GameDir) { $arguments += "-p:GameDir=$($GameDir.TrimEnd('\'))" }
 if ($BepInExDir) { $arguments += "-p:BepInExDir=$($BepInExDir.TrimEnd('\'))" }
 

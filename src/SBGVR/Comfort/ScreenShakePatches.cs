@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 
-namespace SbgVr.Comfort
+namespace SBGVR.Comfort
 {
     /// <summary>
     /// Scales the game's camera shake in VR by VR Comfort.ScreenShake. The camera controller reads the game's

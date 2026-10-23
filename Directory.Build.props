@@ -1,15 +1,15 @@
 <Project>
   <!--
-    Shared build settings for SBG VR and the vendored UUVR projects.
+    Shared build settings for SBGVR and the vendored UUVR projects.
 
     Every path can be overridden on the command line, for example:
-      dotnet build SBG_VR.sln -c Release -p:GameDir="D:\SteamLibrary\steamapps\common\Super Battle Golf"
+      dotnet build SBGVR.proj -c Release -p:GameDir="D:\SteamLibrary\steamapps\common\Super Battle Golf"
   -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
 
-    <!-- SBG VR's version. Also update Plugin.Version and thunderstore/manifest.json; the build checks they match. -->
-    <SbgVrVersion>0.2.14</SbgVrVersion>
+    <!-- SBGVR's version. Also update Plugin.Version and thunderstore/manifest.json; the build checks they match. -->
+    <SBGVRVersion>0.2.14</SBGVRVersion>
 
     <!-- The game install. The *_Data folder is named after the game's .exe. -->
     <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf</GameDir>
@@ -54,7 +54,7 @@
     </Reference>
   </ItemGroup>
 
-  <Target Name="SbgVrCheckPaths" BeforeTargets="ResolveAssemblyReferences">
+  <Target Name="SBGVRCheckPaths" BeforeTargets="ResolveAssemblyReferences">
     <Error Condition="!Exists('$(ManagedDir)\GameAssembly.dll')"
            Text="GameAssembly.dll not found in '$(ManagedDir)'. Pass -p:GameDir=... (the Super Battle Golf install folder)." />
     <Error Condition="!Exists('$(BepInExDir)\core\BepInEx.dll')"

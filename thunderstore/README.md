@@ -1,8 +1,8 @@
-# SBG VR
+# SBGVR
 
 Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
-> **Experimental.** SBG VR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.14 is a test build: expect rough edges.
+> **Experimental.** SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.14 is a test build: expect rough edges.
 
 ## What it does
 
@@ -15,7 +15,7 @@ Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
 ## Install
 
-Install `SBG_VR` with r2modman or another Thunderstore mod manager. BepInEx is installed with it.
+Install `SBGVR` with r2modman or another Thunderstore mod manager. BepInEx is installed with it.
 
 Before you start the game:
 
@@ -34,7 +34,7 @@ Then start the game from the mod manager.
 Settings are in two files under `BepInEx\config`. In r2modman, open them with **Config editor**.
 
 - `raicuparta.uuvr-modern.cfg`: UUVR's settings: the VR runtime (OpenXR or OpenVR), camera tracking, and the floating screen's size and position.
-- `com.sbgvr.cfg`: SBG VR's settings. They only apply while VR is running:
+- `com.sbgvr.cfg`: SBGVR's settings. They only apply while VR is running:
   - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` and `FlashFrames` (off), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
   - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
@@ -47,11 +47,11 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 
 ## Good to know
 
-- **Files in the game folder.** Each time the game starts, the mod copies its VR runtime files into `Super Battle Golf_Data` (`Plugins`, `UnitySubsystems` and `StreamingAssets\SteamVR`). Uninstalling the mod doesn't remove them. They aren't used unless SBG VR is installed, but you can delete them: `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`.
+- **Files in the game folder.** Each time the game starts, the mod copies its VR runtime files into `Super Battle Golf_Data` (`Plugins`, `UnitySubsystems` and `StreamingAssets\SteamVR`). Uninstalling the mod doesn't remove them. They aren't used unless SBGVR is installed, but you can delete them: `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`.
 - **Field of view.** Your headset sets the field of view, so the game's FOV slider doesn't apply in VR yet.
 - **SteamVR menu opening on launch or when a match starts.** In Steam, right-click Super Battle Golf → Properties → General and untick **Use Desktop Game Theatre while SteamVR is active**. (Or, for every game: SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.) Steam otherwise shows the game on SteamVR's theatre screen, and SteamVR opens its menu when the game switches to VR or pauses while loading.
-- **MaxFOVSlider.** Turn it off while you use VR. SBG VR doesn't handle it yet.
-- **Reporting problems.** Send `BepInEx\LogOutput.log` from a session where the problem happened. SBG VR writes the VR and camera details needed to track it down.
+- **MaxFOVSlider.** Turn it off while you use VR. SBGVR doesn't handle it yet.
+- **Reporting problems.** Send `BepInEx\LogOutput.log` from a session where the problem happened. SBGVR writes the VR and camera details needed to track it down.
 
 ## Credits
 
@@ -60,4 +60,4 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 
 ## License
 
-GPL-3.0-or-later. SBG VR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences; see `THIRD_PARTY_NOTICES.md`.
+GPL-3.0-or-later. SBGVR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences; see `THIRD_PARTY_NOTICES.md`.

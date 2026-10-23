@@ -1,6 +1,6 @@
 # Third-party notices
 
-SBG VR is licensed under the GNU General Public License v3.0 or later (see `LICENSE`).
+SBGVR is licensed under the GNU General Public License v3.0 or later (see `LICENSE`).
 
 It contains Universal Unity VR (UUVR) by Raicuparta, copyright 2024 Raicuparta, licensed under the
 GNU General Public License v3.0 or later. Source: <https://github.com/Raicuparta/uuvr>. The package's

@@ -1,10 +1,10 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-namespace SbgVr.Rendering
+namespace SBGVR.Rendering
 {
     /// <summary>
     /// The eye URP is drawing right now, for code that asks the Camera for its size or view and would

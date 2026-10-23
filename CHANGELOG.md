@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers use Thunderstore's `Major.Minor.Patch` format.
 
-No version has been published to Thunderstore yet. Versions 0.1.0 to 0.2.14 are test builds, each built from the commit that set its version number. Dates are in US Central time (UTC−05:00).
+No version has been published to Thunderstore yet. Every version is a test build, built from the commit that set its version number. Versions 0.1.0 to 0.2.14 were named SBG VR, with the Thunderstore package `SBG_VR`. Dates are in US Central time (UTC−05:00).
 
 ## [Unreleased]
 
@@ -14,6 +14,11 @@ No version has been published to Thunderstore yet. Versions 0.1.0 to 0.2.14 are 
 
 ### Changed
 
+- The project is renamed from SBG VR to SBGVR, without a space:
+  - The Thunderstore package is `SBGVR` (it was `SBG_VR`), and the zip is `lmkHenlo-SBGVR-<version>.zip`.
+  - The plugin is `SBGVR.dll` (it was `SbgVr.dll`), and the build file is `SBGVR.proj` (it was `SBG_VR.proj`).
+  - The plugin ID `com.sbgvr` and the settings file `com.sbgvr.cfg` are unchanged, so your settings carry over.
+  - Remove the old `SBG_VR` mod before installing this one, so the game doesn't end up with two copies.
 - The package description is shorter and matches the README's.
 - The README follows the [Standard Readme](https://github.com/RichardLitt/standard-readme) specification. It now has install and usage examples, how to update and uninstall, and how to contribute.
 

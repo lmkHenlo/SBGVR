@@ -1,10 +1,10 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using HarmonyLib;
 using UnityEngine;
 
-namespace SbgVr.Comfort
+namespace SBGVR.Comfort
 {
     /// <summary>
     /// Shortens or removes the camera's sweeps between views in VR (VR Comfort.CameraTransitions). A long

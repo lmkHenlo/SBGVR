@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using Game.Rendering.Blur;
@@ -6,7 +6,7 @@ using Game.Rendering.CRT;
 using Game.Rendering.FlashFrame;
 using HarmonyLib;
 
-namespace SbgVr.Comfort
+namespace SBGVR.Comfort
 {
     /// <summary>
     /// Full-screen effects that don't suit a headset. Each is skipped while VR runs rather than switched off,

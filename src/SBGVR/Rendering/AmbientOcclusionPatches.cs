@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
@@ -12,7 +12,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-namespace SbgVr.Rendering
+namespace SBGVR.Rendering
 {
     /// <summary>
     /// VR Graphics.AmbientOcclusion: the game's ambient occlusion (HTrace AO) in VR.
@@ -218,7 +218,7 @@ namespace SbgVr.Rendering
                 Plugin.Log.LogInfo($"Ambient occlusion: draws for each eye in VR ({counts}).");
             else
                 Plugin.Log.LogWarning(
-                    $"Ambient occlusion: HTrace AO isn't the code SBG VR expects ({counts}), so it's off in VR.");
+                    $"Ambient occlusion: HTrace AO isn't the code SBGVR expects ({counts}), so it's off in VR.");
         }
     }
 }

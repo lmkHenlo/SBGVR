@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Uuvr;
 
-namespace SbgVr.Hud
+namespace SBGVR.Hud
 {
     /// <summary>
     /// Moves one HUD marker (an icon, name tag or reticle) into the 3D world at its target while VR runs, so
@@ -98,7 +98,7 @@ namespace SbgVr.Hud
         {
             _onTopMaterial = new Material(Canvas.GetDefaultCanvasMaterial())
             {
-                name = "SBG VR marker (on top)",
+                name = "SBGVR marker (on top)",
             };
             _onTopMaterial.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
         }
@@ -232,7 +232,7 @@ namespace SbgVr.Hud
             var source = DrawnCopySources.TryGetValue(drawn, out var original) && original != null ? original : drawn;
             if (DrawnCopies.TryGetValue((source, renderQueue, coveringMask), out var copy) && copy != null) return copy;
 
-            copy = new Material(source) { name = $"{source.name} (SBG VR marker {renderQueue}/{coveringMask})" };
+            copy = new Material(source) { name = $"{source.name} (SBGVR marker {renderQueue}/{coveringMask})" };
             if (copy.HasProperty(ZTestProperty)) copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
             if (coveringMask != 0 && copy.HasProperty("_StencilComp"))
             {
@@ -267,7 +267,7 @@ namespace SbgVr.Hud
         {
             if (UiMaterials.TryGetValue(renderQueue, out var material) && material != null) return material;
 
-            material = new Material(_onTopMaterial) { name = $"SBG VR marker ({renderQueue})", renderQueue = renderQueue };
+            material = new Material(_onTopMaterial) { name = $"SBGVR marker ({renderQueue})", renderQueue = renderQueue };
             UiMaterials[renderQueue] = material;
             return material;
         }
@@ -276,7 +276,7 @@ namespace SbgVr.Hud
         {
             if (FontMaterials.TryGetValue((original, renderQueue), out var material) && material != null) return material;
 
-            material = new Material(original) { name = $"{original.name} (SBG VR marker {renderQueue})" };
+            material = new Material(original) { name = $"{original.name} (SBGVR marker {renderQueue})" };
             material.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
             material.renderQueue = renderQueue;
             FontMaterials[(original, renderQueue)] = material;
@@ -376,7 +376,7 @@ namespace SbgVr.Hud
 
         private void CreateAnchor()
         {
-            _anchor = new GameObject($"SBG VR marker ({name})", typeof(RectTransform));
+            _anchor = new GameObject($"SBGVR marker ({name})", typeof(RectTransform));
             _anchor.hideFlags = HideFlags.DontSave;
             _canvas = _anchor.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.WorldSpace;

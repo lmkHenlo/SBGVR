@@ -1,4 +1,4 @@
-// SBG VR: Super Battle Golf fixes for UUVR.
+// SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using HarmonyLib;
@@ -7,7 +7,7 @@ using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Uuvr;
 
-namespace SbgVr.Fades
+namespace SBGVR.Fades
 {
     /// <summary>
     /// VR Comfort.FullViewFades: the game fades the screen with 2D images, which UUVR can only show on its
@@ -52,8 +52,8 @@ namespace SbgVr.Fades
         private void Awake()
         {
             _instance = this;
-            _over = new FadeSphere("SBG VR fade (over UI)", OverUiQueue, transform);
-            _behind = new FadeSphere("SBG VR fade (behind UI)", BehindUiQueue, transform);
+            _over = new FadeSphere("SBGVR fade (over UI)", OverUiQueue, transform);
+            _behind = new FadeSphere("SBGVR fade (behind UI)", BehindUiQueue, transform);
         }
 
         private void OnEnable()
