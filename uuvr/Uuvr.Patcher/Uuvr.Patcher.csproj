@@ -14,8 +14,11 @@
         <RootNamespace>UuvrPatcher</RootNamespace>
     </PropertyGroup>
     
-    <ItemGroup>
+    <ItemGroup Condition=" '$(UnityGeneration)' == 'legacy' ">
         <PackageReference Include="AssetsTools.NET" Version="2.0.9" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Reference Include="lib\$(UnityBackend)\$(UnityGeneration)/*.dll">
             <Private>False</Private>
         </Reference>
@@ -25,7 +28,7 @@
         <Content Include="CopyToGame\**" >
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
-        <Content Include="classdata.tpk">
+        <Content Include="classdata.tpk" Condition=" '$(UnityGeneration)' == 'legacy' ">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
     </ItemGroup>

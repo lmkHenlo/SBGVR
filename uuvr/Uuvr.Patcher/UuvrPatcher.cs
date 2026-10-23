@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if LEGACY
 using AssetsTools.NET;
 using AssetsTools.NET.Extra;
+#endif
 #if CPP
 using BepInEx.Preloader.Core.Patching;
 #elif MONO
@@ -20,11 +22,13 @@ public class Patcher
     : BasePatcher
 #endif
 {
+#if LEGACY
     private static readonly List<string> GlobalSettingsFileNames =
         new()
         {
             "globalgamemanagers", "mainData", "data.unity3d"
         };
+#endif
 
     private static readonly List<string> PluginsToDeleteBeforePatch =
         new()
@@ -70,6 +74,7 @@ public class Patcher
         Console.WriteLine("Installed successfully, probably.");
     }
 
+#if LEGACY
     private static string GetGlobalSettingsFilePath(string dataPath)
     {
         foreach (var globalSettingsFielName in GlobalSettingsFileNames)
@@ -169,6 +174,7 @@ public class Patcher
             value = new AssetTypeValue(EnumValueTypes.ValueType_String, str)
         };
     }
+#endif
 
     private static void CopyFilesToGame(string patcherPath, string dataPath)
     {
