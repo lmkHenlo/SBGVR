@@ -72,8 +72,8 @@ namespace SbgVr
                 "target, so each eye sees them at the right depth. Off = UUVR's floating screen, where markers on " +
                 "nearby targets look doubled.");
             MarkersOnTop = config.Bind(hud, "MarkersOnTop", true,
-                "Draw world-space markers over scenery, like the game does. Off = scenery in front of a target " +
-                "hides its marker.");
+                "Draw world-space markers over scenery, like the game does. Menus on the floating screen still " +
+                "cover them. Off = scenery in front of a target hides its marker.");
             MarkerScale = config.Bind(hud, "MarkerScale", 1f,
                 new ConfigDescription(
                     "Size of world-space markers. 1 = the size they have on UUVR's floating screen.",

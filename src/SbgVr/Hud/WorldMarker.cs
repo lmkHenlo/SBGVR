@@ -27,7 +27,9 @@ namespace SbgVr.Hud
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
-        private const int CanvasSortingOrder = 30000;
+        // Drawn just before UUVR's floating screen (its VR UI Render Queue, 5000 by default), so menus on the
+        // floating screen cover markers the way the game's menus cover its HUD.
+        private const int QueuesBeforeFloatingScreen = 10;
         private const float FloatingScreenWidthPerScale = 1.8f;
 
         private static Material _onTopMaterial;
@@ -154,7 +156,9 @@ namespace SbgVr.Hud
             _anchor.hideFlags = HideFlags.DontSave;
             _canvas = _anchor.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.WorldSpace;
-            _canvas.sortingOrder = CanvasSortingOrder;
+            // Left at sorting order 0, like the floating screen: Unity sorts transparent objects by sorting
+            // order before render queue, so a higher order would draw markers over the floating screen.
+            _canvas.sortingOrder = 0;
             _canvasGroup = _anchor.AddComponent<CanvasGroup>();
             _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
@@ -228,7 +232,8 @@ namespace SbgVr.Hud
 
         /// <summary>
         /// World-space UI is depth tested, so scenery would hide markers that the game draws over everything.
-        /// With MarkersOnTop the marker's graphics use a copy of the UI material that ignores depth.
+        /// With MarkersOnTop the marker's graphics use a copy of the UI material that ignores depth, drawn after
+        /// the scene but before the floating screen.
         /// </summary>
         private void UpdateMaterials()
         {
@@ -237,6 +242,9 @@ namespace SbgVr.Hud
                 RestoreMaterials();
                 return;
             }
+
+            var renderQueue = OnTopRenderQueue();
+            _onTopMaterial.renderQueue = renderQueue;
 
             var graphics = GetComponentsInChildren<Graphic>(true);
             if (_materialsSwapped && graphics.Length == _graphicCount) return;
@@ -252,6 +260,7 @@ namespace SbgVr.Hud
                     _originalFontMaterials.Add(new KeyValuePair<TMP_Text, Material>(text, original));
                     var onTop = new Material(original);
                     onTop.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+                    onTop.renderQueue = renderQueue;
                     text.fontSharedMaterial = onTop;
                     continue;
                 }
@@ -264,6 +273,12 @@ namespace SbgVr.Hud
             }
 
             _materialsSwapped = true;
+        }
+
+        private static int OnTopRenderQueue()
+        {
+            var floatingScreenQueue = ModConfiguration.Instance.VrUiRenderQueue.Value;
+            return Mathf.Max((int)RenderQueue.Transparent, floatingScreenQueue - QueuesBeforeFloatingScreen);
         }
 
         private void RestoreMaterials()
