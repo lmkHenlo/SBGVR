@@ -21,7 +21,8 @@ namespace SbgVr.Hud
         private static void LockOnTargetLateUpdate(Transform ___container, Vector3 ___worldPosition, bool ___isVisible, LockOnTarget ___target)
         {
             var inWorld = WorldMarker.Enabled && ___isVisible;
-            WorldMarker.Place(___container, ___worldPosition, inWorld, inWorld ? PlayerOf(___target) : null);
+            WorldMarker.Place(___container, ___worldPosition, inWorld, inWorld ? PlayerOf(___target) : null,
+                alwaysOnTop: true);
         }
 
         // The airhorn's indicator over each player it will hit.

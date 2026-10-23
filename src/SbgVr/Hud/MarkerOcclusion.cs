@@ -21,7 +21,8 @@ namespace SbgVr.Hud
     /// </list>
     /// The characters themselves are drawn once, as usual; nothing about how they look changes.
     ///
-    /// A name tag or teammate icon isn't covered by the player it belongs to.
+    /// A name tag or teammate icon isn't covered by the player it belongs to, and weapon reticles aren't
+    /// covered at all.
     /// </summary>
     internal static class MarkerOcclusion
     {
@@ -67,7 +68,8 @@ namespace SbgVr.Hud
             foreach (var marker in WorldMarker.InWorld)
             {
                 if (marker == null) continue;
-                if (camera == null || !marker.DrawnOnTop || !marker.TryGetArea(cameraTransform, out var area)) continue;
+                // Reticles are never covered.
+                if (camera == null || marker.AlwaysOnTop || !marker.DrawnOnTop || !marker.TryGetArea(cameraTransform, out var area)) continue;
 
                 Markers.Add(new MarkerInView
                 {

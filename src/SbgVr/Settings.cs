@@ -77,7 +77,8 @@ namespace SbgVr
                 "nearby targets look doubled.");
             MarkersOnTop = config.Bind(hud, "MarkersOnTop", true,
                 "Draw world-space markers over scenery, like the game does. Menus on the floating screen still " +
-                "cover them. Off = scenery in front of a target hides its marker.");
+                "cover them. Off = scenery in front of a target hides its marker. Weapon reticles are always " +
+                "drawn on top.");
             MarkerScale = config.Bind(hud, "MarkerScale", 1f,
                 new ConfigDescription(
                     "Size of world-space markers. 1 = the size they have on UUVR's floating screen.",
@@ -89,11 +90,12 @@ namespace SbgVr
                     new AcceptableValueRange<float>(30f, 120f)));
             WorldSpaceReticles = config.Bind(hud, "WorldSpaceReticles", true,
                 "Draw weapon reticles in the world at the point you're aiming at, so both eyes see them on the " +
-                "target. Off = on UUVR's floating screen, where they look doubled against a distant target.");
+                "target, always on top of scenery and characters. Off = on UUVR's floating screen, where they " +
+                "look doubled against a distant target.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
-                "to.");
+                "to, and weapon reticles aren't covered at all.");
 
             const string graphics = "VR Graphics";
             AmbientOcclusion = config.Bind(graphics, "AmbientOcclusion", true,

@@ -2,7 +2,7 @@
 
 Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
-> **Experimental.** SBG VR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.13 is a test build: expect rough edges.
+> **Experimental.** SBG VR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.14 is a test build: expect rough edges.
 
 ## What it does
 
@@ -37,7 +37,7 @@ Settings are in two files under `BepInEx\config`. In r2modman, open them with **
 - `com.sbgvr.cfg`: SBG VR's settings. They only apply while VR is running:
   - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` and `FlashFrames` (off), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
-  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
+  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
   - **Diagnostics:** logging for bug reports.
 
 If the headset shows nothing, try these UUVR settings, one at a time:

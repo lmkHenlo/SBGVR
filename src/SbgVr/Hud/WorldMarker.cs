@@ -27,6 +27,10 @@ namespace SbgVr.Hud
     ///
     /// <see cref="MarkerOcclusion"/> tells each marker which player characters are in front of it; the
     /// marker skips the pixels those characters cover (marked in the stencil buffer).
+    ///
+    /// Weapon reticles (and the lock-on reticle) are always drawn on top: over scenery whatever MarkersOnTop
+    /// says, never covered by player characters, and after every other transparent object (effects with a
+    /// high sorting order included). Menus and full-view fades, drawn last of all, still cover them.
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -55,6 +59,7 @@ namespace SbgVr.Hud
         private int _renderQueue = -1;
         private int _coveringMask;
         private bool _isReticle;
+        private bool _alwaysOnTop;
         private int _lastPlacedFrame;
         private Canvas _hudCanvas;
 
@@ -79,6 +84,12 @@ namespace SbgVr.Hud
         /// <summary>Where the marker is drawn this frame.</summary>
         internal Vector3 Position => _anchor != null ? _anchor.transform.position : transform.position;
 
+        /// <summary>
+        /// True for a reticle: drawn over scenery and every other transparent object, and never covered by
+        /// player characters.
+        /// </summary>
+        internal bool AlwaysOnTop => _alwaysOnTop;
+
         /// <summary>True when the marker is drawn over scenery and can be seen this frame.</summary>
         internal bool DrawnOnTop => _inWorld && _materialsSwapped && _canvas != null && _canvas.enabled &&
                                     _canvasGroup.alpha > 0f;
@@ -101,10 +112,11 @@ namespace SbgVr.Hud
         /// <paramref name="owner"/> is the player the marker belongs to (a name tag's or teammate icon's), whose
         /// own character doesn't hide it. A <paramref name="reticle"/> keeps its size on the floating screen
         /// whatever VR HUD.MarkerScale is, and is held in a rectangle the size of its HUD canvas, so parts laid
-        /// out against the screen's edges keep their places.
+        /// out against the screen's edges keep their places. A reticle, or a marker placed with
+        /// <paramref name="alwaysOnTop"/>, is never hidden by scenery or characters (see <see cref="AlwaysOnTop"/>).
         /// </summary>
         internal static void Place(Component marker, Vector3 worldPosition, bool inWorld, PlayerInfo owner = null,
-            bool reticle = false)
+            bool reticle = false, bool alwaysOnTop = false)
         {
             if (marker == null) return;
 
@@ -117,6 +129,7 @@ namespace SbgVr.Hud
 
             worldMarker.Owner = owner;
             worldMarker._isReticle = reticle;
+            worldMarker._alwaysOnTop = reticle || alwaysOnTop;
             worldMarker.PlaceInternal(worldPosition, inWorld);
         }
 
@@ -377,6 +390,26 @@ namespace SbgVr.Hud
         }
 
         /// <summary>
+        /// Markers sort with the scene's transparent objects (sorting order 0, like the floating screen). A
+        /// reticle sorts after all of them, on the last sorting layer one order below the floating screen and
+        /// full-view fades (<see cref="Uuvr.VrUi.UiSorting"/>), so those still draw over it.
+        /// </summary>
+        private void ApplySorting()
+        {
+            var layerId = 0;
+            var order = 0;
+            if (_alwaysOnTop)
+            {
+                var layers = SortingLayer.layers;
+                if (layers.Length > 0) layerId = layers[layers.Length - 1].id;
+                order = short.MaxValue - 1;
+            }
+
+            if (_canvas.sortingLayerID != layerId) _canvas.sortingLayerID = layerId;
+            if (_canvas.sortingOrder != order) _canvas.sortingOrder = order;
+        }
+
+        /// <summary>
         /// Copies what the HUD around the marker does to it: hidden when the HUD object is inactive or its canvas
         /// is off, and faded by the HUD's canvas groups (the game hides and fades whole HUD sections that way).
         /// </summary>
@@ -418,6 +451,7 @@ namespace SbgVr.Hud
             distance = Mathf.Clamp(distance, camera.nearClipPlane * 2f, camera.farClipPlane * 0.9f);
 
             _anchor.layer = LayerHelper.GetVrUiLayer();
+            ApplySorting();
             _anchor.transform.SetPositionAndRotation(
                 cameraTransform.position + direction * distance,
                 Quaternion.LookRotation(direction, cameraTransform.up));
@@ -450,11 +484,11 @@ namespace SbgVr.Hud
         /// <summary>
         /// World-space UI is depth tested, so scenery would hide markers that the game draws over everything.
         /// With MarkersOnTop the marker's graphics use copies of their materials that ignore depth, drawn after
-        /// the scene but before the floating screen.
+        /// the scene but before the floating screen. Reticles always do.
         /// </summary>
         private void UpdateMaterials()
         {
-            if (!Settings.MarkersOnTop.Value)
+            if (!Settings.MarkersOnTop.Value && !_alwaysOnTop)
             {
                 RestoreMaterials();
                 return;
