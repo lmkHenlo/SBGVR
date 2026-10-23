@@ -44,6 +44,7 @@ namespace SbgVr.Hud
         private static readonly HashSet<WorldMarker> CoveredMarkers = new HashSet<WorldMarker>();
         private static readonly HashSet<PlayerOverlap.PlayerView> CoveringPlayers = new HashSet<PlayerOverlap.PlayerView>();
         private static readonly HashSet<PlayerInfo> Drawn = new HashSet<PlayerInfo>();
+        private static readonly Dictionary<WorldMarker, int> Queues = new Dictionary<WorldMarker, int>();
         private static readonly List<PlayerInfo> Gone = new List<PlayerInfo>();
 
         internal static void Initialize()
@@ -63,12 +64,12 @@ namespace SbgVr.Hud
             CoveredMarkers.Clear();
             CoveringPlayers.Clear();
             Drawn.Clear();
+            Queues.Clear();
 
             var cameraTransform = camera != null ? camera.transform : null;
             foreach (var marker in WorldMarker.InWorld)
             {
                 if (marker == null) continue;
-                marker.SetRenderQueue(top);
                 if (camera == null || !marker.DrawnOnTop || !marker.TryGetArea(cameraTransform, out var area)) continue;
 
                 Markers.Add(new MarkerInView
@@ -111,7 +112,7 @@ namespace SbgVr.Hud
                 var item = Items[i];
                 if (item.Marker != null)
                 {
-                    item.Marker.SetRenderQueue(queue);
+                    Queues[item.Marker] = queue;
                     continue;
                 }
 
@@ -124,6 +125,13 @@ namespace SbgVr.Hud
 
                 occluder.Draw(item.Player, queue);
                 Drawn.Add(player);
+            }
+
+            // Each marker's queue is set once a frame: changing it switches its graphics' materials, which
+            // rebuilds its canvas.
+            foreach (var marker in WorldMarker.InWorld)
+            {
+                if (marker != null) marker.SetRenderQueue(Queues.TryGetValue(marker, out var queue) ? queue : top);
             }
 
             foreach (var pair in Occluders)

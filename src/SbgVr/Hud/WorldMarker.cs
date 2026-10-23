@@ -25,8 +25,8 @@ namespace SbgVr.Hud
     /// unloaded with it), copies the HUD's visibility and fading, and the marker is destroyed if the HUD
     /// object it came from is.
     ///
-    /// Each marker has its own copy of the on-top material, so <see cref="MarkerOcclusion"/> can give it its
-    /// own place in the drawing order relative to the player characters in front of it.
+    /// <see cref="MarkerOcclusion"/> gives each marker its own place in the drawing order, relative to the
+    /// player characters in front of it, by switching its graphics to on-top materials for that render queue.
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -40,7 +40,13 @@ namespace SbgVr.Hud
 
         private static Material _onTopMaterial;
 
-        private Material _markerMaterial;
+        // On-top materials by render queue, shared by all markers: plain UI graphics by queue, text by its
+        // font material and queue. A graphic is switched to another material to change its queue, rather
+        // than the queue of its material being changed: UI masks (and SoftMask) draw with copies of a
+        // graphic's material that they make once and keep, so a changed queue would never reach them.
+        private static readonly Dictionary<int, Material> UiMaterials = new Dictionary<int, Material>();
+        private static readonly Dictionary<(Material, int), Material> FontMaterials = new Dictionary<(Material, int), Material>();
+
         private int _renderQueue = -1;
 
         private Transform _rect;
@@ -105,7 +111,6 @@ namespace SbgVr.Hud
         {
             InWorld.Remove(this);
             if (_anchor != null) Destroy(_anchor);
-            if (_markerMaterial != null) Destroy(_markerMaterial);
         }
 
         private void OnTransformParentChanged()
@@ -149,13 +154,41 @@ namespace SbgVr.Hud
         {
             if (renderQueue == _renderQueue || !_materialsSwapped) return;
             _renderQueue = renderQueue;
-            if (_markerMaterial != null) _markerMaterial.renderQueue = renderQueue;
+            ApplyRenderQueue();
+        }
+
+        private void ApplyRenderQueue()
+        {
+            var uiMaterial = UiMaterial(_renderQueue);
+            foreach (var pair in _originalMaterials)
+            {
+                if (pair.Key != null) pair.Key.material = uiMaterial;
+            }
+
             foreach (var pair in _originalFontMaterials)
             {
-                if (pair.Key == null) continue;
-                var onTop = pair.Key.fontSharedMaterial;
-                if (onTop != null && onTop != pair.Value) onTop.renderQueue = renderQueue;
+                if (pair.Key != null) pair.Key.fontSharedMaterial = FontMaterial(pair.Value, _renderQueue);
             }
+        }
+
+        private static Material UiMaterial(int renderQueue)
+        {
+            if (UiMaterials.TryGetValue(renderQueue, out var material) && material != null) return material;
+
+            material = new Material(_onTopMaterial) { name = $"SBG VR marker ({renderQueue})", renderQueue = renderQueue };
+            UiMaterials[renderQueue] = material;
+            return material;
+        }
+
+        private static Material FontMaterial(Material original, int renderQueue)
+        {
+            if (FontMaterials.TryGetValue((original, renderQueue), out var material) && material != null) return material;
+
+            material = new Material(original) { name = $"{original.name} (SBG VR marker {renderQueue})" };
+            material.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+            material.renderQueue = renderQueue;
+            FontMaterials[(original, renderQueue)] = material;
+            return material;
         }
 
         /// <summary>
@@ -329,8 +362,8 @@ namespace SbgVr.Hud
 
         /// <summary>
         /// World-space UI is depth tested, so scenery would hide markers that the game draws over everything.
-        /// With MarkersOnTop the marker's graphics use the marker's own copy of a UI material that ignores
-        /// depth, drawn after the scene but before the floating screen.
+        /// With MarkersOnTop the marker's graphics use copies of their materials that ignore depth, drawn after
+        /// the scene but before the floating screen.
         /// </summary>
         private void UpdateMaterials()
         {
@@ -344,34 +377,25 @@ namespace SbgVr.Hud
             if (_materialsSwapped && graphics.Length == _graphicCount) return;
 
             RestoreMaterials();
-            var renderQueue = TopRenderQueue;
-            _renderQueue = renderQueue;
-            if (_markerMaterial == null)
-                _markerMaterial = new Material(_onTopMaterial) { name = $"SBG VR marker ({name})" };
-            _markerMaterial.renderQueue = renderQueue;
             _graphicCount = graphics.Length;
             foreach (var graphic in graphics)
             {
                 if (graphic is TMP_Text text)
                 {
                     var original = text.fontSharedMaterial;
-                    if (original == null) continue;
-                    _originalFontMaterials.Add(new KeyValuePair<TMP_Text, Material>(text, original));
-                    var onTop = new Material(original);
-                    onTop.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
-                    onTop.renderQueue = renderQueue;
-                    text.fontSharedMaterial = onTop;
+                    if (original != null) _originalFontMaterials.Add(new KeyValuePair<TMP_Text, Material>(text, original));
                     continue;
                 }
 
-                // Only plain UI graphics; ones with their own shader (masks, effects) keep it.
+                // Only plain UI graphics; ones with their own shader (effects) keep it.
                 var material = graphic.material;
                 if (material != null && material.shader != _onTopMaterial.shader) continue;
                 _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
-                graphic.material = _markerMaterial;
             }
 
             _materialsSwapped = true;
+            _renderQueue = TopRenderQueue;
+            ApplyRenderQueue();
         }
 
         /// <summary>
@@ -397,10 +421,7 @@ namespace SbgVr.Hud
 
             foreach (var pair in _originalFontMaterials)
             {
-                if (pair.Key == null) continue;
-                var onTop = pair.Key.fontSharedMaterial;
-                pair.Key.fontSharedMaterial = pair.Value;
-                if (onTop != null && onTop != pair.Value) Destroy(onTop);
+                if (pair.Key != null) pair.Key.fontSharedMaterial = pair.Value;
             }
 
             _originalMaterials.Clear();

@@ -17,11 +17,15 @@ namespace SbgVr.Hud
         [HarmonyPatch(typeof(WorldspaceIconUi), "LateUpdate")]
         [HarmonyPostfix]
         private static void IconLateUpdate(
-            WorldspaceIconUi __instance, Vector3 ___worldPosition, bool ___isOffscreen, Transform ___parent)
+            WorldspaceIconUi __instance, Vector3 ___worldPosition, bool ___isOffscreen, Transform ___parent,
+            WorldspaceIconUiSettings ___settings)
         {
             var inWorld = WorldMarker.Enabled && !___isOffscreen;
-            // A teammate's icon sits on that player, whose own character shouldn't hide it.
-            var owner = inWorld && ___parent != null ? ___parent.GetComponentInParent<PlayerInfo>() : null;
+            // A teammate's icon sits on that player, whose own character shouldn't cover it. Only teammate
+            // icons: a ball (or a tee) can be attached to its player, and the player should still cover it.
+            var owner = inWorld && ___parent != null && ___settings == WorldspaceIconManager.TeammateIconSettings
+                ? ___parent.GetComponentInParent<PlayerInfo>()
+                : null;
             WorldMarker.Place(__instance, ___worldPosition, inWorld, owner);
         }
 
@@ -47,9 +51,11 @@ namespace SbgVr.Hud
         // Player name tags.
         [HarmonyPatch(typeof(NameTagUi), "LateUpdate")]
         [HarmonyPostfix]
-        private static void NameTagLateUpdate(NameTagUi __instance, Vector3 ___worldPosition, PlayerInfo ___playerInfo)
+        private static void NameTagLateUpdate(
+            NameTagUi __instance, Vector3 ___worldPosition, PlayerInfo ___playerInfo, bool ___nameTagIsPlayer)
         {
-            WorldMarker.Place(__instance, ___worldPosition, WorldMarker.Enabled, ___playerInfo);
+            // A player's name tag isn't covered by that player; a ball's name tag is covered by its owner.
+            WorldMarker.Place(__instance, ___worldPosition, WorldMarker.Enabled, ___nameTagIsPlayer ? ___playerInfo : null);
         }
 
         // The reticle on whatever you can interact with, and its button prompt.
