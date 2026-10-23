@@ -144,6 +144,7 @@ It also logs diagnostics, each kind once and again when it changes: the game, gr
 - **0.2.x is being tested in a headset.** It fixes what testing 0.1.0 found; the test plan below covers the new features.
 - **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet.
 - **Game folder files.** The patcher writes into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`. They aren't used without the mod and can be deleted.
+- **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR, and SteamVR docks that screen into its dashboard when the game becomes a VR app or stalls while loading. There's no API for the mod to close the dashboard. Turn the theatre off: in Steam, right-click Super Battle Golf → Properties → General, untick **Use Desktop Game Theatre while SteamVR is active**; or, for every game, SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.
 - **MaxFOVSlider** isn't handled yet. Disable it while using VR.
 - **No motion controllers.** UUVR doesn't support them.
 
