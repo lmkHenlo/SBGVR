@@ -8,6 +8,8 @@ No version has been published to Thunderstore yet. Every version is a test build
 
 ## [Unreleased]
 
+## [0.2.15] - 2026-10-23
+
 ### Added
 
 - This changelog.
