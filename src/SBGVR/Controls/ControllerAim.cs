@@ -120,8 +120,11 @@ namespace SBGVR.Controls
             return true;
         }
 
-        /// <summary>The dominant hand controller's pointing pose in tracking space.</summary>
-        private static bool TryGetControllerPose(out Vector3 position, out Quaternion rotation)
+        /// <summary>
+        /// The dominant hand controller's pointing pose in tracking space (the room, in metres), independent of
+        /// the game camera. Also used by the motion camera, which measures how the hand moves while you aim.
+        /// </summary>
+        internal static bool TryGetControllerPose(out Vector3 position, out Quaternion rotation)
         {
             position = default;
             rotation = default;

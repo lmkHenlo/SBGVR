@@ -154,6 +154,13 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 
 The Meta button on the right controller opens the headset's universal menu and isn't available to games. The golf cart's honk (L3 on a gamepad) has no controller input.
 
+**Motion camera.** With `MotionCamera` on (the default once `MotionControls` is on), small movements of your `DominantHand` controller turn the camera while you aim and charge a golf club or rocket club swing, just like the right thumbstick:
+
+- turn the controller, or move it sideways, to turn the camera left or right;
+- tilt it to look up or down.
+
+Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera 2°, up to 15° left or right and 10° up or down from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`.
+
 **Mirrored buttons.** With `MirrorButtons` on (off by default), the layout is mirrored left to right, for example for left-handed play together with `DominantHand` = `Left`:
 
 | Controller | Gamepad | In the game |
@@ -214,6 +221,11 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
 | `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | The controller weapons aim with: `Right` or `Left`. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCamera` | `true` | With `MotionControls`, small controller movements turn the camera while you aim a golf club or rocket club swing (see [Motion controls](#motion-controls)). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraStrength` | `0.25` | Share of the controller's turn and tilt that goes into the camera (0.05–1). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMovement` | `2` | Degrees the camera turns per 10 cm of sideways hand movement (0–10). `0` = turning and tilting only. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxYaw` | `15` | Furthest the controller turns the camera left or right while aiming, in degrees (1–45). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxPitch` | `10` | Furthest the controller tilts the camera up or down while aiming, in degrees (0–30). `0` = left and right only. |
 | `com.sbgvr.cfg` | `VR Controls` → `MirrorButtons` | `false` | Mirror the motion controls button layout left to right (see [Motion controls](#motion-controls)). |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
@@ -278,6 +290,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
 | Motion controls | `Controls/MotionControls.cs`, `Plugin.EnableOpenXrControllers` | With `MotionControls` on, SBGVR enables UUVR's OpenXR controller profiles before UUVR starts VR (OpenVR reports controllers without them). Just before each Input System update, `MotionControls` reads both controllers through Unity's XR input (`UnityEngine.XR.InputDevices`) and queues their state to a virtual `Gamepad` it adds while VR runs. Nothing is sent until a controller is used, or while it's left alone, so other devices stay usable. The game's own input code is unchanged. |
 | Controller aiming | `Controls/ControllerAim.cs`, `ControllerAimPatches.cs` | The game aims every weapon from `GameManager.Camera`'s transform. Transpilers on `PlayerInventory.GetFirearmAimPoint`, `GetFreezeBombAimDirection`, `TryGetThunderstormAimPoint`, `PlayerAnimatorIo.UpdateAimingAngle`, `PlayerMovement.AlignWithCameraImmediately` and, while the rocket launcher picks its target, `PlayerGolfer.TryGetBestLockOnTarget` send their `Component.transform` reads through `ControllerAim.TransformOf`. While the local player aims or uses an item, that returns a stand-in transform on the dominant hand controller's pointing ray instead of the camera's; other transforms pass through. The ray is the controller's pose (OpenXR's aim pose, or the grip pose) relative to the headset, placed under UUVR's `VrCameraOffset`, so it starts where your hand is in the view you see. `WorldReticles` casts along the same ray. |
+| Motion camera | `Controls/MotionCamera.cs` | While aiming a swing, the game turns the character to the orbit camera's yaw (`PlayerMovement.UpdateTargetYaw`), and every swing goes the way the character faces (`PlayerGolfer.GetSwingDirection`). While the local player aims or charges the golf club or rocket club and the orbit camera is active, `MotionCamera` compares the dominant controller's pose in tracking space with the pose it had when aiming started: horizontal turn and sideways movement give a yaw, tilt gives a pitch, each through a dead zone, scaled and clamped. Each frame it adds only the change since the last frame to the camera with `OrbitCameraModule.SetYaw` and `SetPitch`, so thumbstick input adds up with it and nothing snaps back. It stops once the swing starts. The game's aiming code is unchanged. |
 | World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), or the controller's aim with `ControllerAiming`, past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
 SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
@@ -347,6 +360,12 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - Golf swings, the flash camera and the airhorn behave as without motion controls.
     - With `DominantHand` = `Left`, the left controller aims and the buttons stay put. With `MirrorButtons` on, every button is mirrored as in the mirrored table, and the Menu button still pauses. With `ControllerAiming` off, weapons aim along the camera again.
     - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
+13. Motion camera, with `MotionControls` on:
+    - Aim a golf club swing, then turn the right controller, move it sideways and tilt it: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
+    - Holding the controller still while aiming doesn't drift the camera. Pulling the trigger to swing doesn't move it. The thumbstick still turns the camera while aiming.
+    - The rocket club works the same way. Outside swing aiming (walking, weapons, menus), the controller doesn't turn the camera.
+    - Stopping aiming leaves the camera where it is; aiming again starts from how you hold the controller then.
+    - With `MotionCamera` off, the camera only turns with the thumbstick, as before.
 
 Send `LogOutput.log` from the session with notes on each step.
 

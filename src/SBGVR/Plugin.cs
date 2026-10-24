@@ -57,6 +57,8 @@ namespace SBGVR
             {
                 EnableOpenXrControllers();
                 Add(host, "Motion controls", typeof(Controls.MotionControls));
+                if (Settings.MotionCamera.Value)
+                    Add(host, "Motion camera", typeof(Controls.MotionCamera));
                 if (Settings.ControllerAiming.Value && Patch("Controller aiming", typeof(Controls.ControllerAimPatches)) &&
                     Patch("Controller aiming for the rocket launcher's lock-on", typeof(Controls.ControllerAimLockOnPatches)))
                 {

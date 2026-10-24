@@ -47,6 +47,11 @@ namespace SBGVR
         internal static ConfigEntry<Controls.ControllerHand> DominantHand;
         internal static ConfigEntry<float> ControllerAimPitch;
         internal static ConfigEntry<bool> MirrorButtons;
+        internal static ConfigEntry<bool> MotionCamera;
+        internal static ConfigEntry<float> MotionCameraStrength;
+        internal static ConfigEntry<float> MotionCameraMovement;
+        internal static ConfigEntry<float> MotionCameraMaxYaw;
+        internal static ConfigEntry<float> MotionCameraMaxPitch;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -135,6 +140,29 @@ namespace SBGVR
                 "with DominantHand = Left: the right controller moves and aims items, the left one turns the " +
                 "camera and swings or fires, X and Y act as A and B, and the right grip button opens the D-pad " +
                 "layer. The Menu button stays on the left controller.");
+            MotionCamera = config.Bind(controls, "MotionCamera", true,
+                "With MotionControls, while you aim and charge a golf club or rocket club swing, small movements of " +
+                "your DominantHand controller turn the camera, like the right thumbstick: turn it or move it " +
+                "sideways to turn the camera left or right, tilt it to look up or down. Your character faces the " +
+                "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
+                "controller when you start aiming and stops when you swing; the thumbstick still works.");
+            MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
+                new ConfigDescription(
+                    "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +
+                    "turns the camera 2 degrees.",
+                    new AcceptableValueRange<float>(0.05f, 1f)));
+            MotionCameraMovement = config.Bind(controls, "MotionCameraMovement", 2f,
+                new ConfigDescription(
+                    "Degrees the camera turns for every 10 cm you move the controller sideways. 0 = only turning " +
+                    "and tilting count.",
+                    new AcceptableValueRange<float>(0f, 10f)));
+            MotionCameraMaxYaw = config.Bind(controls, "MotionCameraMaxYaw", 15f,
+                new ConfigDescription("The furthest the controller turns the camera left or right while aiming, in degrees.",
+                    new AcceptableValueRange<float>(1f, 45f)));
+            MotionCameraMaxPitch = config.Bind(controls, "MotionCameraMaxPitch", 10f,
+                new ConfigDescription("The furthest the controller tilts the camera up or down while aiming, in degrees. " +
+                    "0 = left and right only.",
+                    new AcceptableValueRange<float>(0f, 30f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,
