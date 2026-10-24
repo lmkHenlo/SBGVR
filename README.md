@@ -133,21 +133,25 @@ Start the VR runtime, then the game. UUVR turns VR on at startup.
 
 Off by default, and new: turn on `VR Controls` → `MotionControls` in `com.sbgvr.cfg`, then restart the game. While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply. A real gamepad, keyboard and mouse still work alongside. The game shows gamepad button icons.
 
+Controller inputs are named as in Meta's [Quest controller guidelines](https://developers.meta.com/vr/design/controllers/); other controllers use the input in the same place.
+
 | Controller | Gamepad | In the game |
 | --- | --- | --- |
-| Left stick | Left stick | Move; menu cursor |
-| Right stick | Right stick | Turn the camera |
-| Left trigger | LT | Aim |
-| Right trigger | RT | Swing (hold to charge) |
-| A / B | A / B | Jump / dive |
-| X / Y | X / Y | Interact / swing angle |
-| Right grip | RB | Next item |
-| Tap the left grip | LB | Previous item |
-| Left menu button | Start | Pause |
-| Left / right stick click | L3 / R3 | Honk (golf cart) / drop item |
-| Hold the left grip + right stick | D-pad | Emotes, push to talk, votes, restart |
-| Hold the left grip + A | Start | Pause (for controllers whose menu button belongs to SteamVR, such as the Valve Index) |
-| Hold the left grip + B | Back | Scoreboard |
+| Left thumbstick | Left stick | Move; menu cursor |
+| Right thumbstick | Right stick | Turn the camera |
+| Left trigger button | LT | Aim |
+| Right trigger button | RT | Swing (hold to charge) |
+| A button / B button | A / B | Jump / dive |
+| X button / Y button | X / Y | Interact / swing angle |
+| Right grip button | RB | Next item |
+| Tap the left grip button | LB | Previous item |
+| Menu button (left controller) | Start | Pause |
+| Press the left / right thumbstick | L3 / R3 | Honk (golf cart) / drop item |
+| Hold the left grip button + right thumbstick | D-pad | Emotes, push to talk, votes, restart |
+| Hold the left grip button + A button | Start | Pause (for controllers without a Menu button the game can use, such as the Valve Index) |
+| Hold the left grip button + B button | Back | Scoreboard |
+
+The Meta button on the right controller opens the headset's universal menu and isn't available to games.
 
 Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad. Aiming still follows your head; the controllers aren't tracked in the game.
 
@@ -206,7 +210,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
 - **MaxFOVSlider before 0.2.1** reshapes the headset's picture with its Panini projection. MaxFOVSlider 0.2.1 and later pause their projection and extra resolution while VR runs, and work alongside SBGVR; update it, or disable older versions while using VR.
-- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, aiming follows your head, and controllers don't vibrate. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
+- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, aiming follows your head, and controllers don't vibrate (no haptics). Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
 
 ## How it works
 

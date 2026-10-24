@@ -26,17 +26,17 @@ namespace SBGVR.Controls
     {
         private const string GamepadName = "SBGVR Motion Controls";
 
-        /// <summary>Stick and trigger values below this are treated as at rest, so drift doesn't send input.</summary>
+        /// <summary>Thumbstick and trigger button values below this are treated as at rest, so drift doesn't send input.</summary>
         private const float StickDeadZone = 0.12f;
         private const float TriggerDeadZone = 0.05f;
 
-        /// <summary>How far the right stick goes before it counts as a D-pad press while the left grip is held.</summary>
+        /// <summary>How far the right thumbstick goes before it counts as a D-pad press while the left grip button is held.</summary>
         private const float DPadThreshold = 0.6f;
 
-        /// <summary>A left grip released within this time, without using its D-pad layer, is a tap: LB.</summary>
+        /// <summary>A left grip button released within this time, without using its D-pad layer, is a tap: LB.</summary>
         private const float GripTapTime = 0.6f;
 
-        /// <summary>How long a left grip tap holds LB down, so the game sees the press.</summary>
+        /// <summary>How long a left grip button tap holds LB down, so the game sees the press.</summary>
         private const float GripTapPressTime = 0.06f;
 
         private readonly Hand _left = new Hand(InputDeviceCharacteristics.Left, "Left");
@@ -123,8 +123,8 @@ namespace SBGVR.Controls
             if (!_left.HasFaceButtons && _left.PadClick(out var leftPad))
                 leftPadDirection = leftPad;
 
-            // Left grip: a tap is LB; held, it turns the right stick into a D-pad and A and B into pause and
-            // scoreboard.
+            // Left grip button: a tap is LB; held, it turns the right thumbstick into a D-pad and A and B into
+            // pause and scoreboard. (Input names follow Meta's Quest controller guidelines.)
             var leftGrip = _left.Button(XRCommonUsages.gripButton);
             var now = Time.unscaledTime;
             if (leftGrip && !_leftGripHeld)
@@ -160,7 +160,7 @@ namespace SBGVR.Controls
             if (now < _leftShoulderPulseUntil) state = state.WithButton(GamepadButton.LeftShoulder, true);
             if (_left.Button(XRCommonUsages.menuButton)) state = state.WithButton(GamepadButton.Start, true);
 
-            // Stick clicks, on controllers whose primary axis is a thumbstick (a Vive's is its touchpad).
+            // Pressing a thumbstick, on controllers whose primary axis is one (a Vive's is its touchpad).
             if (_left.HasFaceButtons && _left.Button(XRCommonUsages.primary2DAxisClick))
                 state = state.WithButton(GamepadButton.LeftStick, true);
             if (_right.HasFaceButtons && _right.Button(XRCommonUsages.primary2DAxisClick))

@@ -107,11 +107,12 @@ namespace SBGVR
 
             const string controls = "VR Controls";
             MotionControls = config.Bind(controls, "MotionControls", false,
-                "Play with your VR controllers: while VR runs, their sticks, triggers and buttons work like a " +
-                "gamepad, including your gamepad rebinds. Left stick moves, right stick turns the camera, left " +
-                "trigger aims, right trigger swings, A jumps, B dives, X interacts, Y changes the swing angle, the " +
-                "right grip and a tap of the left grip cycle items, and the left menu button pauses. Hold the left " +
-                "grip for more: right stick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. " +
+                "Play with your VR controllers: while VR runs, their thumbsticks, trigger buttons and buttons work " +
+                "like a gamepad, including your gamepad rebinds. Left thumbstick moves, right thumbstick turns the " +
+                "camera, left trigger button aims, right trigger button swings, A jumps, B dives, X interacts, Y " +
+                "changes the swing angle, the right grip button and a tap of the left grip button cycle items, and " +
+                "the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push " +
+                "to talk, votes), A = pause, B = scoreboard. " +
                 "A real gamepad, keyboard and mouse still work. Restart the game after changing this.");
 
             const string diagnostics = "Diagnostics";
