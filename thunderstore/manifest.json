@@ -1,7 +1,7 @@
 {
   "name": "SBGVR",
   "author": "lmkHenlo",
-  "version_number": "1.0.1",
+  "version_number": "1.0.2",
   "website_url": "https://github.com/lmkHenlo/SBGVR",
   "description": "Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.",
   "dependencies": [
