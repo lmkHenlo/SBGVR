@@ -8,6 +8,15 @@ No version has been published to Thunderstore yet. Every version is a test build
 
 ## [Unreleased]
 
+### Added
+
+- The game's field of view in VR. `VR Graphics` → `FieldOfView` (`Setting` by default) makes the game's Field of view slider work in VR, MaxFOVSlider's range included. At the game's default of 60 you get the headset's own view; higher values show more of the world, squeezed into the headset, and lower ones magnify it. `Headset` keeps the headset's view, and `Game` also follows the game's own changes, such as the overview camera. The floating screen, markers and reticles keep their size, and icons turn into edge arrows at the new edge of the view.
+- `VR Graphics` → `RailgunZoom` (on by default): the railgun's aim zooms the view in VR, as it does on a flat screen. While the view is magnified, the eyes are drawn closer together by the same amount, so it stays easy to focus.
+
+### Fixed
+
+- After turning VR off with F3, the Field of view slider didn't change the view on the flat screen. UUVR blocked every field of view change, not only while VR runs.
+
 ## [0.2.15] - 2026-10-23
 
 ### Added
