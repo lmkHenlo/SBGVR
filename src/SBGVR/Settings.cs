@@ -123,7 +123,9 @@ namespace SBGVR
                 "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
                 "follow the camera. Off = weapons aim along the camera, as on a flat screen.");
             DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
-                "The controller weapons aim with: Right or Left. Buttons stay where they are.");
+                "Your dominant hand: Right or Left. Weapons aim with that controller, and with Left the whole button " +
+                "layout is mirrored (the right controller moves and aims items, the left one turns the camera and " +
+                "fires, and so on). The Menu button stays on the left controller.");
             ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
                 new ConfigDescription(
                     "Degrees to tilt the aim from where the controller points: positive tilts it down, negative " +

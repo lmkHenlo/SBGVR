@@ -153,9 +153,27 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 
 The Meta button on the right controller opens the headset's universal menu and isn't available to games.
 
-Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad.
+**Left-handed.** With `DominantHand` = `Left`, the layout is mirrored so your left hand does what the right hand does above:
 
-**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the buttons stay where they are. If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character.
+| Controller | Gamepad | In the game |
+| --- | --- | --- |
+| Right thumbstick | Left stick | Move; menu cursor |
+| Left thumbstick | Right stick | Turn the camera |
+| Right trigger button | LT | Aim |
+| Left trigger button | RT | Swing (hold to charge) |
+| X button / Y button | A / B | Jump / dive |
+| A button / B button | X / Y | Interact / swing angle |
+| Left grip button | RB | Next item |
+| Tap the right grip button | LB | Previous item |
+| Menu button (left controller) | Start | Pause (the Menu button is only on the left controller) |
+| Press the right / left thumbstick | L3 / R3 | Honk (golf cart) / drop item |
+| Hold the right grip button + left thumbstick | D-pad | Emotes, push to talk, votes, restart |
+| Hold the right grip button + X button | Start | Pause |
+| Hold the right grip button + Y button | Back | Scoreboard |
+
+Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad (mirrored with `DominantHand` = `Left`).
+
+**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the whole layout is then mirrored (see below). If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character.
 
 ### Settings
 
@@ -193,7 +211,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
 | `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
-| `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | The controller weapons aim with: `Right` or `Left`. |
+| `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | Your dominant hand, `Right` or `Left`: weapons aim with that controller, and `Left` mirrors the button layout. |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs (0–600). `0` = never. |
@@ -324,7 +342,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - Aim each weapon (dueling pistol, elephant gun, rocket launcher, railgun, freeze bomb, thunderstorm): the reticle sits where the right controller points, and shots go there. The log says `Controller aiming: aiming with the right controller` and which pose it uses.
     - The rocket launcher's orange lock-on picks the target you point at. A full-power golf swing's homing target still follows the camera.
     - Golf swings, the flash camera and the airhorn behave as without motion controls.
-    - With `DominantHand` = `Left`, the left controller aims. With `ControllerAiming` off, weapons aim along the camera again.
+    - With `DominantHand` = `Left`, the left controller aims and every button is mirrored, as in the left-handed table; the Menu button still pauses. With `ControllerAiming` off, weapons aim along the camera again.
     - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
 
 Send `LogOutput.log` from the session with notes on each step.
