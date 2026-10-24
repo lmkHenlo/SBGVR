@@ -41,8 +41,17 @@ namespace SBGVR.Hud
 
         private static readonly AccessTools.FieldRef<ReticleManager, Reticle>[] Reticles = CreateReticleRefs();
 
+        /// <summary>
+        /// Whether a weapon reticle (not the "can't use here" one) is drawn in the world this frame, and where.
+        /// Read by <see cref="AimLine"/>.
+        /// </summary>
+        internal static bool AimShowing { get; private set; }
+
+        internal static Vector3 AimPoint { get; private set; }
+
         private readonly RaycastHit[] _hits = new RaycastHit[32];
         private readonly List<Component> _reticles = new List<Component>();
+        private int _weaponReticleCount;
         private float _logDistance;
         private bool _wasShowing;
 
@@ -65,6 +74,7 @@ namespace SBGVR.Hud
                     if (component != null) _reticles.Add(component);
                 }
 
+                _weaponReticleCount = _reticles.Count;
                 var disallowed = DisallowedReticle(manager);
                 if (disallowed != null) _reticles.Add(disallowed.transform);
             }
@@ -72,9 +82,12 @@ namespace SBGVR.Hud
             var enabled = WorldMarker.Enabled && Settings.WorldSpaceReticles.Value;
             var camera = enabled ? Fades.FullViewFade.ViewCamera() : null;
             var showing = false;
-            foreach (var reticle in _reticles)
+            var weaponShowing = false;
+            for (var i = 0; i < _reticles.Count; i++)
             {
-                if (camera != null && reticle.gameObject.activeSelf) showing = true;
+                if (camera == null || !_reticles[i].gameObject.activeSelf) continue;
+                showing = true;
+                if (i < _weaponReticleCount) weaponShowing = true;
             }
 
             var point = Vector3.zero;
@@ -96,6 +109,8 @@ namespace SBGVR.Hud
             }
 
             _wasShowing = showing;
+            AimShowing = weaponShowing;
+            AimPoint = point;
             foreach (var reticle in _reticles)
                 WorldMarker.Place(reticle, point, showing && reticle.gameObject.activeSelf, reticle: true);
         }

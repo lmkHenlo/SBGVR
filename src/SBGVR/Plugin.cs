@@ -49,6 +49,7 @@ namespace SBGVR
                 Hud.WorldMarker.Initialize();
                 Hud.MarkerOcclusion.Initialize();
                 Add(host, "World-space reticles", typeof(Hud.WorldReticles));
+                Add(host, "Aim line", typeof(Hud.AimLine));
                 Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
             }
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));

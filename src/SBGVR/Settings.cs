@@ -39,6 +39,7 @@ namespace SBGVR
         internal static ConfigEntry<float> MarkerViewAngle;
         internal static ConfigEntry<bool> PlayersCoverMarkers;
         internal static ConfigEntry<bool> WorldSpaceReticles;
+        internal static ConfigEntry<bool> AimLine;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
 
@@ -104,6 +105,9 @@ namespace SBGVR
                 "Draw weapon reticles in the world at the point you're aiming at, so both eyes see them on the " +
                 "target, always on top of scenery and characters. Off = on UUVR's floating screen, where they " +
                 "look doubled against a distant target.");
+            AimLine = config.Bind(hud, "AimLine", true,
+                "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
+                "while you aim, so you can see where the shot goes from where it leaves.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
