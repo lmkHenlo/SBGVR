@@ -46,6 +46,7 @@ namespace SBGVR
         internal static ConfigEntry<bool> ControllerAiming;
         internal static ConfigEntry<Controls.ControllerHand> DominantHand;
         internal static ConfigEntry<float> ControllerAimPitch;
+        internal static ConfigEntry<bool> MirrorButtons;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -123,12 +124,17 @@ namespace SBGVR
                 "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
                 "follow the camera. Off = weapons aim along the camera, as on a flat screen.");
             DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
-                "The controller weapons aim with: Right or Left. Buttons stay where they are.");
+                "The controller weapons aim with: Right or Left. Buttons stay where they are; see MirrorButtons.");
             ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
                 new ConfigDescription(
                     "Degrees to tilt the aim from where the controller points: positive tilts it down, negative " +
                     "up. For controllers that aim too high or low in your hand.",
                     new AcceptableValueRange<float>(-45f, 45f)));
+            MirrorButtons = config.Bind(controls, "MirrorButtons", false,
+                "With MotionControls, mirror the button layout left to right, for example for left-handed play " +
+                "with DominantHand = Left: the right controller moves and aims items, the left one turns the " +
+                "camera and swings or fires, X and Y act as A and B, and the right grip button opens the D-pad " +
+                "layer. The Menu button stays on the left controller.");
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,
