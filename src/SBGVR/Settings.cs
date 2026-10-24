@@ -67,8 +67,9 @@ namespace SBGVR
             ImpactFrames = config.Bind(comfort, "ImpactFrames", false,
                 "Show the game's impact frames (the brief distorted, recoloured frame when an explosion goes off near " +
                 "you) in VR. They fill your whole view and are centred for a flat screen.");
-            FlashFrames = config.Bind(comfort, "FlashFrames", false,
-                "Show the game's flash frames (the full-screen flash with a doubled picture) in VR.");
+            FlashFrames = config.Bind(comfort, "FlashFrames", true,
+                "Show the game's flash frames in VR: the full-view flash with a doubled picture that blinds you " +
+                "when another player's flash camera catches you. Off = you aren't blinded in VR.");
             CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Fast,
                 "How the camera moves when the game switches views, for example to the hole overview and back. " +
                 "Game = the game's own sweep, Fast = the same sweep in about a third of the time, Instant = a cut.");

@@ -14,7 +14,7 @@ namespace SBGVR.Comfort
     /// <list type="bullet">
     /// <item>Impact frames (VR Comfort.ImpactFrames): a distorted, recoloured frame centred on the flat
     /// camera's view of the explosion.</item>
-    /// <item>Flash frames (VR Comfort.FlashFrames): a full-view flash with a doubled picture.</item>
+    /// <item>Flash frames (VR Comfort.FlashFrames): a full-view flash with a doubled picture, when a flash camera blinds you.</item>
     /// <item>The CRT effect (photo camera and the CRT graphics option), always: its bulge warps each eye
     /// separately.</item>
     /// <item>The menu blur, always: the pause menu (and the settings opened from it) blurs the camera's

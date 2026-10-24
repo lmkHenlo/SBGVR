@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Motion camera: `VR Controls` → `MotionCamera` (on), `MotionCameraStrength` (0.25), `MotionCameraMovement` (2° per 10 cm), `MotionCameraMaxYaw` (30°) and `MotionCameraMaxPitch` (0°). With `MotionControls` on, while you aim and charge a golf club or rocket club swing, turning or moving your dominant controller sideways turns the camera left or right, like the right thumbstick; with `MotionCameraMaxPitch` above 0, tilting it also looks up or down. Your character faces the camera while aiming, so this fine-tunes the swing through the game's own aiming. It stops when you swing.
 - `VR Controls` → `MirrorButtons` (off): mirrors the motion controls button layout left to right, for example for left-handed play with `DominantHand` = `Left`. The Menu button stays on the left controller.
 
+### Changed
+
+- `VR Comfort` → `FlashFrames` is on by default, so a flash camera blinds you in VR as it does on a flat screen. Turn it off to keep the view clear. A settings file you already have keeps its value; change it there, or delete the line to get the new default.
+
 ## [1.0.2] - 2026-10-24
 
 ### Changed
