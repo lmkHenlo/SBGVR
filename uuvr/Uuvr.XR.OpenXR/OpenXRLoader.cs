@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine.Scripting;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR.Features;
+using UnityEngine.XR.OpenXR.Input;
 
 [assembly: Preserve]
 
@@ -269,6 +270,9 @@ namespace UnityEngine.XR.OpenXR
 
             if (!actionSetsAttached)
             {
+                // SBGVR: restored from the Unity OpenXR plugin. Does nothing unless a controller profile was
+                // enabled (ControllerProfiles.Enable), so OpenXR starts as before by default.
+                OpenXRInput.AttachActionSets();
                 actionSetsAttached = true;
             }
 
