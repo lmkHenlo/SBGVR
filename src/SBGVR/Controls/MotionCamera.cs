@@ -124,10 +124,13 @@ namespace SBGVR.Controls
             return type == SwingType.Regular || type == SwingType.RocketDriver ? golfer : null;
         }
 
+        /// <summary>Turns smaller than this, in degrees, aren't logged, so ordinary hand wobble stays out of the log.</summary>
+        private const float LogThreshold = 0.5f;
+
         private void LogSwing()
         {
             if (!_hasReference || !Settings.DiagnosticsEnabled.Value) return;
-            if (_appliedYaw == 0f && _appliedPitch == 0f) return;
+            if (Mathf.Abs(_appliedYaw) < LogThreshold && Mathf.Abs(_appliedPitch) < LogThreshold) return;
             Plugin.Log.LogInfo($"Motion camera: turned the camera {_appliedYaw:+0.0;-0.0;0}° sideways and " +
                                $"{_appliedPitch:+0.0;-0.0;0}° up while aiming.");
         }
