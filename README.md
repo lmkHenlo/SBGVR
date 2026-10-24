@@ -7,7 +7,7 @@ Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle G
 
 SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a Thunderstore mod for Super Battle Golf. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
-The repository, its source archive and the Thunderstore package are all named `SBGVR`. Locally, the repository is kept in a folder named `source`, inside `sbgvr_master\master` next to its release files, the same layout as the maintainer's other mods. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
+The repository and the Thunderstore package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
 SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
 
@@ -313,9 +313,9 @@ SBGVR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it ha
 
 ## Contributing
 
-Send questions and bug reports to [ps.meiisbei@gmail.com](mailto:ps.meiisbei@gmail.com). For a bug, include `BepInEx\LogOutput.log` from a session where it happened. SBGVR writes the VR and camera details needed to track it down.
+Ask questions and report bugs in [GitHub issues](https://github.com/lmkHenlo/SBGVR/issues), or by email to [ps.meiisbei@gmail.com](mailto:ps.meiisbei@gmail.com). For a bug, include `BepInEx\LogOutput.log` from a session where it happened. SBGVR writes the VR and camera details needed to track it down.
 
-Pull requests are accepted. The repository isn't public yet, so email to ask about contributing until it is. When you make changes:
+Pull requests are accepted on [GitHub](https://github.com/lmkHenlo/SBGVR). When you make changes:
 
 - Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org/) style.
 - Put changes to UUVR's files (`uuvr/`) in their own commits, so the differences from upstream stay easy to review.

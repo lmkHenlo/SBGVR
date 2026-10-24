@@ -51,7 +51,7 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 - **Field of view.** Your headset sets the field of view, so the game's FOV slider doesn't apply in VR yet.
 - **SteamVR menu opening on launch or when a match starts.** In Steam, right-click Super Battle Golf → Properties → General and untick **Use Desktop Game Theatre while SteamVR is active**. (Or, for every game: SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.) Steam otherwise shows the game on SteamVR's theatre screen, and SteamVR opens its menu when the game switches to VR or pauses while loading.
 - **MaxFOVSlider.** Version 0.2.1 or later works alongside SBGVR: it pauses its own projection while you're in VR. Turn older versions off while you use VR.
-- **Reporting problems.** Send `BepInEx\LogOutput.log` from a session where the problem happened. SBGVR writes the VR and camera details needed to track it down.
+- **Reporting problems.** Open an issue at <https://github.com/lmkHenlo/SBGVR/issues> with `BepInEx\LogOutput.log` from a session where the problem happened. SBGVR writes the VR and camera details needed to track it down.
 
 ## Credits
 
@@ -62,4 +62,4 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 
 ## License
 
-GPL-3.0-or-later. SBGVR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences; see `THIRD_PARTY_NOTICES.md`.
+GPL-3.0-or-later. SBGVR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences; see `THIRD_PARTY_NOTICES.md`. The source, including SBGVR's copy of UUVR, is at <https://github.com/lmkHenlo/SBGVR>.

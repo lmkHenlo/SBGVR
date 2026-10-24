@@ -12,7 +12,8 @@ de8e9218f8a9310778f2f57c189bef9ccc8c4dc8) and was changed by lmkHenlo between 20
 2026-10-23, to build it against Super Battle Golf's own assemblies, leave out files the game doesn't
 use, fix the VR UI's camera, shutdown and drawing order for this game, and add a recentre rotation.
 Each change is its own commit, and README.md (How it works) lists them; changed source files mark
-the changes with `SBGVR:` comments.
+the changes with `SBGVR:` comments. SBGVR's full source, including its copy of UUVR, is at
+<https://github.com/lmkHenlo/SBGVR>.
 
 UUVR in turn includes the components below, which keep their own licences.
 

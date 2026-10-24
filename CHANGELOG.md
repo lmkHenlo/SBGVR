@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Credits: UUVR's modified copy (version, upstream commit and licence), the testers, and how Claude, an AI model made by Anthropic, was used to develop SBGVR.
 - `THIRD_PARTY_NOTICES.md` says what was changed in SBGVR's copy of UUVR, by whom and when, as UUVR's licence (GPL-3.0) asks of modified copies.
+- The source is public at <https://github.com/lmkHenlo/SBGVR>, linked from the Thunderstore page, as UUVR's licence asks of anyone distributing the compiled mod. Questions and bug reports can go to its issues.
 
 ## [0.2.17] - 2026-10-23
 
