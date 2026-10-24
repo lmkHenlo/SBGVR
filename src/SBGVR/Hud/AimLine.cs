@@ -14,7 +14,7 @@ namespace SBGVR.Hud
     /// <remarks>
     /// The line is a world-space <see cref="LineRenderer"/> facing the viewer, so each eye draws it at its own
     /// depth, like the reticle. It's updated every frame after <see cref="WorldReticles"/> places the reticle,
-    /// from the character's right-hand equipment holder to the reticle's point, so it follows both as they
+    /// from the character's right-hand equipment holder to the middle of the crosshair as drawn, so it follows both as they
     /// move. Its width grows with distance from the camera, so it looks equally thin near and far instead of
     /// shrinking to a flickering sub-pixel line. Scenery between the two points covers it, as it does a shot.
     /// </remarks>

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SBGVR.Hud
 {
@@ -125,10 +126,60 @@ namespace SBGVR.Hud
             }
 
             _wasShowing = showing;
-            AimShowing = weaponShowing;
-            AimPoint = point;
             foreach (var reticle in _reticles)
                 WorldMarker.Place(reticle, point, showing && reticle.gameObject.activeSelf, reticle: true);
+
+            AimShowing = weaponShowing;
+            AimPoint = point;
+            if (!weaponShowing) return;
+
+            // The line goes to the crosshair's middle as drawn. Some reticles (the freeze bomb's) aren't drawn
+            // centred on their own origin, which is what sits on the aim point.
+            for (var i = 0; i < _reticles.Count; i++)
+            {
+                if (!_drawsAimLine[i] || !_reticles[i].gameObject.activeSelf) continue;
+                if (TryGetDrawnCentre(_reticles[i].transform, out var centre)) AimPoint = centre;
+                LogCentreOffset(_reticles[i], point);
+                break;
+            }
+        }
+
+        private static readonly List<Graphic> Graphics = new List<Graphic>();
+        private static readonly Vector3[] Corners = new Vector3[4];
+        private readonly HashSet<string> _loggedCentres = new HashSet<string>();
+
+        /// <summary>The middle of everything the reticle draws, in world space.</summary>
+        private static bool TryGetDrawnCentre(Transform reticle, out Vector3 centre)
+        {
+            centre = default;
+            var bounds = new Bounds();
+            var any = false;
+            reticle.GetComponentsInChildren(false, Graphics);
+            foreach (var graphic in Graphics)
+            {
+                if (!graphic.enabled || graphic.color.a <= 0f) continue;
+                graphic.rectTransform.GetWorldCorners(Corners);
+                foreach (var corner in Corners)
+                {
+                    if (!any) bounds = new Bounds(corner, Vector3.zero);
+                    else bounds.Encapsulate(corner);
+                    any = true;
+                }
+            }
+
+            Graphics.Clear();
+            if (any) centre = bounds.center;
+            return any;
+        }
+
+        /// <summary>Logs once per reticle how far its drawn middle sits from its origin, for bug reports.</summary>
+        private void LogCentreOffset(Component reticle, Vector3 origin)
+        {
+            if (!Settings.DiagnosticsEnabled.Value || !_loggedCentres.Add(reticle.name)) return;
+            var scale = reticle.transform.lossyScale.y;
+            var offset = scale > 0f ? reticle.transform.InverseTransformVector(AimPoint - origin) : Vector3.zero;
+            Plugin.Log.LogInfo($"[diag] Aim line: '{reticle.name}' is drawn centred {offset.x:0.#}, {offset.y:0.#} " +
+                               "HUD units from its origin; the line ends at the drawn centre.");
         }
 
         /// <summary>How far along the aim it meets something solid, past the local player.</summary>
