@@ -24,8 +24,25 @@ public class VrUiManager : UuvrBehaviour
     private FollowTarget? _worldRenderModeFollowTarget;
     private UiOverlayRenderMode? _uiOverlayRenderMode;
 
+    // SBGVR: how much another plugin has scaled the view's tangents (its projection divided by this), so the
+    // floating screen is scaled by the same amount and keeps its apparent size and place. 1 = unscaled.
+    private static VrUiManager? _instance;
+    private static float _viewScale = 1f;
+
+    public static float ViewScale
+    {
+        get => _viewScale;
+        set
+        {
+            if (Mathf.Approximately(value, _viewScale)) return;
+            _viewScale = value;
+            if (_instance != null) _instance.ApplyQuadTransform();
+        }
+    }
+
     private void Start()
     {
+        _instance = this;
         SetUpUi();
         OnSettingChanged();
         Create<VrUiCursor>(transform);
@@ -53,22 +70,7 @@ public class VrUiManager : UuvrBehaviour
         _canvasRedirectPatchMode.enabled = ModConfiguration.Instance.PreferredUiPatchMode.Value ==
                                            ModConfiguration.UiPatchMode.CanvasRedirect;
 
-        var uiTextureAspectRatio = (float) _uiTexture.height / _uiTexture.width;
-        var quadWidth = 1.8f * ModConfiguration.Instance.VrUiScale.Value;
-        var quadHeight = quadWidth * uiTextureAspectRatio;
-        _vrUiQuad.transform.localScale = new Vector3(quadWidth, quadHeight, 1f);
-
-        // For some reason I need to flip the UI upside down when using mirror mode.
-        var yScale = Mathf.Abs(_vrUiQuad.transform.localScale.y);
-        if (ModConfiguration.Instance.PreferredUiPatchMode.Value == ModConfiguration.UiPatchMode.Mirror)
-        {
-            yScale *= -1;
-        }
-
-        _vrUiQuad.transform.localScale =
-            new Vector3(_vrUiQuad.transform.localScale.x, yScale, _vrUiQuad.transform.localScale.z);
-        _vrUiQuad.transform.localPosition = ModConfiguration.Instance.VrUiPosition.Value;
-
+        ApplyQuadTransform();
 
         if (_vrUiRenderer != null)
         {
@@ -78,6 +80,31 @@ public class VrUiManager : UuvrBehaviour
         }
 
         UpdateFollowTarget();
+    }
+
+    private void ApplyQuadTransform()
+    {
+        if (_vrUiQuad == null || _uiTexture == null) return;
+
+        // SBGVR: in world mode the quad is drawn by the game camera, so it follows ViewScale: its size and
+        // its sideways and upward offsets grow by the same factor, at the same distance.
+        var viewScale = ModConfiguration.Instance.PreferredUiRenderMode.Value == ModConfiguration.UiRenderMode.InWorld
+            ? _viewScale
+            : 1f;
+
+        var uiTextureAspectRatio = (float) _uiTexture.height / _uiTexture.width;
+        var quadWidth = 1.8f * ModConfiguration.Instance.VrUiScale.Value * viewScale;
+        var quadHeight = quadWidth * uiTextureAspectRatio;
+
+        // For some reason I need to flip the UI upside down when using mirror mode.
+        if (ModConfiguration.Instance.PreferredUiPatchMode.Value == ModConfiguration.UiPatchMode.Mirror)
+        {
+            quadHeight *= -1;
+        }
+
+        _vrUiQuad.transform.localScale = new Vector3(quadWidth, quadHeight, 1f);
+        var position = ModConfiguration.Instance.VrUiPosition.Value;
+        _vrUiQuad.transform.localPosition = new Vector3(position.x * viewScale, position.y * viewScale, position.z);
     }
 
     private static Shader GetVrUiShader()
