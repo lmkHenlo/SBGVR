@@ -8,6 +8,11 @@ No version has been published to Thunderstore yet. Every version is a test build
 
 ## [Unreleased]
 
+### Removed
+
+- The game's field of view in VR (`VR Graphics` → `FieldOfView` and `RailgunZoom`, added in 0.2.16). Values above 60 stretched the view enough to cause nausea in the headset. The headset sets the field of view again, as in 0.2.15, and the railgun's aim doesn't zoom in VR. Those two settings stay in `com.sbgvr.cfg` until you delete them, but nothing reads them.
+- The flat-screen fix from 0.2.16 is undone with it: after turning VR off with F3, the Field of view slider again doesn't change the view.
+
 ## [0.2.16] - 2026-10-23
 
 ### Added
