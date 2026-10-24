@@ -159,8 +159,6 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceReticles` | `true` | Draw weapon reticles in the world at the point you're aiming at, always on top of scenery and characters, instead of doubled on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
-| `com.sbgvr.cfg` | `VR Graphics` → `FieldOfView` | `Setting` | How the game's field of view applies in VR. At the game's default of 60, the view is the headset's own; higher shows more of the world, squeezed into the headset, and lower magnifies it. The HUD and markers keep their size. `Headset` (always the headset's view), `Setting` (follows the Field of view slider, MaxFOVSlider's range too) or `Game` (also the game's own changes, such as the overview camera). |
-| `com.sbgvr.cfg` | `VR Graphics` → `RailgunZoom` | `true` | Zoom the view when the railgun's aim zooms. While magnified, the eyes are drawn closer together by the same amount, so the view stays easy to focus. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs (0–600). `0` = never. |
 
@@ -174,11 +172,11 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 
 ## Known issues
 
-- **A field of view far from 60 is hard on the eyes.** A wider view squeezes more of the world into the headset, so everything looks smaller and more is drawn, which costs frame rate. A magnified view, including the railgun's zoom, moves with your head by more than your head moves. `FieldOfView` = `Headset` and `RailgunZoom` = `false` keep the headset's own view.
+- **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet, and the railgun's zoomed aim shows its reticle without zooming.
 - **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR. SteamVR then docks that screen into its dashboard when the game becomes a VR app or stalls while loading, and there's no API for the mod to close the dashboard. Turn the theatre off in one of two ways:
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
-- **MaxFOVSlider** isn't handled yet. Its extended range works in VR through `FieldOfView`, but its own wide-view rendering (its Panini projection and extra resolution) still runs in VR and may look wrong or cost frame rate. Disable it while using VR if it does.
+- **MaxFOVSlider** isn't handled yet. Disable it while using VR.
 - **No motion controllers.** UUVR doesn't support them.
 
 ## How it works
@@ -200,8 +198,6 @@ Changes made to UUVR in this repository, each in its own commit:
 | Fix the patcher's clean-up list (`ucrtbased`) and add `OVRPlugin` | The old entry never matched, and both files are no longer shipped. |
 | Remove the x86 libraries, `ucrtbased.dll` and `OVRPlugin.dll` | The game is 64-bit, and nothing imports or loads the other two. `ucrtbased.dll` is Microsoft's debug runtime, which isn't redistributable. |
 | Remove `uuvr/lib` | The build uses the game's assemblies instead. |
-| Block `Camera.fieldOfView` changes only while VR runs, and remember the value asked for (`Patches.TryGetRequestedFieldOfView`) | Upstream blocked them always, so the game's field of view didn't change on the flat screen after F3, and the value the game wanted was lost. |
-| Add `VrUiManager.ViewScale` | Scales the floating screen with SBGVR's field of view, so it keeps its apparent size. 1 (the default) keeps upstream behaviour. |
 | Pick the UI's camera again when the current one stops rendering | The main menu switches between seven cameras of equal depth. The floating screen kept following one that was switched off, and the menu disappeared. |
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
 | Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
@@ -215,7 +211,6 @@ Changes made to UUVR in this repository, each in its own commit:
 | Screen effects | `Comfort/ScreenEffectPatches.cs` | Prefixes skip `ImpactFrameController.PlayImpactFrame`, `FlashFrameFeature.AddRenderPasses`, `CRTFeature.AddRenderPasses` and `BlurFeature.AddRenderPasses`. The last is the pause menu's blur, which in VR blurred the floating screen too. |
 | Camera transitions | `Comfort/CameraTransitionPatches.cs` | A prefix on `CameraModuleController.TransitionToInternal` shortens or zeroes the duration. |
 | Ambient occlusion | `Rendering/` | HTrace AO asks the `Camera` for its size, view and field of view, which in VR are still the game window's, so part of each eye drew nearby surfaces black. Before each eye is drawn, `EyeView` records it. Transpilers then redirect HTrace AO's camera reads, history keys and GTAO's depth-to-view factors to that eye. If the patches don't apply, or `AmbientOcclusion` is off, the feature is skipped in VR. |
-| Field of view | `Rendering/VrFieldOfView.cs` | Each frame, works out the field of view the game wants (the slider, the railgun's zoom or the camera's own value) and a factor `tan(fov/2) / tan(30°)`. In URP's XR layout override (`XRSystem.s_LayoutOverride`), it divides each eye's projection of the game camera by the factor and, when the view is wider, widens culling to contain every eye's new frustum. While magnified, it moves the eyes closer together by the factor. The floating screen and markers are scaled by the factor, and `MarkerViewAngle` follows the new edge of the view. URP's XR view is internal, so it's reached by reflection, checked at load. |
 | Menu background | `Comfort/MenuBackground.cs` | Holds each `MainMenuScenario` camera halfway between its two pan points. |
 | Full-view fades | `Fades/` | Hides `ColorOverlay`'s image and the main menu's overlay, and draws their colour on spheres around the camera, over and behind the floating screen. |
 | Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
@@ -223,7 +218,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
 | World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
-SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; the field of view applied in VR when it changes; and the frame rate while VR runs. Lines start with `[diag]`.
+SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
 ## Building from source
 
@@ -269,20 +264,15 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - Sweeping the aim from near to far moves them smoothly in depth.
    - No scenery, character (including yours) or effect ever covers any part of them; menus and fades still do.
    - The orange lock-on reticle (full-power swings, rocket launcher) sits on its target, single. So do airhorn target indicators, the giant-form timer and pop-up text.
+   - The railgun's zoomed reticle doesn't zoom the view in VR.
 7. Ambient occlusion:
    - No black areas cover nearby scenery or your character when you look around or move.
    - Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes, and doesn't smear or flicker when you turn your head.
    - The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size).
    - With `AmbientOcclusion` off, the frame rate goes up.
-8. Field of view (`FieldOfView` = `Setting`):
-   - At the game's default of 60, the view is the same as with `FieldOfView` = `Headset`.
-   - At 45, 90 and, with MaxFOVSlider, 120 and 179, the view changes to match, while the floating screen, markers and reticles keep their size, and markers stay on their targets. Nothing disappears at the edges of a wide view.
-   - The railgun's aim zooms in smoothly and back out when you stop aiming, stays easy to focus, and doesn't zoom with `RailgunZoom` off.
-   - The log says `Field of view: changing the eyes' views of camera` the first time the view changes.
-   - After F3, the Field of view slider works on the flat screen.
-9. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
-10. F4 recentres the view. F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
-11. The frame rate lines in the log are close to the headset's refresh rate.
+8. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
+9. F4 recentres the view. F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
+10. The frame rate lines in the log are close to the headset's refresh rate.
 
 Send `LogOutput.log` from the session with notes on each step.
 

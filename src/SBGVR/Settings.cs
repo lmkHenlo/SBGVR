@@ -19,18 +19,6 @@ namespace SBGVR
         Still,
     }
 
-    internal enum FieldOfViewMode
-    {
-        /// <summary>The headset's own view, whatever the game's field of view.</summary>
-        Headset,
-
-        /// <summary>The game's Field of view slider.</summary>
-        Setting,
-
-        /// <summary>Every field of view change the game makes, as on a flat screen.</summary>
-        Game,
-    }
-
     /// <summary>
     /// Every SBGVR setting. VR settings only take effect while VR is running; the game's own
     /// settings, and its save file, are never changed.
@@ -53,8 +41,6 @@ namespace SBGVR
         internal static ConfigEntry<bool> WorldSpaceReticles;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
-        internal static ConfigEntry<FieldOfViewMode> FieldOfView;
-        internal static ConfigEntry<bool> RailgunZoom;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -116,16 +102,6 @@ namespace SBGVR
                 "The game's ambient occlusion (soft shading where surfaces meet) in VR. It costs more than on a " +
                 "flat screen: each eye is drawn separately, at the headset's resolution. Off = none in VR; the " +
                 "game's own setting still applies on a flat screen.");
-            FieldOfView = config.Bind(graphics, "FieldOfView", FieldOfViewMode.Setting,
-                "How the game's field of view applies in VR. At the game's default of 60, the view is the " +
-                "headset's own; a higher value shows more of the world, squeezed into the headset, and a lower " +
-                "one magnifies it. The HUD and markers keep their size. Headset = always the headset's own " +
-                "view, Setting = follows the game's Field of view slider (MaxFOVSlider's range too), Game = " +
-                "also follows the game's own changes, such as the overview camera and camera transitions.");
-            RailgunZoom = config.Bind(graphics, "RailgunZoom", true,
-                "Zoom the view in VR when the railgun's aim zooms, as the game does on a flat screen. While " +
-                "zoomed in, your eyes are drawn closer together by the same amount, so the view stays easy to " +
-                "focus. Off = the railgun's aim doesn't zoom in VR.");
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

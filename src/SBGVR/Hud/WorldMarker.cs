@@ -478,8 +478,6 @@ namespace SBGVR.Hud
             var canvas = _hudCanvas != null ? _hudCanvas : GameplayScreenspaceUiCanvas.Canvas;
             var hudScale = canvas != null ? canvas.scaleFactor : 1f;
             var scale = _isReticle ? 1f : Settings.MarkerScale.Value;
-            // A wider or magnified view (VR Graphics.FieldOfView) changes how big things look; this undoes it.
-            scale *= Rendering.VrFieldOfView.Factor;
             return hudScale * screenWidthMetres / Mathf.Max(1, Screen.width) / screenDistance * scale;
         }
 
