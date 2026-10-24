@@ -9,7 +9,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
 
     <!-- SBGVR's version. Also update Plugin.Version and thunderstore/manifest.json; the build checks they match. -->
-    <SBGVRVersion>0.2.15</SBGVRVersion>
+    <SBGVRVersion>0.2.16</SBGVRVersion>
 
     <!-- The game install. The *_Data folder is named after the game's .exe. -->
     <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf</GameDir>
