@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-24
+
 ### Changed
 
 - First public release. The mod itself is unchanged from 0.2.17, the last pre-release test build, which players tested on Steam Frame, Valve Index and Meta Quest 3.
