@@ -42,7 +42,8 @@ namespace SBGVR.Hud
         private static readonly AccessTools.FieldRef<ReticleManager, Reticle>[] Reticles = CreateReticleRefs();
 
         /// <summary>
-        /// Whether a weapon reticle (not the "can't use here" one) is drawn in the world this frame, and where.
+        /// Whether a weapon reticle that gets an aim line (not the railgun's or the "can't use here" one) is
+        /// drawn in the world this frame, and where.
         /// Read by <see cref="AimLine"/>.
         /// </summary>
         internal static bool AimShowing { get; private set; }
@@ -51,7 +52,8 @@ namespace SBGVR.Hud
 
         private readonly RaycastHit[] _hits = new RaycastHit[32];
         private readonly List<Component> _reticles = new List<Component>();
-        private int _weaponReticleCount;
+        /// <summary>For each entry in <see cref="_reticles"/>: whether <see cref="AimLine"/> draws a line to it.</summary>
+        private readonly List<bool> _drawsAimLine = new List<bool>();
         private float _logDistance;
         private bool _wasShowing;
 
@@ -65,18 +67,25 @@ namespace SBGVR.Hud
         private void LateUpdate()
         {
             _reticles.Clear();
+            _drawsAimLine.Clear();
             if (SingletonBehaviour<ReticleManager>.HasInstance)
             {
                 var manager = SingletonBehaviour<ReticleManager>.Instance;
-                foreach (var reticle in Reticles)
+                for (var i = 0; i < Reticles.Length; i++)
                 {
-                    var component = reticle(manager);
-                    if (component != null) _reticles.Add(component);
+                    var component = Reticles[i](manager);
+                    if (component == null) continue;
+                    _reticles.Add(component);
+                    // The railgun gets no aim line.
+                    _drawsAimLine.Add(!ReticleFields[i].StartsWith("railgun"));
                 }
 
-                _weaponReticleCount = _reticles.Count;
                 var disallowed = DisallowedReticle(manager);
-                if (disallowed != null) _reticles.Add(disallowed.transform);
+                if (disallowed != null)
+                {
+                    _reticles.Add(disallowed.transform);
+                    _drawsAimLine.Add(false);
+                }
             }
 
             var enabled = WorldMarker.Enabled && Settings.WorldSpaceReticles.Value;
@@ -87,7 +96,7 @@ namespace SBGVR.Hud
             {
                 if (camera == null || !_reticles[i].gameObject.activeSelf) continue;
                 showing = true;
-                if (i < _weaponReticleCount) weaponShowing = true;
+                if (_drawsAimLine[i]) weaponShowing = true;
             }
 
             var point = Vector3.zero;

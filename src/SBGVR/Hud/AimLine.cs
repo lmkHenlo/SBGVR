@@ -8,7 +8,7 @@ namespace SBGVR.Hud
 {
     /// <summary>
     /// VR HUD.AimLine: while a weapon reticle is drawn in the world, a thin white line runs from the hand that
-    /// holds the item to the reticle, so you can see where the shot goes from where it leaves.
+    /// holds the item to the reticle, so you can see where the shot goes from where it leaves. The railgun has no line.
     /// </summary>
     /// <remarks>
     /// The line is a world-space <see cref="LineRenderer"/> facing the viewer, so each eye draws it at its own
