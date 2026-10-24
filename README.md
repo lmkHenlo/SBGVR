@@ -5,11 +5,11 @@
 
 Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.
 
-SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a Thunderstore mod for Super Battle Golf. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
+SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
-The repository and the Thunderstore package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
+The repository and the package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
-SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
+SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. It's published on [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases); Thunderstore didn't accept it (see [Known issues](#known-issues)). [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
 
 ## Table of Contents
 
@@ -61,17 +61,19 @@ UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which wor
 
 ### With r2modman
 
-Install `SBGVR` from Thunderstore with r2modman or another Thunderstore mod manager; BepInExPack is installed with it.
+1. Download `lmkHenlo-SBGVR-<version>.zip` from [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases).
+2. In r2modman, make sure the Super Battle Golf profile has `BepInExPack` (install it from r2modman's online list if not).
+3. Use r2modman's **Import local mod** with the zip.
 
-To install a zip you built yourself ([Building from source](#building-from-source) writes `artifacts\lmkHenlo-SBGVR-<version>.zip`), make sure the profile has BepInExPack, then use r2modman's **Import local mod** with the zip.
+A zip you built yourself ([Building from source](#building-from-source) writes `artifacts\lmkHenlo-SBGVR-<version>.zip`) installs the same way.
 
 ### By hand
 
-Install BepInEx 5 into the game folder and start the game once. Then run this in PowerShell, in the repository folder, to install the zip a build wrote there. Change `$game` if the game is installed somewhere else.
+Install BepInEx 5 into the game folder and start the game once. Then run this in PowerShell. It installs the newest SBGVR zip in your Downloads folder, or in `artifacts` if you run it in the repository folder after a build. Change `$game` if the game is installed somewhere else.
 
 ```powershell
 $game = "C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf"
-$zip = Get-ChildItem .\artifacts\lmkHenlo-SBGVR-*.zip | Sort-Object LastWriteTime | Select-Object -Last 1
+$zip = Get-ChildItem "$HOME\Downloads\lmkHenlo-SBGVR-*.zip", ".\artifacts\lmkHenlo-SBGVR-*.zip" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime | Select-Object -Last 1
 $package = Join-Path $env:TEMP "SBGVR"
 Expand-Archive $zip.FullName -DestinationPath $package -Force
 New-Item -ItemType Directory -Force "$game\BepInEx\plugins\SBGVR", "$game\BepInEx\patchers\SBGVR" | Out-Null
@@ -172,6 +174,8 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 3. Set `Camera` → `Camera Tracking Mode` to `RelativeMatrix` or `Absolute`.
 
 ## Known issues
+
+- **Not on Thunderstore.** Thunderstore's moderators rejected the package because UUVR's patcher writes VR runtime files into the game's own `Super Battle Golf_Data` folder (see [Uninstalling](#uninstalling)), outside BepInEx. Unity only looks for a VR runtime there. Install from [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases) instead.
 
 - **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet, and the railgun's zoomed aim shows its reticle without zooming.
 - **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR. SteamVR then docks that screen into its dashboard when the game becomes a VR app or stalls while loading, and there's no API for the mod to close the dashboard. Turn the theatre off in one of two ways:
