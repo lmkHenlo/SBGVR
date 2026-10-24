@@ -143,7 +143,8 @@ namespace SBGVR
             MotionCamera = config.Bind(controls, "MotionCamera", true,
                 "With MotionControls, while you aim and charge a golf club or rocket club swing, small movements of " +
                 "your DominantHand controller turn the camera, like the right thumbstick: turn it or move it " +
-                "sideways to turn the camera left or right, tilt it to look up or down. Your character faces the " +
+                "sideways to turn the camera left or right (and, with MotionCameraMaxPitch above 0, tilt it to look up " +
+                "or down). Your character faces the " +
                 "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
                 "controller when you start aiming and stops when you swing; the thumbstick still works.");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
@@ -156,10 +157,10 @@ namespace SBGVR
                     "Degrees the camera turns for every 10 cm you move the controller sideways. 0 = only turning " +
                     "and tilting count.",
                     new AcceptableValueRange<float>(0f, 10f)));
-            MotionCameraMaxYaw = config.Bind(controls, "MotionCameraMaxYaw", 15f,
+            MotionCameraMaxYaw = config.Bind(controls, "MotionCameraMaxYaw", 30f,
                 new ConfigDescription("The furthest the controller turns the camera left or right while aiming, in degrees.",
                     new AcceptableValueRange<float>(1f, 45f)));
-            MotionCameraMaxPitch = config.Bind(controls, "MotionCameraMaxPitch", 10f,
+            MotionCameraMaxPitch = config.Bind(controls, "MotionCameraMaxPitch", 0f,
                 new ConfigDescription("The furthest the controller tilts the camera up or down while aiming, in degrees. " +
                     "0 = left and right only.",
                     new AcceptableValueRange<float>(0f, 30f)));

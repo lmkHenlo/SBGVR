@@ -157,9 +157,9 @@ The Meta button on the right controller opens the headset's universal menu and i
 **Motion camera.** With `MotionCamera` on (the default once `MotionControls` is on), small movements of your `DominantHand` controller turn the camera while you aim and charge a golf club or rocket club swing, just like the right thumbstick:
 
 - turn the controller, or move it sideways, to turn the camera left or right;
-- tilt it to look up or down.
+- with `MotionCameraMaxPitch` above 0 (it's 0 by default), tilt it to look up or down.
 
-Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera 2°, up to 15° left or right and 10° up or down from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`.
+Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera 2°, up to 30° left or right from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`.
 
 **Mirrored buttons.** With `MirrorButtons` on (off by default), the layout is mirrored left to right, for example for left-handed play together with `DominantHand` = `Left`:
 
@@ -224,8 +224,8 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR Controls` → `MotionCamera` | `true` | With `MotionControls`, small controller movements turn the camera while you aim a golf club or rocket club swing (see [Motion controls](#motion-controls)). |
 | `com.sbgvr.cfg` | `VR Controls` → `MotionCameraStrength` | `0.25` | Share of the controller's turn and tilt that goes into the camera (0.05–1). |
 | `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMovement` | `2` | Degrees the camera turns per 10 cm of sideways hand movement (0–10). `0` = turning and tilting only. |
-| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxYaw` | `15` | Furthest the controller turns the camera left or right while aiming, in degrees (1–45). |
-| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxPitch` | `10` | Furthest the controller tilts the camera up or down while aiming, in degrees (0–30). `0` = left and right only. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxYaw` | `30` | Furthest the controller turns the camera left or right while aiming, in degrees (1–45). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxPitch` | `0` | Furthest the controller tilts the camera up or down while aiming, in degrees (0–30). `0` (the default) = left and right only. |
 | `com.sbgvr.cfg` | `VR Controls` → `MirrorButtons` | `false` | Mirror the motion controls button layout left to right (see [Motion controls](#motion-controls)). |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
@@ -361,10 +361,11 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - With `DominantHand` = `Left`, the left controller aims and the buttons stay put. With `MirrorButtons` on, every button is mirrored as in the mirrored table, and the Menu button still pauses. With `ControllerAiming` off, weapons aim along the camera again.
     - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
 13. Motion camera, with `MotionControls` on:
-    - Aim a golf club swing, then turn the right controller, move it sideways and tilt it: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
+    - Aim a golf club swing, then turn the right controller and move it sideways: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
     - Holding the controller still while aiming doesn't drift the camera. Pulling the trigger to swing doesn't move it. The thumbstick still turns the camera while aiming.
     - The rocket club works the same way. Outside swing aiming (walking, weapons, menus), the controller doesn't turn the camera.
     - Stopping aiming leaves the camera where it is; aiming again starts from how you hold the controller then.
+    - Tilting the controller doesn't move the camera unless `MotionCameraMaxPitch` is above 0.
     - With `MotionCamera` off, the camera only turns with the thumbstick, as before.
 
 Send `LogOutput.log` from the session with notes on each step.
