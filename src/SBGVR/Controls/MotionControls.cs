@@ -46,9 +46,9 @@ namespace SBGVR.Controls
         private GamepadState _lastSent;
         private bool _hasSent;
 
-        private bool _layerGripHeld;
-        private float _layerGripPressedAt;
-        private bool _layerGripLayerUsed;
+        private bool _leftGripHeld;
+        private float _leftGripPressedAt;
+        private bool _leftGripLayerUsed;
         private float _leftShoulderPulseUntil = -1f;
 
         private void OnEnable()
@@ -94,33 +94,25 @@ namespace SBGVR.Controls
 
         private GamepadState ReadState()
         {
-            // The gamepad's left side (moving, aiming, X/Y, LB and the D-pad layer) comes from the hand that
-            // doesn't aim weapons, and its right side (camera, swinging and firing, A/B, RB) from the one that
-            // does. With DominantHand = Left the whole layout is mirrored. The Menu button only exists on the
-            // left controller (the right one has the Meta button), so it's read there either way.
-            var mirrored = Settings.DominantHand.Value == ControllerHand.Left;
-            var move = mirrored ? _right : _left;
-            var aim = mirrored ? _left : _right;
-
             var state = new GamepadState
             {
-                leftStick = Stick(move.Axis(XRCommonUsages.primary2DAxis)),
-                leftTrigger = Trigger(move.Value(XRCommonUsages.trigger)),
-                rightTrigger = Trigger(aim.Value(XRCommonUsages.trigger)),
+                leftStick = Stick(_left.Axis(XRCommonUsages.primary2DAxis)),
+                leftTrigger = Trigger(_left.Value(XRCommonUsages.trigger)),
+                rightTrigger = Trigger(_right.Value(XRCommonUsages.trigger)),
             };
-            var aimStick = Stick(aim.Axis(XRCommonUsages.primary2DAxis));
+            var rightStick = Stick(_right.Axis(XRCommonUsages.primary2DAxis));
 
-            var a = aim.Button(XRCommonUsages.primaryButton);
-            var b = aim.Button(XRCommonUsages.secondaryButton);
-            var x = move.Button(XRCommonUsages.primaryButton);
-            var y = move.Button(XRCommonUsages.secondaryButton);
-            var movePadDirection = Vector2.zero;
+            var a = _right.Button(XRCommonUsages.primaryButton);
+            var b = _right.Button(XRCommonUsages.secondaryButton);
+            var x = _left.Button(XRCommonUsages.primaryButton);
+            var y = _left.Button(XRCommonUsages.secondaryButton);
+            var leftPadDirection = Vector2.zero;
 
             // Controllers without face buttons (HTC Vive, Windows Mixed Reality): click the touchpad's edges
-            // instead. Aiming hand's touchpad = A, B, X, Y; other touchpad = D-pad.
-            if (!aim.HasFaceButtons && aim.PadClick(out var aimPad))
+            // instead. Right touchpad = A, B, X, Y; left touchpad = D-pad.
+            if (!_right.HasFaceButtons && _right.PadClick(out var rightPad))
             {
-                switch (Direction(aimPad))
+                switch (Direction(rightPad))
                 {
                     case 0: y = true; break;
                     case 1: b = true; break;
@@ -128,51 +120,50 @@ namespace SBGVR.Controls
                     case 3: x = true; break;
                 }
             }
-            if (!move.HasFaceButtons && move.PadClick(out var movePad))
-                movePadDirection = movePad;
+            if (!_left.HasFaceButtons && _left.PadClick(out var leftPad))
+                leftPadDirection = leftPad;
 
-            // Grip button on the non-aiming hand (left by default): a tap is LB; held, it turns the aiming hand's
-            // thumbstick into a D-pad and its lower and upper face buttons (A and B by default) into pause and
-            // scoreboard. (Input names follow Meta's Quest controller guidelines.)
-            var layerGrip = move.Button(XRCommonUsages.gripButton);
+            // Left grip button: a tap is LB; held, it turns the right thumbstick into a D-pad and A and B into
+            // pause and scoreboard. (Input names follow Meta's Quest controller guidelines.)
+            var leftGrip = _left.Button(XRCommonUsages.gripButton);
             var now = Time.unscaledTime;
-            if (layerGrip && !_layerGripHeld)
+            if (leftGrip && !_leftGripHeld)
             {
-                _layerGripPressedAt = now;
-                _layerGripLayerUsed = false;
+                _leftGripPressedAt = now;
+                _leftGripLayerUsed = false;
             }
-            else if (!layerGrip && _layerGripHeld && !_layerGripLayerUsed && now - _layerGripPressedAt <= GripTapTime)
+            else if (!leftGrip && _leftGripHeld && !_leftGripLayerUsed && now - _leftGripPressedAt <= GripTapTime)
             {
                 _leftShoulderPulseUntil = now + GripTapPressTime;
             }
-            _layerGripHeld = layerGrip;
+            _leftGripHeld = leftGrip;
 
-            if (layerGrip)
+            if (leftGrip)
             {
-                var dpad = aimStick.magnitude >= DPadThreshold ? Direction(aimStick) : -1;
+                var dpad = rightStick.magnitude >= DPadThreshold ? Direction(rightStick) : -1;
                 SetDPad(ref state, dpad);
                 if (a) state = state.WithButton(GamepadButton.Start, true);
                 if (b) state = state.WithButton(GamepadButton.Select, true);
-                if (dpad >= 0 || a || b) _layerGripLayerUsed = true;
+                if (dpad >= 0 || a || b) _leftGripLayerUsed = true;
             }
             else
             {
-                state.rightStick = aimStick;
+                state.rightStick = rightStick;
                 if (a) state = state.WithButton(GamepadButton.South, true);
                 if (b) state = state.WithButton(GamepadButton.East, true);
-                if (movePadDirection != Vector2.zero) SetDPad(ref state, Direction(movePadDirection));
+                if (leftPadDirection != Vector2.zero) SetDPad(ref state, Direction(leftPadDirection));
             }
 
             if (x) state = state.WithButton(GamepadButton.West, true);
             if (y) state = state.WithButton(GamepadButton.North, true);
-            if (aim.Button(XRCommonUsages.gripButton)) state = state.WithButton(GamepadButton.RightShoulder, true);
+            if (_right.Button(XRCommonUsages.gripButton)) state = state.WithButton(GamepadButton.RightShoulder, true);
             if (now < _leftShoulderPulseUntil) state = state.WithButton(GamepadButton.LeftShoulder, true);
             if (_left.Button(XRCommonUsages.menuButton)) state = state.WithButton(GamepadButton.Start, true);
 
             // Pressing a thumbstick, on controllers whose primary axis is one (a Vive's is its touchpad).
-            if (move.HasFaceButtons && move.Button(XRCommonUsages.primary2DAxisClick))
+            if (_left.HasFaceButtons && _left.Button(XRCommonUsages.primary2DAxisClick))
                 state = state.WithButton(GamepadButton.LeftStick, true);
-            if (aim.HasFaceButtons && aim.Button(XRCommonUsages.primary2DAxisClick))
+            if (_right.HasFaceButtons && _right.Button(XRCommonUsages.primary2DAxisClick))
                 state = state.WithButton(GamepadButton.RightStick, true);
 
             return state;
@@ -200,7 +191,7 @@ namespace SBGVR.Controls
         private void RemoveGamepad()
         {
             _hasSent = false;
-            _layerGripHeld = false;
+            _leftGripHeld = false;
             _leftShoulderPulseUntil = -1f;
             if (_gamepad == null) return;
 
