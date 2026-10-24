@@ -4,9 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers use Thunderstore's `Major.Minor.Patch` format.
 
-No version has been published to Thunderstore yet. Every version is a test build, built from the commit that set its version number. Versions 0.1.0 to 0.2.14 were named SBG VR, with the Thunderstore package `SBG_VR`. Dates are in US Central time (UTC−05:00).
+1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Versions 0.1.0 to 0.2.14 were named SBG VR, with the Thunderstore package `SBG_VR`. Dates are in US Central time (UTC−05:00).
 
 ## [Unreleased]
+
+### Changed
+
+- First public release. The mod itself is unchanged from 0.2.17, the last pre-release test build, which players tested on Steam Frame, Valve Index and Meta Quest 3.
+- The READMEs no longer call SBGVR experimental, list the tested headsets, and say that MaxFOVSlider 0.2.1 and later work alongside SBGVR (they pause their own projection in VR).
+- Install instructions start with installing from Thunderstore; installing a local build is still described.
+
+### Added
+
+- Credits: UUVR's modified copy (version, upstream commit and licence), the testers, and how Claude, an AI model made by Anthropic, was used to develop SBGVR.
+- `THIRD_PARTY_NOTICES.md` says what was changed in SBGVR's copy of UUVR, by whom and when, as UUVR's licence (GPL-3.0) asks of modified copies.
 
 ## [0.2.17] - 2026-10-23
 

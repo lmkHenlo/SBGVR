@@ -9,7 +9,7 @@ SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/u
 
 The repository, its source archive and the Thunderstore package are all named `SBGVR`. Locally, the repository is kept in a folder named `source`, inside `sbgvr_master\master` next to its release files, the same layout as the maintainer's other mods. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
-SBGVR is experimental. No version has been published to Thunderstore yet: every version so far is a test build, installed from a local zip. [CHANGELOG.md](CHANGELOG.md) lists what each version changed.
+SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
 
 ## Table of Contents
 
@@ -28,6 +28,7 @@ SBGVR is experimental. No version has been published to Thunderstore yet: every 
 - [Building from source](#building-from-source)
 - [Test plan](#test-plan)
 - [Files](#files)
+- [AI assistance](#ai-assistance)
 - [API](#api)
 - [Maintainers](#maintainers)
 - [Thanks](#thanks)
@@ -58,15 +59,15 @@ UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which wor
 - A PC VR runtime: SteamVR, or another OpenXR runtime. With SteamVR (including Steam Link), set SteamVR as the OpenXR runtime in SteamVR's settings. It's on the OpenXR page or the Developer page, depending on the SteamVR version.
 - **Client-side only.** Only the VR player needs the mod. The host and other players need nothing.
 
-Both ways below install a zip made by [Building from source](#building-from-source): `artifacts\lmkHenlo-SBGVR-<version>.zip`.
-
 ### With r2modman
 
-Make sure the profile has BepInExPack, then use r2modman's **Import local mod** with the zip.
+Install `SBGVR` from Thunderstore with r2modman or another Thunderstore mod manager; BepInExPack is installed with it.
+
+To install a zip you built yourself ([Building from source](#building-from-source) writes `artifacts\lmkHenlo-SBGVR-<version>.zip`), make sure the profile has BepInExPack, then use r2modman's **Import local mod** with the zip.
 
 ### By hand
 
-Install BepInEx 5 into the game folder and start the game once. Then run this in PowerShell, in the repository folder. Change `$game` if the game is installed somewhere else.
+Install BepInEx 5 into the game folder and start the game once. Then run this in PowerShell, in the repository folder, to install the zip a build wrote there. Change `$game` if the game is installed somewhere else.
 
 ```powershell
 $game = "C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf"
@@ -176,7 +177,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 - **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR. SteamVR then docks that screen into its dashboard when the game becomes a VR app or stalls while loading, and there's no API for the mod to close the dashboard. Turn the theatre off in one of two ways:
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
-- **MaxFOVSlider** isn't handled yet. Disable it while using VR.
+- **MaxFOVSlider before 0.2.1** reshapes the headset's picture with its Panini projection. MaxFOVSlider 0.2.1 and later pause their projection and extra resolution while VR runs, and work alongside SBGVR; update it, or disable older versions while using VR.
 - **No motion controllers.** UUVR doesn't support them.
 
 ## How it works
@@ -292,6 +293,10 @@ SBGVR/
 └── THIRD_PARTY_NOTICES.md    licences of the bundled VR runtime libraries
 ```
 
+## AI assistance
+
+SBGVR was developed with the help of Claude, an AI model made by Anthropic. Claude wrote most of the code and documentation in this repository, including the changes to UUVR, working from lmkHenlo's requests. lmkHenlo set the goals and requirements, chose between the approaches Claude proposed, tested the builds in a VR headset and reported what needed fixing, and decides what is released. Commits Claude helped write end with a `Co-Authored-By: Claude` line.
+
 ## API
 
 SBGVR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it hard-depends on UUVR's `raicuparta.uuvr-modern`.
@@ -302,8 +307,9 @@ SBGVR has no API for other mods. Its BepInEx plugin ID is `com.sbgvr`, and it ha
 
 ## Thanks
 
-- [Raicuparta](https://github.com/Raicuparta), for [Universal Unity VR](https://github.com/Raicuparta/uuvr), which does the VR work this package is built on.
+- [Raicuparta](https://github.com/Raicuparta), for [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR), which does the VR work this package is built on. SBGVR includes a modified copy of UUVR v0.4.0 (upstream commit `de8e921`), under its GPL-3.0-or-later licence; [How it works](#how-it-works) lists every change, and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) has the notices.
 - The [BepInEx](https://github.com/BepInEx/BepInEx) team, for the mod loader.
+- The players who tested SBGVR before 1.0.0 on Steam Frame, Valve Index and Meta Quest 3.
 
 ## Contributing
 
@@ -318,4 +324,4 @@ Pull requests are accepted. The repository isn't public yet, so email to ask abo
 
 ## License
 
-[GPL-3.0-or-later](LICENSE) © 2026 lmkHenlo. UUVR is GPL-3.0-or-later © 2024 Raicuparta. The bundled VR runtime libraries keep their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[GPL-3.0-or-later](LICENSE) © 2026 lmkHenlo. UUVR is GPL-3.0-or-later © 2024 Raicuparta; SBGVR's copy is modified, as listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The bundled VR runtime libraries keep their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

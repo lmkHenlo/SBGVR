@@ -2,7 +2,7 @@
 
 Play Super Battle Golf in a PC VR headset. Client-side: only you need it.
 
-> **Experimental.** SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. 0.2.17 is a test build: expect rough edges.
+SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Battle Golf, with fixes and comfort settings for the game. Tested on Steam Frame, Valve Index and Meta Quest 3.
 
 ## What it does
 
@@ -50,13 +50,15 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 - **Files in the game folder.** Each time the game starts, the mod copies its VR runtime files into `Super Battle Golf_Data` (`Plugins`, `UnitySubsystems` and `StreamingAssets\SteamVR`). Uninstalling the mod doesn't remove them. They aren't used unless SBGVR is installed, but you can delete them: `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`.
 - **Field of view.** Your headset sets the field of view, so the game's FOV slider doesn't apply in VR yet.
 - **SteamVR menu opening on launch or when a match starts.** In Steam, right-click Super Battle Golf → Properties → General and untick **Use Desktop Game Theatre while SteamVR is active**. (Or, for every game: SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.) Steam otherwise shows the game on SteamVR's theatre screen, and SteamVR opens its menu when the game switches to VR or pauses while loading.
-- **MaxFOVSlider.** Turn it off while you use VR. SBGVR doesn't handle it yet.
+- **MaxFOVSlider.** Version 0.2.1 or later works alongside SBGVR: it pauses its own projection while you're in VR. Turn older versions off while you use VR.
 - **Reporting problems.** Send `BepInEx\LogOutput.log` from a session where the problem happened. SBGVR writes the VR and camera details needed to track it down.
 
 ## Credits
 
-- [UUVR](https://github.com/Raicuparta/uuvr) by Raicuparta, the VR mod this package is built on.
+- [UUVR](https://github.com/Raicuparta/uuvr) by Raicuparta, the VR mod this package is built on. SBGVR includes a modified copy of UUVR v0.4.0, under its GPL-3.0-or-later licence; `THIRD_PARTY_NOTICES.md` describes the changes.
 - [BepInEx](https://github.com/BepInEx/BepInEx), the mod loader.
+- The players who tested SBGVR before 1.0.0 on Steam Frame, Valve Index and Meta Quest 3.
+- Developed with the help of Claude, an AI model made by Anthropic, which wrote most of the code under lmkHenlo's direction. lmkHenlo tested it in VR and maintains it.
 
 ## License
 
