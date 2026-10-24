@@ -44,7 +44,9 @@ namespace SBGVR.Hud
             if (camera == null) return true;
 
             var toTarget = ___worldPosition - camera.transform.position;
-            __result = Vector3.Angle(camera.transform.forward, toTarget) > Settings.MarkerViewAngle.Value;
+            // A wider or magnified view (VR Graphics.FieldOfView) moves the edge of the view.
+            var limit = Rendering.VrFieldOfView.ScaleAngle(Settings.MarkerViewAngle.Value);
+            __result = Vector3.Angle(camera.transform.forward, toTarget) > limit;
             return false;
         }
 

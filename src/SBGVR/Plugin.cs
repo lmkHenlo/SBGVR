@@ -41,6 +41,7 @@ namespace SBGVR
             if (Patch("Ambient occlusion for each eye", typeof(Rendering.AmbientOcclusionEyePatches)))
                 Rendering.AmbientOcclusionEyePatches.Verify();
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
+            AddFieldOfView(host);
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
@@ -102,6 +103,19 @@ namespace SBGVR
             {
                 if (patch.owner == Guid && patch.PatchMethod.DeclaringType == patchClass)
                     Harmony.Unpatch(original, patch.PatchMethod);
+            }
+        }
+
+        /// <summary>The game's field of view in VR, if this version of URP has what it needs.</summary>
+        private static void AddFieldOfView(GameObject host)
+        {
+            try
+            {
+                if (Rendering.VrFieldOfView.Initialize()) Add(host, "Field of view in VR", typeof(Rendering.VrFieldOfView));
+            }
+            catch (Exception exception)
+            {
+                Log.LogError($"[FAILED] Field of view in VR: {exception.GetBaseException().Message}");
             }
         }
 
