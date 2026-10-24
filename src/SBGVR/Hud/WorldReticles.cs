@@ -42,7 +42,7 @@ namespace SBGVR.Hud
         private static readonly AccessTools.FieldRef<ReticleManager, Reticle>[] Reticles = CreateReticleRefs();
 
         /// <summary>
-        /// Whether a weapon reticle that gets an aim line (not the railgun's or the "can't use here" one) is
+        /// Whether a weapon reticle that gets an aim line (see <see cref="DrawsAimLine"/>; never the "can't use here" one) is
         /// drawn in the world this frame, and where.
         /// Read by <see cref="AimLine"/>.
         /// </summary>
@@ -56,6 +56,14 @@ namespace SBGVR.Hud
         private readonly List<bool> _drawsAimLine = new List<bool>();
         private float _logDistance;
         private bool _wasShowing;
+
+        /// <summary>
+        /// Whether the aim line draws to this reticle: the dueling pistol, elephant gun, rocket launcher and
+        /// freeze bomb, but not the railgun, thunderstorm or flash camera.
+        /// </summary>
+        private static bool DrawsAimLine(string reticleField) =>
+            !reticleField.StartsWith("railgun") && reticleField != "thunderstormReticle" &&
+            reticleField != "flashCameraReticle";
 
         private static AccessTools.FieldRef<ReticleManager, Reticle>[] CreateReticleRefs()
         {
@@ -76,8 +84,7 @@ namespace SBGVR.Hud
                     var component = Reticles[i](manager);
                     if (component == null) continue;
                     _reticles.Add(component);
-                    // The railgun gets no aim line.
-                    _drawsAimLine.Add(!ReticleFields[i].StartsWith("railgun"));
+                    _drawsAimLine.Add(DrawsAimLine(ReticleFields[i]));
                 }
 
                 var disallowed = DisallowedReticle(manager);

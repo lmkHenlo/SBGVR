@@ -107,7 +107,8 @@ namespace SBGVR
                 "look doubled against a distant target.");
             AimLine = config.Bind(hud, "AimLine", true,
                 "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
-                "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun.");
+                "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
+                "thunderstorm or flash camera.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
