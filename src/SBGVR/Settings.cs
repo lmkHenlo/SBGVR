@@ -43,6 +43,9 @@ namespace SBGVR
         internal static ConfigEntry<bool> AmbientOcclusion;
 
         internal static ConfigEntry<bool> MotionControls;
+        internal static ConfigEntry<bool> ControllerAiming;
+        internal static ConfigEntry<Controls.ControllerHand> DominantHand;
+        internal static ConfigEntry<float> ControllerAimPitch;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -114,6 +117,18 @@ namespace SBGVR
                 "the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push " +
                 "to talk, votes), A = pause, B = scoreboard. " +
                 "A real gamepad, keyboard and mouse still work. Restart the game after changing this.");
+            ControllerAiming = config.Bind(controls, "ControllerAiming", true,
+                "With MotionControls, weapons aim where your DominantHand controller points while you aim or use " +
+                "them (dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb, " +
+                "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
+                "follow the camera. Off = weapons aim along the camera, as on a flat screen.");
+            DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
+                "The controller weapons aim with: Right or Left. Buttons stay where they are.");
+            ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
+                new ConfigDescription(
+                    "Degrees to tilt the aim from where the controller points: positive tilts it down, negative " +
+                    "up. For controllers that aim too high or low in your hand.",
+                    new AcceptableValueRange<float>(-45f, 45f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

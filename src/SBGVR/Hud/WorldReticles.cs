@@ -80,12 +80,19 @@ namespace SBGVR.Hud
             var point = Vector3.zero;
             if (showing)
             {
-                var cameraTransform = camera.transform;
-                var target = Mathf.Log(AimDistance(cameraTransform));
+                // Weapons aim along the camera, or along the controller with VR Controls.ControllerAiming.
+                if (!Controls.ControllerAim.TryGetAimRay(out var origin, out var direction))
+                {
+                    origin = camera.transform.position;
+                    direction = camera.transform.forward;
+                }
+                direction.Normalize();
+
+                var target = Mathf.Log(AimDistance(origin, direction));
                 _logDistance = _wasShowing
                     ? Mathf.Lerp(_logDistance, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / GlideSeconds))
                     : target;
-                point = cameraTransform.position + cameraTransform.forward * Mathf.Exp(_logDistance);
+                point = origin + direction * Mathf.Exp(_logDistance);
             }
 
             _wasShowing = showing;
@@ -93,10 +100,10 @@ namespace SBGVR.Hud
                 WorldMarker.Place(reticle, point, showing && reticle.gameObject.activeSelf, reticle: true);
         }
 
-        /// <summary>How far ahead the camera's aim meets something solid, past the local player.</summary>
-        private float AimDistance(Transform camera)
+        /// <summary>How far along the aim it meets something solid, past the local player.</summary>
+        private float AimDistance(Vector3 origin, Vector3 direction)
         {
-            var count = Physics.RaycastNonAlloc(camera.position, camera.forward, _hits, MaximumRayDistance,
+            var count = Physics.RaycastNonAlloc(origin, direction, _hits, MaximumRayDistance,
                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
 
             var localPlayer = GameManager.LocalPlayerInfo;

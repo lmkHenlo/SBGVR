@@ -10,8 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- Motion controls, off by default: `VR Controls` → `MotionControls`. While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply; a real gamepad, keyboard and mouse still work. Holding the left grip button turns the right thumbstick into a D-pad and A and B into pause and scoreboard. Controllers without face buttons use touchpad clicks. The README lists every button. Aiming still follows your head.
+- Motion controls, off by default: `VR Controls` → `MotionControls`. While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply; a real gamepad, keyboard and mouse still work. Holding the left grip button turns the right thumbstick into a D-pad and A and B into pause and scoreboard. Controllers without face buttons use touchpad clicks. The README lists every button.
 - OpenXR reports controllers again. UUVR's copy of the Unity OpenXR plugin left out the code that asks the OpenXR runtime for controller input; SBGVR restores it from the plugin's 1.4.2 source, with the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles. It's only used with `MotionControls` on.
+- Aiming with your controller: `VR Controls` → `ControllerAiming` (on), `DominantHand` (`Right`) and `ControllerAimPitch` (0). With `MotionControls` on, weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb and thunderstorm. The world-space reticle follows the same aim, and your character turns to face it when you fire. Golf swings still follow the camera.
 
 ## [1.0.2] - 2026-10-24
 

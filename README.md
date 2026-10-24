@@ -153,7 +153,9 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 
 The Meta button on the right controller opens the headset's universal menu and isn't available to games.
 
-Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad. Aiming still follows your head; the controllers aren't tracked in the game.
+Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad.
+
+**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the buttons stay where they are. If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character.
 
 ### Settings
 
@@ -190,6 +192,9 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
 | `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
+| `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
+| `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | The controller weapons aim with: `Right` or `Left`. |
+| `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs (0–600). `0` = never. |
 
@@ -210,7 +215,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
 - **MaxFOVSlider before 0.2.1** reshapes the headset's picture with its Panini projection. MaxFOVSlider 0.2.1 and later pause their projection and extra resolution while VR runs, and work alongside SBGVR; update it, or disable older versions while using VR.
-- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, aiming follows your head, and controllers don't vibrate (no haptics). Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
+- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, and controllers don't vibrate (no haptics). Controller aiming covers weapons only; golf swings follow the camera. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
 
 ## How it works
 
@@ -251,7 +256,8 @@ Changes made to UUVR in this repository, each in its own commit:
 | World-space markers | `Hud/` | After the game lays out a marker (`WorldspaceIconUi`, `NameTagUi`, `TargetReticleUi`, `LockOnTargetUi` (the orange lock-on reticle), `AirhornTargetIndicator`, `JumboBurgerGiantFormTimerUi` or `TextPopupUi`), `WorldMarker` moves its UI objects under a world-space canvas at the target. It's scaled to its size on the floating screen. Markers return to the HUD when they go off screen or the game stops laying them out. |
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
 | Motion controls | `Controls/MotionControls.cs`, `Plugin.EnableOpenXrControllers` | With `MotionControls` on, SBGVR enables UUVR's OpenXR controller profiles before UUVR starts VR (OpenVR reports controllers without them). Just before each Input System update, `MotionControls` reads both controllers through Unity's XR input (`UnityEngine.XR.InputDevices`) and queues their state to a virtual `Gamepad` it adds while VR runs. Nothing is sent until a controller is used, or while it's left alone, so other devices stay usable. The game's own input code is unchanged. |
-| World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
+| Controller aiming | `Controls/ControllerAim.cs`, `ControllerAimPatches.cs` | The game aims every weapon from `GameManager.Camera`'s transform. Transpilers on `PlayerInventory.GetFirearmAimPoint`, `GetFreezeBombAimDirection`, `TryGetThunderstormAimPoint`, `PlayerAnimatorIo.UpdateAimingAngle`, `PlayerMovement.AlignWithCameraImmediately` and, while the rocket launcher picks its target, `PlayerGolfer.TryGetBestLockOnTarget` send their `Component.transform` reads through `ControllerAim.TransformOf`. While the local player aims or uses an item, that returns a stand-in transform on the dominant hand controller's pointing ray instead of the camera's; other transforms pass through. The ray is the controller's pose (OpenXR's aim pose, or the grip pose) relative to the headset, placed under UUVR's `VrCameraOffset`, so it starts where your hand is in the view you see. `WorldReticles` casts along the same ray. |
+| World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), or the controller's aim with `ControllerAiming`, past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
 SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
@@ -314,6 +320,12 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - A real gamepad, keyboard and mouse still work, before and after using the controllers.
     - F3 off and on a few times: the controllers keep working, and with VR off they do nothing.
     - Repeat with `Preferred VR APi` = `OpenVr`.
+12. Controller aiming, with `MotionControls` on:
+    - Aim each weapon (dueling pistol, elephant gun, rocket launcher, railgun, freeze bomb, thunderstorm): the reticle sits where the right controller points, and shots go there. The log says `Controller aiming: aiming with the right controller` and which pose it uses.
+    - The rocket launcher's orange lock-on picks the target you point at. A full-power golf swing's homing target still follows the camera.
+    - Golf swings, the flash camera and the airhorn behave as without motion controls.
+    - With `DominantHand` = `Left`, the left controller aims. With `ControllerAiming` off, weapons aim along the camera again.
+    - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
 
 Send `LogOutput.log` from the session with notes on each step.
 
