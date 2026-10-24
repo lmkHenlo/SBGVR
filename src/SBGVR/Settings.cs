@@ -47,6 +47,11 @@ namespace SBGVR
         internal static ConfigEntry<Controls.ControllerHand> DominantHand;
         internal static ConfigEntry<float> ControllerAimPitch;
         internal static ConfigEntry<bool> MirrorButtons;
+        internal static ConfigEntry<bool> FineSwingAim;
+        internal static ConfigEntry<float> FineSwingAimStrength;
+        internal static ConfigEntry<float> FineSwingAimMovement;
+        internal static ConfigEntry<float> FineSwingAimMaxYaw;
+        internal static ConfigEntry<float> FineSwingAimMaxPitch;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -135,6 +140,28 @@ namespace SBGVR
                 "with DominantHand = Left: the right controller moves and aims items, the left one turns the " +
                 "camera and swings or fires, X and Y act as A and B, and the right grip button opens the D-pad " +
                 "layer. The Menu button stays on the left controller.");
+            FineSwingAim = config.Bind(controls, "FineSwingAim", true,
+                "With MotionControls, while you aim and charge a golf club or rocket club swing, small movements of " +
+                "your DominantHand controller fine-tune the swing: turn it or move it sideways to aim a little left " +
+                "or right, tilt it to aim a little higher or lower. The trajectory preview follows. The adjustment " +
+                "starts from how you hold the controller when you start aiming, locks when you swing, and is off " +
+                "for homing swings with a lock-on target and for putts' height.");
+            FineSwingAimStrength = config.Bind(controls, "FineSwingAimStrength", 0.25f,
+                new ConfigDescription(
+                    "How much of the controller's turn and tilt goes into the swing: 0.25 = turning it 8 degrees " +
+                    "aims 2 degrees.",
+                    new AcceptableValueRange<float>(0.05f, 1f)));
+            FineSwingAimMovement = config.Bind(controls, "FineSwingAimMovement", 2f,
+                new ConfigDescription(
+                    "Degrees the swing turns for every 10 cm you move the controller sideways. 0 = only turning and " +
+                    "tilting count.",
+                    new AcceptableValueRange<float>(0f, 10f)));
+            FineSwingAimMaxYaw = config.Bind(controls, "FineSwingAimMaxYaw", 10f,
+                new ConfigDescription("The furthest fine aiming turns a swing left or right, in degrees.",
+                    new AcceptableValueRange<float>(1f, 30f)));
+            FineSwingAimMaxPitch = config.Bind(controls, "FineSwingAimMaxPitch", 5f,
+                new ConfigDescription("The furthest fine aiming tilts a swing up or down, in degrees. 0 = left and right only.",
+                    new AcceptableValueRange<float>(0f, 15f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

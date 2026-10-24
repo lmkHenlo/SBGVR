@@ -154,6 +154,13 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 
 The Meta button on the right controller opens the headset's universal menu and isn't available to games. The golf cart's honk (L3 on a gamepad) has no controller input.
 
+**Fine swing aiming.** With `FineSwingAim` on (the default once `MotionControls` is on), small movements of your `DominantHand` controller fine-tune a golf club or rocket club swing while you aim and charge it. Aim roughly with the right thumbstick and the swing angle as usual, then:
+
+- turn the controller, or move it sideways, to aim a little left or right;
+- tilt it to aim a little higher or lower.
+
+The trajectory preview follows as you move. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the swing 2°, up to 10° left or right and 5° up or down. The adjustment starts from however you hold the controller when you start aiming, locks the moment you swing (so pulling the trigger or following through doesn't move it), and resets when you stop aiming. Your character and the camera don't turn. It's off for full-power homing swings that have a lock-on target, and putts are never lifted. Tune it with `FineSwingAimStrength`, `FineSwingAimMovement`, `FineSwingAimMaxYaw` and `FineSwingAimMaxPitch`.
+
 **Mirrored buttons.** With `MirrorButtons` on (off by default), the layout is mirrored left to right, for example for left-handed play together with `DominantHand` = `Left`:
 
 | Controller | Gamepad | In the game |
@@ -214,6 +221,11 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
 | `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | The controller weapons aim with: `Right` or `Left`. |
+| `com.sbgvr.cfg` | `VR Controls` → `FineSwingAim` | `true` | With `MotionControls`, small controller movements fine-tune golf club and rocket club swings while you aim (see [Motion controls](#motion-controls)). |
+| `com.sbgvr.cfg` | `VR Controls` → `FineSwingAimStrength` | `0.25` | Share of the controller's turn and tilt that goes into the swing (0.05–1). |
+| `com.sbgvr.cfg` | `VR Controls` → `FineSwingAimMovement` | `2` | Degrees the swing turns per 10 cm of sideways hand movement (0–10). `0` = turning and tilting only. |
+| `com.sbgvr.cfg` | `VR Controls` → `FineSwingAimMaxYaw` | `10` | Furthest fine aiming turns a swing left or right, in degrees (1–30). |
+| `com.sbgvr.cfg` | `VR Controls` → `FineSwingAimMaxPitch` | `5` | Furthest fine aiming tilts a swing up or down, in degrees (0–15). `0` = left and right only. |
 | `com.sbgvr.cfg` | `VR Controls` → `MirrorButtons` | `false` | Mirror the motion controls button layout left to right (see [Motion controls](#motion-controls)). |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
@@ -278,6 +290,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
 | Motion controls | `Controls/MotionControls.cs`, `Plugin.EnableOpenXrControllers` | With `MotionControls` on, SBGVR enables UUVR's OpenXR controller profiles before UUVR starts VR (OpenVR reports controllers without them). Just before each Input System update, `MotionControls` reads both controllers through Unity's XR input (`UnityEngine.XR.InputDevices`) and queues their state to a virtual `Gamepad` it adds while VR runs. Nothing is sent until a controller is used, or while it's left alone, so other devices stay usable. The game's own input code is unchanged. |
 | Controller aiming | `Controls/ControllerAim.cs`, `ControllerAimPatches.cs` | The game aims every weapon from `GameManager.Camera`'s transform. Transpilers on `PlayerInventory.GetFirearmAimPoint`, `GetFreezeBombAimDirection`, `TryGetThunderstormAimPoint`, `PlayerAnimatorIo.UpdateAimingAngle`, `PlayerMovement.AlignWithCameraImmediately` and, while the rocket launcher picks its target, `PlayerGolfer.TryGetBestLockOnTarget` send their `Component.transform` reads through `ControllerAim.TransformOf`. While the local player aims or uses an item, that returns a stand-in transform on the dominant hand controller's pointing ray instead of the camera's; other transforms pass through. The ray is the controller's pose (OpenXR's aim pose, or the grip pose) relative to the headset, placed under UUVR's `VrCameraOffset`, so it starts where your hand is in the view you see. `WorldReticles` casts along the same ray. |
+| Fine swing aiming | `Controls/FineSwingAim.cs` | Every swing's direction, for the hit and the trajectory preview, comes from `PlayerGolfer.GetSwingDirection` (the character's facing, tilted by the swing angle). While the local player aims, charges or swings the golf club or rocket club without a lock-on target, `FineSwingAim` compares the dominant controller's pose in tracking space with the pose it had when aiming started: horizontal turn and sideways movement give a yaw, tilt gives a pitch, each through a dead zone, scaled and clamped. It stops updating once the swing starts. A postfix on `GetSwingDirection` turns the result by that yaw about world up and tilts it by the pitch, within the game's 0 to `MaxSwingPitch` and never for a putt. The game sends the hit direction to the server itself (`Hittable.CmdHitWithGolfSwing`). |
 | World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), or the controller's aim with `ControllerAiming`, past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
 SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
@@ -347,6 +360,12 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - Golf swings, the flash camera and the airhorn behave as without motion controls.
     - With `DominantHand` = `Left`, the left controller aims and the buttons stay put. With `MirrorButtons` on, every button is mirrored as in the mirrored table, and the Menu button still pauses. With `ControllerAiming` off, weapons aim along the camera again.
     - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
+13. Fine swing aiming, with `MotionControls` on:
+    - Aim a golf club swing, then turn the right controller, move it sideways and tilt it: the trajectory preview moves a little, smoothly, and the ball goes where the preview showed. The log says `Fine swing aim: swung with …` for each swing (with `Diagnostics` on).
+    - Holding the controller still while aiming doesn't drift the aim. Pulling the trigger to swing doesn't change it.
+    - The rocket club works the same way. A full-power swing with a homing lock-on target isn't adjusted, and a putt isn't lifted.
+    - Stopping aiming and aiming again starts from zero. The camera and your character don't turn with the controller.
+    - With `FineSwingAim` off, swings aim as before.
 
 Send `LogOutput.log` from the session with notes on each step.
 
