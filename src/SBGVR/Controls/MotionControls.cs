@@ -169,9 +169,11 @@ namespace SBGVR.Controls
             if (now < _leftShoulderPulseUntil) state = state.WithButton(GamepadButton.LeftShoulder, true);
             if (_left.Button(XRCommonUsages.menuButton)) state = state.WithButton(GamepadButton.Start, true);
 
-            // Pressing a thumbstick, on controllers whose primary axis is one (a Vive's is its touchpad).
+            // Pressing a thumbstick, on controllers whose primary axis is one (a Vive's is its touchpad). The
+            // moving hand's thumbstick interacts, like X (the gamepad's west button), so nothing sends L3 and the
+            // golf cart's honk has no controller input.
             if (move.HasFaceButtons && move.Button(XRCommonUsages.primary2DAxisClick))
-                state = state.WithButton(GamepadButton.LeftStick, true);
+                state = state.WithButton(GamepadButton.West, true);
             if (aim.HasFaceButtons && aim.Button(XRCommonUsages.primary2DAxisClick))
                 state = state.WithButton(GamepadButton.RightStick, true);
 

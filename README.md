@@ -5,7 +5,7 @@
 
 Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.
 
-SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
+SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking, and VR controllers can optionally act as a gamepad and aim weapons. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
 The repository and the package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
@@ -146,12 +146,13 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 | Right grip button | RB | Next item |
 | Tap the left grip button | LB | Previous item |
 | Menu button (left controller) | Start | Pause |
-| Press the left / right thumbstick | L3 / R3 | Honk (golf cart) / drop item |
+| Press the left thumbstick | X | Interact (same as the X button) |
+| Press the right thumbstick | R3 | Drop item |
 | Hold the left grip button + right thumbstick | D-pad | Emotes, push to talk, votes, restart |
 | Hold the left grip button + A button | Start | Pause (for controllers without a Menu button the game can use, such as the Valve Index) |
 | Hold the left grip button + B button | Back | Scoreboard |
 
-The Meta button on the right controller opens the headset's universal menu and isn't available to games.
+The Meta button on the right controller opens the headset's universal menu and isn't available to games. The golf cart's honk (L3 on a gamepad) has no controller input.
 
 **Mirrored buttons.** With `MirrorButtons` on (off by default), the layout is mirrored left to right, for example for left-handed play together with `DominantHand` = `Left`:
 
@@ -166,7 +167,8 @@ The Meta button on the right controller opens the headset's universal menu and i
 | Left grip button | RB | Next item |
 | Tap the right grip button | LB | Previous item |
 | Menu button (left controller) | Start | Pause (the Menu button is only on the left controller) |
-| Press the right / left thumbstick | L3 / R3 | Honk (golf cart) / drop item |
+| Press the right thumbstick | X | Interact (same as the A button here) |
+| Press the left thumbstick | R3 | Drop item |
 | Hold the right grip button + left thumbstick | D-pad | Emotes, push to talk, votes, restart |
 | Hold the right grip button + X button | Start | Pause |
 | Hold the right grip button + Y button | Back | Scoreboard |
