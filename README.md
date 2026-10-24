@@ -21,6 +21,7 @@ SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, 
   - [Updating](#updating)
   - [Uninstalling](#uninstalling)
 - [Usage](#usage)
+  - [Motion controls](#motion-controls)
   - [Settings](#settings)
   - [If the headset stays black](#if-the-headset-stays-black)
 - [Known issues](#known-issues)
@@ -128,6 +129,28 @@ Start the VR runtime, then the game. UUVR turns VR on at startup.
 | F3 | Turn VR off and on. |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead. Set by `RecenterKey`. |
 
+### Motion controls
+
+Off by default, and new: turn on `VR Controls` → `MotionControls` in `com.sbgvr.cfg`, then restart the game. While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply. A real gamepad, keyboard and mouse still work alongside. The game shows gamepad button icons.
+
+| Controller | Gamepad | In the game |
+| --- | --- | --- |
+| Left stick | Left stick | Move; menu cursor |
+| Right stick | Right stick | Turn the camera |
+| Left trigger | LT | Aim |
+| Right trigger | RT | Swing (hold to charge) |
+| A / B | A / B | Jump / dive |
+| X / Y | X / Y | Interact / swing angle |
+| Right grip | RB | Next item |
+| Tap the left grip | LB | Previous item |
+| Left menu button | Start | Pause |
+| Left / right stick click | L3 / R3 | Honk (golf cart) / drop item |
+| Hold the left grip + right stick | D-pad | Emotes, push to talk, votes, restart |
+| Hold the left grip + A | Start | Pause (for controllers whose menu button belongs to SteamVR, such as the Valve Index) |
+| Hold the left grip + B | Back | Scoreboard |
+
+Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad. Aiming still follows your head; the controllers aren't tracked in the game.
+
 ### Settings
 
 Settings are in `BepInEx\config`. In r2modman, open them with **Config editor**. Change them with the game closed, since BepInEx reads the files when the game starts. For example, these lines in `com.sbgvr.cfg` keep a little camera shake and turn ambient occlusion off for a higher frame rate:
@@ -162,6 +185,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceReticles` | `true` | Draw weapon reticles in the world at the point you're aiming at, always on top of scenery and characters, instead of doubled on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs (0–600). `0` = never. |
 
@@ -182,7 +206,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
 - **MaxFOVSlider before 0.2.1** reshapes the headset's picture with its Panini projection. MaxFOVSlider 0.2.1 and later pause their projection and extra resolution while VR runs, and work alongside SBGVR; update it, or disable older versions while using VR.
-- **No motion controllers.** UUVR doesn't support them.
+- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, aiming follows your head, and controllers don't vibrate. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
 
 ## How it works
 
@@ -207,6 +231,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
 | Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
 | Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
+| Restore OpenXR controller input: `Input/OpenXRInput.cs`, `Features/Interactions/` and the call in `OpenXRLoader.StartInternal` | UUVR's copy of the Unity OpenXR plugin left out the code that tells the OpenXR runtime which controller inputs to report, so OpenXR showed no controllers. It's adapted from the plugin's 1.4.2 source, which matches the bundled `UnityOpenXR.dll`: the action set setup and the action maps of the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles, without their Input System layouts. `ControllerProfiles.Enable` turns the profiles on; until something calls it, OpenXR starts exactly as before. |
 
 **SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
 
@@ -221,6 +246,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
 | World-space markers | `Hud/` | After the game lays out a marker (`WorldspaceIconUi`, `NameTagUi`, `TargetReticleUi`, `LockOnTargetUi` (the orange lock-on reticle), `AirhornTargetIndicator`, `JumboBurgerGiantFormTimerUi` or `TextPopupUi`), `WorldMarker` moves its UI objects under a world-space canvas at the target. It's scaled to its size on the floating screen. Markers return to the HUD when they go off screen or the game stops laying them out. |
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
+| Motion controls | `Controls/MotionControls.cs`, `Plugin.EnableOpenXrControllers` | With `MotionControls` on, SBGVR enables UUVR's OpenXR controller profiles before UUVR starts VR (OpenVR reports controllers without them). Just before each Input System update, `MotionControls` reads both controllers through Unity's XR input (`UnityEngine.XR.InputDevices`) and queues their state to a virtual `Gamepad` it adds while VR runs. Nothing is sent until a controller is used, or while it's left alone, so other devices stay usable. The game's own input code is unchanged. |
 | World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
 SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
@@ -278,6 +304,12 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 8. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
 9. F4 recentres the view. F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
 10. The frame rate lines in the log are close to the headset's refresh rate.
+11. Motion controls, with `MotionControls` on (and once with it off, to check nothing changes):
+    - The log shows `[ok] OpenXR controller profiles` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
+    - Every button in the [Motion controls](#motion-controls) table does what it says, in a match, the golf cart, spectating, the emote wheel and the menus (with the gamepad cursor).
+    - A real gamepad, keyboard and mouse still work, before and after using the controllers.
+    - F3 off and on a few times: the controllers keep working, and with VR off they do nothing.
+    - Repeat with `Preferred VR APi` = `OpenVr`.
 
 Send `LogOutput.log` from the session with notes on each step.
 
@@ -290,7 +322,7 @@ SBGVR/
 ├── NuGet.config              no package sources: the build is offline
 ├── SBGVR.proj                builds everything and makes the Thunderstore zip
 ├── build.ps1                 Windows build wrapper
-├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Diagnostics/, Fades/, Hud/, Rendering/
+├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Controls/, Diagnostics/, Fades/, Hud/, Rendering/
 ├── thunderstore/             manifest.json, icon.png and the package README
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)

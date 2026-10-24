@@ -10,7 +10,7 @@ SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Ba
 - Shows menus and the HUD on a floating screen in front of you, and draws markers (your ball, the hole, name tags, the interaction reticle) in the world at their target, so they line up at any distance.
 - Draws the game's ambient occlusion correctly for each eye. Turn `AmbientOcclusion` off for more frame rate.
 - Fades your whole view when the game fades the screen, holds the main menu's background scenes still, and turns off screen shake, explosion flashes, the CRT effect and the pause menu's background blur (which made the menu itself blurry in VR). Camera moves between views are quicker. All of this can be changed in the settings.
-- Keeps your usual controls: mouse and keyboard or gamepad. Motion controllers aren't used.
+- Keeps your usual controls: mouse and keyboard or gamepad. Optionally, your VR controllers can work as a gamepad (`MotionControls`, off by default and new).
 - Only changes what you see. Nothing is sent to other players, so you can play VR in any lobby with flat-screen players.
 
 ## Install
@@ -37,6 +37,7 @@ Settings are in two files under `BepInEx\config`. In r2modman, open them with **
 - `com.sbgvr.cfg`: SBGVR's settings. They only apply while VR is running:
   - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` and `FlashFrames` (off), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
+  - **VR Controls:** `MotionControls` (off): your VR controllers work as a gamepad while VR runs. Restart the game after changing it. Left stick moves, right stick turns the camera, left trigger aims, right trigger swings, A jumps, B dives, X interacts, Y changes the swing angle, the right grip and a tap of the left grip cycle items, and the left menu button pauses. Hold the left grip for more: right stick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. Aiming still follows your head.
   - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
   - **Diagnostics:** logging for bug reports.
 

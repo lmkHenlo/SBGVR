@@ -42,6 +42,8 @@ namespace SBGVR
 
         internal static ConfigEntry<bool> AmbientOcclusion;
 
+        internal static ConfigEntry<bool> MotionControls;
+
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
 
@@ -102,6 +104,15 @@ namespace SBGVR
                 "The game's ambient occlusion (soft shading where surfaces meet) in VR. It costs more than on a " +
                 "flat screen: each eye is drawn separately, at the headset's resolution. Off = none in VR; the " +
                 "game's own setting still applies on a flat screen.");
+
+            const string controls = "VR Controls";
+            MotionControls = config.Bind(controls, "MotionControls", false,
+                "Play with your VR controllers: while VR runs, their sticks, triggers and buttons work like a " +
+                "gamepad, including your gamepad rebinds. Left stick moves, right stick turns the camera, left " +
+                "trigger aims, right trigger swings, A jumps, B dives, X interacts, Y changes the swing angle, the " +
+                "right grip and a tap of the left grip cycle items, and the left menu button pauses. Hold the left " +
+                "grip for more: right stick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. " +
+                "A real gamepad, keyboard and mouse still work. Restart the game after changing this.");
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

@@ -9,8 +9,9 @@ files under `patchers/CopyToGame/Data/StreamingAssets/SteamVR/` come from UUVR.
 
 SBGVR's copy of UUVR is modified. It started from UUVR v0.4.0 (upstream commit
 de8e9218f8a9310778f2f57c189bef9ccc8c4dc8) and was changed by lmkHenlo between 2026-10-22 and
-2026-10-23, to build it against Super Battle Golf's own assemblies, leave out files the game doesn't
-use, fix the VR UI's camera, shutdown and drawing order for this game, and add a recentre rotation.
+2026-10-24, to build it against Super Battle Golf's own assemblies, leave out files the game doesn't
+use, fix the VR UI's camera, shutdown and drawing order for this game, add a recentre rotation, and
+restore OpenXR controller input.
 Each change is its own commit, and README.md (How it works) lists them; changed source files mark
 the changes with `SBGVR:` comments. SBGVR's full source, including its copy of UUVR, is at
 <https://github.com/lmkHenlo/SBGVR>.
@@ -25,7 +26,7 @@ UUVR in turn includes the components below, which keep their own licences.
 | `plugins/Uuvr.XR.OpenVR.dll` (loader and settings) | OpenVR Unity XR plugin, Valve Software | BSD 3-Clause ([text below](#openvr-unity-xr-plugin)) |
 | `patchers/CopyToGame/Plugins/x64/openxr_loader.dll` | OpenXR loader 1.0.20, The Khronos Group | Apache License 2.0 ([text below](#openxr-loader)) |
 | `patchers/CopyToGame/Plugins/x64/UnityOpenXR.dll`, `patchers/CopyToGame/Data/UnitySubsystems/UnityOpenXR/` | Unity OpenXR plugin (com.unity.xr.openxr) 1.4.2, Unity Technologies | Unity Package Distribution License ([notice below](#unity-openxr-plugin)) |
-| `plugins/Uuvr.XR.OpenXR.dll` | Adapted from the Unity OpenXR plugin's source | Unity Companion License ([notice below](#unity-openxr-plugin)) |
+| `plugins/Uuvr.XR.OpenXR.dll` | Adapted from the Unity OpenXR plugin's source. SBGVR added, on 2026-10-24, the controller input code and five controller profiles adapted from version 1.4.2 (`Input/OpenXRInput.cs` and `Features/Interactions/` in the source); each of those files says what was changed. | Unity Companion License ([notice below](#unity-openxr-plugin)) |
 | `plugins/Uuvr.XR.Management.dll` | Adapted from Unity XR Plugin Management (com.unity.xr.management) | Unity Companion License ([notice below](#unity-xr-plugin-management)) |
 
 ## OpenVR SDK
