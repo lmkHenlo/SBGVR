@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-24
+
+Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index or Steam Frame. They don't work with OpenVR.
+
 ### Added
 
 - Motion controls, off by default: `VR Controls` → `MotionControls`. They work with UUVR's default runtime, OpenXR; with `Preferred VR APi` = `OpenVr` the controllers don't work (a known issue). While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply; a real gamepad, keyboard and mouse still work. Holding the left grip button turns the right thumbstick into a D-pad and A and B into pause and scoreboard. Pressing the left thumbstick interacts, like X; the golf cart's honk has no controller input. Controllers without face buttons use touchpad clicks. The README lists every button.
