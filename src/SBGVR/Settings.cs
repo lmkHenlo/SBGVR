@@ -133,7 +133,9 @@ namespace SBGVR
                 "With MotionControls, weapons aim where your DominantHand controller points while you aim or use " +
                 "them (dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb, " +
                 "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
-                "follow the camera. Off = weapons aim along the camera, as on a flat screen.");
+                "follow the camera. Only while you're playing with the controllers: after you use a gamepad, " +
+                "keyboard or mouse, weapons aim along the camera until you use a controller again. Off = weapons " +
+                "always aim along the camera, as on a flat screen.");
             DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
                 "The controller weapons aim with: Right or Left. Buttons stay where they are; see MirrorButtons.");
             ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
@@ -152,7 +154,8 @@ namespace SBGVR
                 "sideways to turn the camera left or right (and, with MotionCameraMaxPitch above 0, tilt it to look up " +
                 "or down). Your character faces the " +
                 "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
-                "controller when you start aiming and stops when you swing; the thumbstick still works.");
+                "controller when you start aiming and stops when you swing; the thumbstick still works. Only while " +
+                "you're playing with the controllers, not a gamepad, keyboard or mouse.");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
                 new ConfigDescription(
                     "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +

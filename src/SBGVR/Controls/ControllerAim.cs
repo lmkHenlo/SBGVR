@@ -66,8 +66,9 @@ namespace SBGVR.Controls
             PickingRocketLauncherTarget ? TransformOf(component) : component.transform;
 
         /// <summary>
-        /// The ray weapons aim along, in world space, while controller aiming applies: VR is running, the local
-        /// player is aiming or using an item, and the dominant hand's controller is tracked.
+        /// The ray weapons aim along, in world space, while controller aiming applies: VR is running, the
+        /// controllers are what the player last used (<see cref="MotionControls.InUse"/>), the local player is
+        /// aiming or using an item, and the dominant hand's controller is tracked.
         /// </summary>
         internal static bool TryGetAimRay(out Vector3 origin, out Vector3 direction)
         {
@@ -75,6 +76,9 @@ namespace SBGVR.Controls
             direction = default;
 
             if (!VrState.IsRunning || !Settings.MotionControls.Value || !Settings.ControllerAiming.Value) return false;
+
+            // Only while the player is playing with the controllers, not a gamepad, keyboard or mouse.
+            if (!MotionControls.InUse) return false;
 
             var inventory = GameManager.LocalPlayerInventory;
             if (inventory == null || !(inventory.IsAimingItem || inventory.IsUsingItemAtAll)) return false;

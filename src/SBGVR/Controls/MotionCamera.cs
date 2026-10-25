@@ -113,6 +113,7 @@ namespace SBGVR.Controls
         private static PlayerGolfer LocalAimingGolfer()
         {
             if (!VrState.IsRunning || !Settings.MotionControls.Value || !Settings.MotionCamera.Value) return null;
+            if (!MotionControls.InUse) return null;
 
             var player = GameManager.LocalPlayerInfo;
             var golfer = player != null ? player.AsGolfer : null;

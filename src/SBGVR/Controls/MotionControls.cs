@@ -43,6 +43,17 @@ namespace SBGVR.Controls
         private readonly Hand _right = new Hand(InputDeviceCharacteristics.Right, "Right");
 
         private Gamepad _gamepad;
+
+        /// <summary>The virtual gamepad the controllers drive, while it exists.</summary>
+        internal static Gamepad VirtualGamepad { get; private set; }
+
+        /// <summary>
+        /// Whether the VR controllers are what the player is playing with right now: the game's current input
+        /// device (which it switches to whatever last triggered one of its actions) is the virtual gamepad. False
+        /// after the player uses a real gamepad, keyboard or mouse, until a controller is used again.
+        /// </summary>
+        internal static bool InUse =>
+            VirtualGamepad != null && InputManager.UsingGamepad && ReferenceEquals(InputManager.CurrentGamepad, VirtualGamepad);
         private GamepadState _lastSent;
         private bool _hasSent;
 
@@ -185,6 +196,7 @@ namespace SBGVR.Controls
             if (_gamepad != null) return true;
 
             _gamepad = InputSystem.AddDevice<Gamepad>(GamepadName);
+            VirtualGamepad = _gamepad;
             if (_gamepad == null)
             {
                 Plugin.Log.LogError("Motion controls: couldn't add the virtual gamepad.");
@@ -208,6 +220,7 @@ namespace SBGVR.Controls
 
             if (_gamepad.added) InputSystem.RemoveDevice(_gamepad);
             _gamepad = null;
+            VirtualGamepad = null;
             Plugin.Log.LogInfo("Motion controls: virtual gamepad removed.");
         }
 

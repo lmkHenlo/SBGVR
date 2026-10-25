@@ -272,7 +272,17 @@ namespace UnityEngine.XR.OpenXR
             {
                 // SBGVR: restored from the Unity OpenXR plugin. Does nothing unless a controller profile was
                 // enabled (ControllerProfiles.Enable, which SBGVR calls with VR Controls.MotionControls on).
-                OpenXRInput.AttachActionSets();
+                // A failure here must not stop VR from starting (this can run from the runtime's native
+                // callback, where an exception could take the game down), so it's logged and VR goes on.
+                try
+                {
+                    OpenXRInput.AttachActionSets();
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogError("SBGVR: couldn't set up OpenXR controller input; VR runs without controllers.");
+                    Debug.LogException(exception);
+                }
                 actionSetsAttached = true;
             }
 
