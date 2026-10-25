@@ -8,11 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-25
+
 ### Changed
 
 - `VR Controls` → `MotionControls` is on by default, so VR controllers work as a gamepad, aim weapons and turn the camera while aiming swings without changing any settings (OpenXR only; with OpenVR the controllers still don't work).
 - `VR HUD` → `AimLine` is off by default. Turn it on to draw the white line from your hand to the weapon reticle.
 - A settings file you already have keeps its values; change them there, or delete those lines to get the new defaults.
+- Controller aiming and the motion camera only work while you're playing with the controllers. After you use a gamepad, keyboard or mouse, weapons aim along the camera and the controllers don't turn it, until you use a controller again. Before, a held or awake controller could aim weapons while you played with something else.
+
+### Fixed
+
+- Changing `DominantHand` while the game runs (with a config editor) now switches the aiming controller straight away; it used to keep the old hand until that controller disconnected.
+- If setting up OpenXR controller input ever fails, VR still starts, without controllers, and the error is logged. Before, such a failure would have stopped VR from starting.
 
 ## [1.1.0] - 2026-10-24
 
