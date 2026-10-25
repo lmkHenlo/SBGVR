@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- `VR Controls` → `MotionControls` is on by default, so VR controllers work as a gamepad, aim weapons and turn the camera while aiming swings without changing any settings (OpenXR only; with OpenVR the controllers still don't work).
+- `VR HUD` → `AimLine` is off by default. Turn it on to draw the white line from your hand to the weapon reticle.
+- A settings file you already have keeps its values; change them there, or delete those lines to get the new defaults.
+
 ## [1.1.0] - 2026-10-24
 
 Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index or Steam Frame. They don't work with OpenVR.

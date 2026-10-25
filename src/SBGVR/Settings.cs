@@ -105,7 +105,7 @@ namespace SBGVR
                 "Draw weapon reticles in the world at the point you're aiming at, so both eyes see them on the " +
                 "target, always on top of scenery and characters. Off = on UUVR's floating screen, where they " +
                 "look doubled against a distant target.");
-            AimLine = config.Bind(hud, "AimLine", true,
+            AimLine = config.Bind(hud, "AimLine", false,
                 "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
                 "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
                 "thunderstorm or flash camera.");
@@ -121,7 +121,7 @@ namespace SBGVR
                 "game's own setting still applies on a flat screen.");
 
             const string controls = "VR Controls";
-            MotionControls = config.Bind(controls, "MotionControls", false,
+            MotionControls = config.Bind(controls, "MotionControls", true,
                 "Play with your VR controllers: while VR runs, their thumbsticks, trigger buttons and buttons work " +
                 "like a gamepad, including your gamepad rebinds. Left thumbstick moves, right thumbstick turns the " +
                 "camera, left trigger button aims, right trigger button swings, A jumps, B dives, X interacts, Y " +
