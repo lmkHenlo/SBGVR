@@ -271,7 +271,7 @@ namespace UnityEngine.XR.OpenXR
             if (!actionSetsAttached)
             {
                 // SBGVR: restored from the Unity OpenXR plugin. Does nothing unless a controller profile was
-                // enabled (ControllerProfiles.Enable), so OpenXR starts as before by default.
+                // enabled (ControllerProfiles.Enable, which SBGVR calls with VR Controls.MotionControls on).
                 OpenXRInput.AttachActionSets();
                 actionSetsAttached = true;
             }

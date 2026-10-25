@@ -245,7 +245,7 @@ namespace SBGVR.Controls
             a.buttons == b.buttons && a.leftStick == b.leftStick && a.rightStick == b.rightStick &&
             a.leftTrigger == b.leftTrigger && a.rightTrigger == b.rightTrigger;
 
-        /// <summary>One VR controller, found through Unity's XR input, from OpenXR or OpenVR alike.</summary>
+        /// <summary>One VR controller, found through Unity's XR input (reported with OpenXR; not with OpenVR, a known issue).</summary>
         private sealed class Hand
         {
             private const float SearchInterval = 1f;

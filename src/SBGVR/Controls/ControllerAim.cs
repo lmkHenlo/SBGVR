@@ -37,6 +37,7 @@ namespace SBGVR.Controls
         private static readonly List<XRInputDevice> Found = new List<XRInputDevice>();
 
         private static XRInputDevice _device;
+        private static ControllerHand _deviceHand;
         private static float _nextSearch;
         private static Transform _standIn;
         private static bool _loggedPose;
@@ -129,18 +130,25 @@ namespace SBGVR.Controls
             position = default;
             rotation = default;
 
+            // DominantHand can be changed while the game runs (with a config editor): look for the other hand then.
+            var hand = Settings.DominantHand.Value;
+            if (_device.isValid && hand != _deviceHand)
+            {
+                _device = default;
+                _nextSearch = 0f;
+            }
+
             if (!_device.isValid)
             {
                 if (Time.unscaledTime < _nextSearch) return false;
                 _nextSearch = Time.unscaledTime + 1f;
 
-                var side = Settings.DominantHand.Value == ControllerHand.Left
-                    ? InputDeviceCharacteristics.Left
-                    : InputDeviceCharacteristics.Right;
+                var side = hand == ControllerHand.Left ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
                 Found.Clear();
                 InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Controller | side, Found);
                 if (Found.Count == 0) return false;
                 _device = Found[0];
+                _deviceHand = hand;
                 _loggedPose = false;
             }
 

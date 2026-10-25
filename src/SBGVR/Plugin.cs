@@ -77,7 +77,7 @@ namespace SBGVR
         /// <summary>
         /// Gives UUVR's OpenXR loader the controller interaction profiles it starts without, so OpenXR reports
         /// controllers. Runs before UUVR starts VR (UUVR starts it from its first Start, after every plugin's
-        /// Awake). OpenVR reports controllers without this.
+        /// Awake). Controllers don't work with OpenVR (a known issue).
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void EnableOpenXrControllers()
