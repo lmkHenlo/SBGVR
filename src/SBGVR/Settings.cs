@@ -39,8 +39,20 @@ namespace SBGVR
         internal static ConfigEntry<float> MarkerViewAngle;
         internal static ConfigEntry<bool> PlayersCoverMarkers;
         internal static ConfigEntry<bool> WorldSpaceReticles;
+        internal static ConfigEntry<bool> AimLine;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
+
+        internal static ConfigEntry<bool> MotionControls;
+        internal static ConfigEntry<bool> ControllerAiming;
+        internal static ConfigEntry<Controls.ControllerHand> DominantHand;
+        internal static ConfigEntry<float> ControllerAimPitch;
+        internal static ConfigEntry<bool> MirrorButtons;
+        internal static ConfigEntry<bool> MotionCamera;
+        internal static ConfigEntry<float> MotionCameraStrength;
+        internal static ConfigEntry<float> MotionCameraMovement;
+        internal static ConfigEntry<float> MotionCameraMaxYaw;
+        internal static ConfigEntry<float> MotionCameraMaxPitch;
 
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
@@ -56,8 +68,9 @@ namespace SBGVR
             ImpactFrames = config.Bind(comfort, "ImpactFrames", false,
                 "Show the game's impact frames (the brief distorted, recoloured frame when an explosion goes off near " +
                 "you) in VR. They fill your whole view and are centred for a flat screen.");
-            FlashFrames = config.Bind(comfort, "FlashFrames", false,
-                "Show the game's flash frames (the full-screen flash with a doubled picture) in VR.");
+            FlashFrames = config.Bind(comfort, "FlashFrames", true,
+                "Show the game's flash frames in VR: the full-view flash with a doubled picture that blinds you " +
+                "when another player's flash camera catches you. Off = you aren't blinded in VR.");
             CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Fast,
                 "How the camera moves when the game switches views, for example to the hole overview and back. " +
                 "Game = the game's own sweep, Fast = the same sweep in about a third of the time, Instant = a cut.");
@@ -92,6 +105,10 @@ namespace SBGVR
                 "Draw weapon reticles in the world at the point you're aiming at, so both eyes see them on the " +
                 "target, always on top of scenery and characters. Off = on UUVR's floating screen, where they " +
                 "look doubled against a distant target.");
+            AimLine = config.Bind(hud, "AimLine", true,
+                "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
+                "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
+                "thunderstorm or flash camera.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
@@ -102,6 +119,57 @@ namespace SBGVR
                 "The game's ambient occlusion (soft shading where surfaces meet) in VR. It costs more than on a " +
                 "flat screen: each eye is drawn separately, at the headset's resolution. Off = none in VR; the " +
                 "game's own setting still applies on a flat screen.");
+
+            const string controls = "VR Controls";
+            MotionControls = config.Bind(controls, "MotionControls", false,
+                "Play with your VR controllers: while VR runs, their thumbsticks, trigger buttons and buttons work " +
+                "like a gamepad, including your gamepad rebinds. Left thumbstick moves, right thumbstick turns the " +
+                "camera, left trigger button aims, right trigger button swings, A jumps, B dives, X interacts, Y " +
+                "changes the swing angle, the right grip button and a tap of the left grip button cycle items, and " +
+                "the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push " +
+                "to talk, votes), A = pause, B = scoreboard. " +
+                "A real gamepad, keyboard and mouse still work. Restart the game after changing this.");
+            ControllerAiming = config.Bind(controls, "ControllerAiming", true,
+                "With MotionControls, weapons aim where your DominantHand controller points while you aim or use " +
+                "them (dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb, " +
+                "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
+                "follow the camera. Off = weapons aim along the camera, as on a flat screen.");
+            DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
+                "The controller weapons aim with: Right or Left. Buttons stay where they are; see MirrorButtons.");
+            ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
+                new ConfigDescription(
+                    "Degrees to tilt the aim from where the controller points: positive tilts it down, negative " +
+                    "up. For controllers that aim too high or low in your hand.",
+                    new AcceptableValueRange<float>(-45f, 45f)));
+            MirrorButtons = config.Bind(controls, "MirrorButtons", false,
+                "With MotionControls, mirror the button layout left to right, for example for left-handed play " +
+                "with DominantHand = Left: the right controller moves and aims items, the left one turns the " +
+                "camera and swings or fires, X and Y act as A and B, and the right grip button opens the D-pad " +
+                "layer. The Menu button stays on the left controller.");
+            MotionCamera = config.Bind(controls, "MotionCamera", true,
+                "With MotionControls, while you aim and charge a golf club or rocket club swing, small movements of " +
+                "your DominantHand controller turn the camera, like the right thumbstick: turn it or move it " +
+                "sideways to turn the camera left or right (and, with MotionCameraMaxPitch above 0, tilt it to look up " +
+                "or down). Your character faces the " +
+                "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
+                "controller when you start aiming and stops when you swing; the thumbstick still works.");
+            MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
+                new ConfigDescription(
+                    "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +
+                    "turns the camera 2 degrees.",
+                    new AcceptableValueRange<float>(0.05f, 1f)));
+            MotionCameraMovement = config.Bind(controls, "MotionCameraMovement", 2f,
+                new ConfigDescription(
+                    "Degrees the camera turns for every 10 cm you move the controller sideways. 0 = only turning " +
+                    "and tilting count.",
+                    new AcceptableValueRange<float>(0f, 10f)));
+            MotionCameraMaxYaw = config.Bind(controls, "MotionCameraMaxYaw", 30f,
+                new ConfigDescription("The furthest the controller turns the camera left or right while aiming, in degrees.",
+                    new AcceptableValueRange<float>(1f, 45f)));
+            MotionCameraMaxPitch = config.Bind(controls, "MotionCameraMaxPitch", 0f,
+                new ConfigDescription("The furthest the controller tilts the camera up or down while aiming, in degrees. " +
+                    "0 = left and right only.",
+                    new AcceptableValueRange<float>(0f, 30f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

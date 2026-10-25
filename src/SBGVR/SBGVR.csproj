@@ -25,6 +25,10 @@
       <HintPath>$(StageDir)plugins\Uuvr.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="Uuvr.XR.OpenXR">
+      <HintPath>$(StageDir)plugins\Uuvr.XR.OpenXR.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

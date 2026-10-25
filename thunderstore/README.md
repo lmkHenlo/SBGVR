@@ -10,7 +10,7 @@ SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Ba
 - Shows menus and the HUD on a floating screen in front of you, and draws markers (your ball, the hole, name tags, the interaction reticle) in the world at their target, so they line up at any distance.
 - Draws the game's ambient occlusion correctly for each eye. Turn `AmbientOcclusion` off for more frame rate.
 - Fades your whole view when the game fades the screen, holds the main menu's background scenes still, and turns off screen shake, explosion flashes, the CRT effect and the pause menu's background blur (which made the menu itself blurry in VR). Camera moves between views are quicker. All of this can be changed in the settings.
-- Keeps your usual controls: mouse and keyboard or gamepad. Motion controllers aren't used.
+- Keeps your usual controls: mouse and keyboard or gamepad. Optionally, your VR controllers can work as a gamepad (`MotionControls`, off by default and new).
 - Only changes what you see. Nothing is sent to other players, so you can play VR in any lobby with flat-screen players.
 
 ## Install
@@ -28,21 +28,21 @@ Then start the game from the mod manager.
 
 | Key | Action |
 | --- | --- |
-| F3 | Turn VR off and on while playing |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead |
 
 Settings are in two files under `BepInEx\config`. In r2modman, open them with **Config editor**.
 
 - `raicuparta.uuvr-modern.cfg`: UUVR's settings: the VR runtime (OpenXR or OpenVR), camera tracking, and the floating screen's size and position.
 - `com.sbgvr.cfg`: SBGVR's settings. They only apply while VR is running:
-  - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` and `FlashFrames` (off), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
+  - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` (off), `FlashFrames` (being blinded by a flash camera, on), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
-  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
+  - **VR Controls:** `MotionControls` (off, OpenXR only): your VR controllers work as a gamepad while VR runs. Restart the game after changing it. The left thumbstick moves, the right thumbstick turns the camera, the left trigger button aims, the right trigger button swings, A jumps, B dives, X interacts, Y changes the swing angle, the right grip button and a tap of the left grip button cycle items, and the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. (Button names follow Meta's Quest controllers.) With `ControllerAiming` (on), weapons aim where your `DominantHand` (`Right`) controller points; `MirrorButtons` (off) mirrors the button layout left to right, for example for left-handed play; `ControllerAimPitch` (0) tilts that aim up or down. Golf swings follow the camera, and with `MotionCamera` (on) small controller turns and sideways movements turn the camera while you aim a swing (up to `MotionCameraMaxYaw`, 30°; set `MotionCameraMaxPitch` above 0 to also tilt it).
+  - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on), `AimLine` (a white line from your hand to the weapon reticle while you aim, except the railgun, thunderstorm and flash camera, on) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
   - **Diagnostics:** logging for bug reports.
 
 If the headset shows nothing, try these UUVR settings, one at a time:
 
-1. `General` → `Preferred VR APi` = `OpenVr`
+1. `General` → `Preferred VR APi` = `OpenVr` (motion controls don't work in that mode)
 2. `Camera` → `Camera Tracking Mode` = `RelativeMatrix` or `Absolute`
 
 ## Good to know

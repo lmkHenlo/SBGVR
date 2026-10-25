@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Motion controls, off by default: `VR Controls` → `MotionControls`. They work with UUVR's default runtime, OpenXR; with `Preferred VR APi` = `OpenVr` the controllers don't work (a known issue). While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply; a real gamepad, keyboard and mouse still work. Holding the left grip button turns the right thumbstick into a D-pad and A and B into pause and scoreboard. Pressing the left thumbstick interacts, like X; the golf cart's honk has no controller input. Controllers without face buttons use touchpad clicks. The README lists every button.
+- OpenXR reports controllers again. UUVR's copy of the Unity OpenXR plugin left out the code that asks the OpenXR runtime for controller input; SBGVR restores it from the plugin's 1.4.2 source, with the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles. It's only used with `MotionControls` on.
+- Aiming with your controller: `VR Controls` → `ControllerAiming` (on), `DominantHand` (`Right`) and `ControllerAimPitch` (0). With `MotionControls` on, weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb and thunderstorm. The world-space reticle follows the same aim, and your character turns to face it when you fire. Golf swings still follow the camera.
+- Motion camera: `VR Controls` → `MotionCamera` (on), `MotionCameraStrength` (0.25), `MotionCameraMovement` (2° per 10 cm), `MotionCameraMaxYaw` (30°) and `MotionCameraMaxPitch` (0°). With `MotionControls` on, while you aim and charge a golf club or rocket club swing, turning or moving your dominant controller sideways turns the camera left or right, like the right thumbstick; with `MotionCameraMaxPitch` above 0, tilting it also looks up or down. Your character faces the camera while aiming, so this fine-tunes the swing through the game's own aiming. It stops when you swing.
+- `VR Controls` → `MirrorButtons` (off): mirrors the motion controls button layout left to right, for example for left-handed play with `DominantHand` = `Left`. The Menu button stays on the left controller.
+- `VR HUD` → `AimLine` (on): while you aim the dueling pistol, elephant gun, rocket launcher or freeze bomb, a thin white line runs from your character's hand to the reticle. It follows both as they move, is drawn at the right depth for each eye, keeps the same thickness near and far, and is hidden by scenery in between.
+
+### Changed
+
+- `VR Comfort` → `FlashFrames` is on by default, so a flash camera blinds you in VR as it does on a flat screen. Turn it off to keep the view clear. A settings file you already have keeps its value; change it there, or delete the line to get the new default.
+
+### Removed
+
+- The F3 key that turned VR off and on. It didn't work in this game, so VR now stays on from when the game starts until it closes. To play on a flat screen, disable SBGVR in your mod manager.
+
 ## [1.0.2] - 2026-10-24
 
 ### Changed

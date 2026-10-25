@@ -5,7 +5,7 @@
 
 Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.
 
-SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking; motion controllers aren't used. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
+SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking, and VR controllers can optionally act as a gamepad and aim weapons. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
 The repository and the package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
@@ -21,6 +21,7 @@ SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, 
   - [Updating](#updating)
   - [Uninstalling](#uninstalling)
 - [Usage](#usage)
+  - [Motion controls](#motion-controls)
   - [Settings](#settings)
   - [If the headset stays black](#if-the-headset-stays-black)
 - [Known issues](#known-issues)
@@ -125,8 +126,64 @@ Start the VR runtime, then the game. UUVR turns VR on at startup.
 
 | Key | Action |
 | --- | --- |
-| F3 | Turn VR off and on. |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead. Set by `RecenterKey`. |
+
+### Motion controls
+
+Motion controls only work with UUVR's default VR runtime, OpenXR (`Preferred VR APi` = `OpenXr`); with `OpenVr`, the controllers don't work (see [Known issues](#known-issues)).
+
+Off by default, and new: turn on `VR Controls` → `MotionControls` in `com.sbgvr.cfg`, then restart the game. While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply. A real gamepad, keyboard and mouse still work alongside. The game shows gamepad button icons.
+
+Controller inputs are named as in Meta's [Quest controller guidelines](https://developers.meta.com/vr/design/controllers/); other controllers use the input in the same place.
+
+| Controller | Gamepad | In the game |
+| --- | --- | --- |
+| Left thumbstick | Left stick | Move; menu cursor |
+| Right thumbstick | Right stick | Turn the camera |
+| Left trigger button | LT | Aim |
+| Right trigger button | RT | Swing (hold to charge) |
+| A button / B button | A / B | Jump / dive |
+| X button / Y button | X / Y | Interact / swing angle |
+| Right grip button | RB | Next item |
+| Tap the left grip button | LB | Previous item |
+| Menu button (left controller) | Start | Pause |
+| Press the left thumbstick | X | Interact (same as the X button) |
+| Press the right thumbstick | R3 | Drop item |
+| Hold the left grip button + right thumbstick | D-pad | Emotes, push to talk, votes, restart |
+| Hold the left grip button + A button | Start | Pause (for controllers without a Menu button the game can use, such as the Valve Index) |
+| Hold the left grip button + B button | Back | Scoreboard |
+
+The Meta button on the right controller opens the headset's universal menu and isn't available to games. The golf cart's honk (L3 on a gamepad) has no controller input.
+
+**Motion camera.** With `MotionCamera` on (the default once `MotionControls` is on), small movements of your `DominantHand` controller turn the camera while you aim and charge a golf club or rocket club swing, just like the right thumbstick:
+
+- turn the controller, or move it sideways, to turn the camera left or right;
+- with `MotionCameraMaxPitch` above 0 (it's 0 by default), tilt it to look up or down.
+
+Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera 2°, up to 30° left or right from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`.
+
+**Mirrored buttons.** With `MirrorButtons` on (off by default), the layout is mirrored left to right, for example for left-handed play together with `DominantHand` = `Left`:
+
+| Controller | Gamepad | In the game |
+| --- | --- | --- |
+| Right thumbstick | Left stick | Move; menu cursor |
+| Left thumbstick | Right stick | Turn the camera |
+| Right trigger button | LT | Aim |
+| Left trigger button | RT | Swing (hold to charge) |
+| X button / Y button | A / B | Jump / dive |
+| A button / B button | X / Y | Interact / swing angle |
+| Left grip button | RB | Next item |
+| Tap the right grip button | LB | Previous item |
+| Menu button (left controller) | Start | Pause (the Menu button is only on the left controller) |
+| Press the right thumbstick | X | Interact (same as the A button here) |
+| Press the left thumbstick | R3 | Drop item |
+| Hold the right grip button + left thumbstick | D-pad | Emotes, push to talk, votes, restart |
+| Hold the right grip button + X button | Start | Pause |
+| Hold the right grip button + Y button | Back | Scoreboard |
+
+Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad (swapped with `MirrorButtons`).
+
+**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the buttons stay where they are unless you also turn on `MirrorButtons` (see below). If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character.
 
 ### Settings
 
@@ -144,13 +201,13 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 
 | File | Setting | Default | What it does |
 | --- | --- | --- | --- |
-| `raicuparta.uuvr-modern.cfg` | `General` → `Preferred VR APi` | `OpenXr` | `OpenXr` or `OpenVr`. |
+| `raicuparta.uuvr-modern.cfg` | `General` → `Preferred VR APi` | `OpenXr` | `OpenXr` or `OpenVr`. Motion controls only work with `OpenXr`. |
 | `raicuparta.uuvr-modern.cfg` | `Camera` → `Camera Tracking Mode` | `RelativeTransform` | How the game camera follows the headset: `Absolute`, `RelativeMatrix`, `RelativeTransform` or `Child`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `UI Patch Mode` | `Mirror` | How the 2D interface reaches the floating screen: `None`, `Mirror` or `CanvasRedirect`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `Preferred UI Plane Render Mode` | `InWorld` | `InWorld` (scenery can cover it) or `OverlayCamera` (always on top). |
 | `com.sbgvr.cfg` | `VR Comfort` → `ScreenShake` | `0` | Camera shake in VR as a share of the game's (0–1). |
 | `com.sbgvr.cfg` | `VR Comfort` → `ImpactFrames` | `false` | Show impact frames (explosion flashes) in VR. |
-| `com.sbgvr.cfg` | `VR Comfort` → `FlashFrames` | `false` | Show flash frames in VR. |
+| `com.sbgvr.cfg` | `VR Comfort` → `FlashFrames` | `true` | Show flash frames in VR: the full-view flash that blinds you when another player's flash camera catches you. `false` = you aren't blinded in VR. |
 | `com.sbgvr.cfg` | `VR Comfort` → `CameraTransitions` | `Fast` | Camera moves between views: `Game`, `Fast` (about a third of the time) or `Instant` (a cut). |
 | `com.sbgvr.cfg` | `VR Comfort` → `MenuBackground` | `Still` | Main menu background scenes: `Moving` (the game's pans) or `Still`. |
 | `com.sbgvr.cfg` | `VR Comfort` → `FullViewFades` | `true` | Fade the whole view, not only the floating screen, when the game fades. |
@@ -160,8 +217,19 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerScale` | `1` | Size of world-space markers (0.25–4); 1 = their size on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerViewAngle` | `70` | Degrees from straight ahead within which icons stay in the world; further round they become edge arrows (30–120). |
 | `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceReticles` | `true` | Draw weapon reticles in the world at the point you're aiming at, always on top of scenery and characters, instead of doubled on the floating screen. |
+| `com.sbgvr.cfg` | `VR HUD` → `AimLine` | `true` | With `WorldSpaceReticles`, draw a thin white line from your character's hand to the weapon reticle while you aim (not for the railgun, thunderstorm or flash camera). |
 | `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `false` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
+| `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
+| `com.sbgvr.cfg` | `VR Controls` → `DominantHand` | `Right` | The controller weapons aim with: `Right` or `Left`. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCamera` | `true` | With `MotionControls`, small controller movements turn the camera while you aim a golf club or rocket club swing (see [Motion controls](#motion-controls)). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraStrength` | `0.25` | Share of the controller's turn and tilt that goes into the camera (0.05–1). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMovement` | `2` | Degrees the camera turns per 10 cm of sideways hand movement (0–10). `0` = turning and tilting only. |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxYaw` | `30` | Furthest the controller turns the camera left or right while aiming, in degrees (1–45). |
+| `com.sbgvr.cfg` | `VR Controls` → `MotionCameraMaxPitch` | `0` | Furthest the controller tilts the camera up or down while aiming, in degrees (0–30). `0` (the default) = left and right only. |
+| `com.sbgvr.cfg` | `VR Controls` → `MirrorButtons` | `false` | Mirror the motion controls button layout left to right (see [Motion controls](#motion-controls)). |
+| `com.sbgvr.cfg` | `VR Controls` → `ControllerAimPitch` | `0` | Degrees to tilt the controller's aim (−45 to 45): positive tilts it down, negative up. |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
 | `com.sbgvr.cfg` | `Diagnostics` → `PerformanceLogInterval` | `30` | Seconds between frame rate lines while VR runs (0–600). `0` = never. |
 
@@ -170,7 +238,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 ### If the headset stays black
 
 1. Check that SteamVR (or your runtime) is set as the OpenXR runtime.
-2. Set `General` → `Preferred VR APi` to `OpenVr`.
+2. Set `General` → `Preferred VR APi` to `OpenVr`. Motion controls don't work in that mode.
 3. Set `Camera` → `Camera Tracking Mode` to `RelativeMatrix` or `Absolute`.
 
 ## Known issues
@@ -182,7 +250,8 @@ SBGVR's settings only change the game while VR is running. The game's own settin
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
 - **MaxFOVSlider before 0.2.1** reshapes the headset's picture with its Panini projection. MaxFOVSlider 0.2.1 and later pause their projection and extra resolution while VR runs, and work alongside SBGVR; update it, or disable older versions while using VR.
-- **No motion controllers.** UUVR doesn't support them.
+- **Motion controls don't work with OpenVR.** With `General` → `Preferred VR APi` = `OpenVr` in `raicuparta.uuvr-modern.cfg`, the VR controllers don't control the game, so controller aiming and the motion camera don't work either. Keep the default, `OpenXr`, to use them; a gamepad, keyboard and mouse work with either.
+- **Motion controls are new and off by default.** They haven't been tested on every headset yet. They act as a gamepad: there's no pointing at the floating screen, and controllers don't vibrate (no haptics). Controller aiming covers weapons only; golf swings follow the camera. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
 
 ## How it works
 
@@ -207,6 +276,8 @@ Changes made to UUVR in this repository, each in its own commit:
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
 | Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
 | Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
+| Remove the F3 key that turned VR off and on (`UuvrCore`) | Toggling VR with it didn't work in this game. VR now stays on from startup until the game closes. |
+| Restore OpenXR controller input: `Input/OpenXRInput.cs`, `Features/Interactions/` and the call in `OpenXRLoader.StartInternal` | UUVR's copy of the Unity OpenXR plugin left out the code that tells the OpenXR runtime which controller inputs to report, so OpenXR showed no controllers. It's adapted from the plugin's 1.4.2 source, which matches the bundled `UnityOpenXR.dll`: the action set setup and the action maps of the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles, without their Input System layouts. `ControllerProfiles.Enable` turns the profiles on; until something calls it, OpenXR starts exactly as before. |
 
 **SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
 
@@ -221,7 +292,11 @@ Changes made to UUVR in this repository, each in its own commit:
 | Recentre | `Comfort/Recenter.cs` | Cancels the headset's yaw through `VrCameraOffset.RecenterRotation`. |
 | World-space markers | `Hud/` | After the game lays out a marker (`WorldspaceIconUi`, `NameTagUi`, `TargetReticleUi`, `LockOnTargetUi` (the orange lock-on reticle), `AirhornTargetIndicator`, `JumboBurgerGiantFormTimerUi` or `TextPopupUi`), `WorldMarker` moves its UI objects under a world-space canvas at the target. It's scaled to its size on the floating screen. Markers return to the HUD when they go off screen or the game stops laying them out. |
 | Players covering markers | `Hud/MarkerOcclusion.cs`, `PlayerOverlap.cs`, `PlayerOccluder.cs` | Each frame, `MarkerOcclusion` finds characters that are nearer than a marker they overlap in view and gives each a stencil bit. `PlayerOccluder` sets that bit wherever the character is visible. It draws the character's meshes again with a UI material that draws no colour, depth tested against the character itself (a twin skinned mesh, or `Graphics.RenderMesh`). Each marker's drawn materials then skip pixels with the bits of the characters in front of it. The characters are drawn once, as usual. |
-| World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
+| Motion controls | `Controls/MotionControls.cs`, `Plugin.EnableOpenXrControllers` | With `MotionControls` on, SBGVR enables UUVR's OpenXR controller profiles before UUVR starts VR. With OpenVR, controllers don't reach the game (a known issue; not investigated). Just before each Input System update, `MotionControls` reads both controllers through Unity's XR input (`UnityEngine.XR.InputDevices`) and queues their state to a virtual `Gamepad` it adds while VR runs. Nothing is sent until a controller is used, or while it's left alone, so other devices stay usable. The game's own input code is unchanged. |
+| Controller aiming | `Controls/ControllerAim.cs`, `ControllerAimPatches.cs` | The game aims every weapon from `GameManager.Camera`'s transform. Transpilers on `PlayerInventory.GetFirearmAimPoint`, `GetFreezeBombAimDirection`, `TryGetThunderstormAimPoint`, `PlayerAnimatorIo.UpdateAimingAngle`, `PlayerMovement.AlignWithCameraImmediately` and, while the rocket launcher picks its target, `PlayerGolfer.TryGetBestLockOnTarget` send their `Component.transform` reads through `ControllerAim.TransformOf`. While the local player aims or uses an item, that returns a stand-in transform on the dominant hand controller's pointing ray instead of the camera's; other transforms pass through. The ray is the controller's pose (OpenXR's aim pose, or the grip pose) relative to the headset, placed under UUVR's `VrCameraOffset`, so it starts where your hand is in the view you see. `WorldReticles` casts along the same ray. |
+| Motion camera | `Controls/MotionCamera.cs` | While aiming a swing, the game turns the character to the orbit camera's yaw (`PlayerMovement.UpdateTargetYaw`), and every swing goes the way the character faces (`PlayerGolfer.GetSwingDirection`). While the local player aims or charges the golf club or rocket club and the orbit camera is active, `MotionCamera` compares the dominant controller's pose in tracking space with the pose it had when aiming started: horizontal turn and sideways movement give a yaw, tilt gives a pitch, each through a dead zone, scaled and clamped. Each frame it adds only the change since the last frame to the camera with `OrbitCameraModule.SetYaw` and `SetPitch`, so thumbstick input adds up with it and nothing snaps back. It stops once the swing starts. The game's aiming code is unchanged. |
+| Aim line | `Hud/AimLine.cs` | While `WorldReticles` has a weapon reticle in the world (not the railgun's, thunderstorm's, flash camera's or "can't use here" one), a world-space `LineRenderer` facing the viewer runs from the local player's `RightHandEquipmentSwitcher` (the hand holding the item) to the middle of what the reticle draws (its graphics' combined bounds), since some reticles, such as the freeze bomb's, aren't drawn centred on the aim point. It updates every frame after the reticle is placed (execution order 30001), so it follows both. Its width is proportional to each end's distance from the camera, about 0.1°, so it stays visible far away without shimmering. It uses the UI shader with depth testing (`unity_GUIZTestMode` = `LessEqual`) in the transparent queue, so scenery covers it like a shot, and menus and fades cover it too. |
+| World-space reticles | `Hud/WorldReticles.cs` | Each frame, casts a ray along the game camera's forward (the direction items aim), or the controller's aim with `ControllerAiming`, past the local player. It moves `ReticleManager`'s reticles into the world at the hit point: 50 m away if the ray hits nothing, and always between 2 m and 150 m. They glide between distances, keep their floating-screen size, and sit in a holder the size of their HUD canvas. Reticles and the lock-on reticle always ignore depth and are never covered by characters. They sort on the last sorting layer, one order below the floating screen and fades. |
 
 SBGVR also logs diagnostics, each kind once and again when it changes: the game, graphics API and URP renderer features; installed plugins; UUVR's settings; the VR runtime's state; each eye's field of view; every active camera with its URP settings; and the frame rate while VR runs. Lines start with `[diag]`.
 
@@ -270,14 +345,33 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - No scenery, character (including yours) or effect ever covers any part of them; menus and fades still do.
    - The orange lock-on reticle (full-power swings, rocket launcher) sits on its target, single. So do airhorn target indicators, the giant-form timer and pop-up text.
    - The railgun's zoomed reticle doesn't zoom the view in VR.
+   - While aiming the dueling pistol, elephant gun, rocket launcher or freeze bomb, a thin white line runs from your character's hand to the reticle. The railgun, thunderstorm and flash camera show no line. It stays attached to both as you move, turn and change the aim, looks single and steady in the headset at any distance, and disappears when you stop aiming. With `AimLine` off, there's no line.
 7. Ambient occlusion:
    - No black areas cover nearby scenery or your character when you look around or move.
    - Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes, and doesn't smear or flicker when you turn your head.
    - The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size).
    - With `AmbientOcclusion` off, the frame rate goes up.
-8. Explosions near you don't flash the view or shake the camera. The pause menu and the settings opened from it are sharp, not blurred.
-9. F4 recentres the view. F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
+8. Explosions near you don't flash the view or shake the camera. Another player's flash camera does blind you (`FlashFrames`). The pause menu and the settings opened from it are sharp, not blurred.
+9. F4 recentres the view.
 10. The frame rate lines in the log are close to the headset's refresh rate.
+11. Motion controls, with `MotionControls` on (and once with it off, to check nothing changes):
+    - The log shows `[ok] OpenXR controller profiles` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
+    - Every button in the [Motion controls](#motion-controls) table does what it says, in a match, the golf cart, spectating, the emote wheel and the menus (with the gamepad cursor).
+    - A real gamepad, keyboard and mouse still work, before and after using the controllers.
+    - With `Preferred VR APi` = `OpenVr`, controllers are known not to work; nothing to test there until that's fixed.
+12. Controller aiming, with `MotionControls` on:
+    - Aim each weapon (dueling pistol, elephant gun, rocket launcher, railgun, freeze bomb, thunderstorm): the reticle sits where the right controller points, and shots go there. The log says `Controller aiming: aiming with the right controller` and which pose it uses.
+    - The rocket launcher's orange lock-on picks the target you point at. A full-power golf swing's homing target still follows the camera.
+    - Golf swings, the flash camera and the airhorn behave as without motion controls.
+    - With `DominantHand` = `Left`, the left controller aims and the buttons stay put. With `MirrorButtons` on, every button is mirrored as in the mirrored table, and the Menu button still pauses. With `ControllerAiming` off, weapons aim along the camera again.
+    - If the aim sits above or below where the controller points, note which headset and the `ControllerAimPitch` that fixes it.
+13. Motion camera, with `MotionControls` on:
+    - Aim a golf club swing, then turn the right controller and move it sideways: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
+    - Holding the controller still while aiming doesn't drift the camera. Pulling the trigger to swing doesn't move it. The thumbstick still turns the camera while aiming.
+    - The rocket club works the same way. Outside swing aiming (walking, weapons, menus), the controller doesn't turn the camera.
+    - Stopping aiming leaves the camera where it is; aiming again starts from how you hold the controller then.
+    - Tilting the controller doesn't move the camera unless `MotionCameraMaxPitch` is above 0.
+    - With `MotionCamera` off, the camera only turns with the thumbstick, as before.
 
 Send `LogOutput.log` from the session with notes on each step.
 
@@ -290,7 +384,7 @@ SBGVR/
 ├── NuGet.config              no package sources: the build is offline
 ├── SBGVR.proj                builds everything and makes the Thunderstore zip
 ├── build.ps1                 Windows build wrapper
-├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Diagnostics/, Fades/, Hud/, Rendering/
+├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Controls/, Diagnostics/, Fades/, Hud/, Rendering/
 ├── thunderstore/             manifest.json, icon.png and the package README
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)

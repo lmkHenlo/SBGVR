@@ -2,6 +2,7 @@
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
+using System.Runtime.CompilerServices;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -48,16 +49,49 @@ namespace SBGVR
                 Hud.WorldMarker.Initialize();
                 Hud.MarkerOcclusion.Initialize();
                 Add(host, "World-space reticles", typeof(Hud.WorldReticles));
+                Add(host, "Aim line", typeof(Hud.AimLine));
                 Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
             }
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Recenter key", typeof(Comfort.Recenter));
+            if (Settings.MotionControls.Value)
+            {
+                EnableOpenXrControllers();
+                Add(host, "Motion controls", typeof(Controls.MotionControls));
+                if (Settings.MotionCamera.Value)
+                    Add(host, "Motion camera", typeof(Controls.MotionCamera));
+                if (Settings.ControllerAiming.Value && Patch("Controller aiming", typeof(Controls.ControllerAimPatches)) &&
+                    Patch("Controller aiming for the rocket launcher's lock-on", typeof(Controls.ControllerAimLockOnPatches)))
+                {
+                    Patch("Controller aiming for the rocket launcher's lock-on (scope)", typeof(Controls.ControllerAimLockOnPatches.RocketLauncherScope));
+                }
+            }
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
 
             Log.LogInfo(Settings.DiagnosticsEnabled.Value
                 ? $"{Name} {Version} loaded. Diagnostics are on: VR, camera and renderer details go to this log."
                 : $"{Name} {Version} loaded.");
+        }
+
+        /// <summary>
+        /// Gives UUVR's OpenXR loader the controller interaction profiles it starts without, so OpenXR reports
+        /// controllers. Runs before UUVR starts VR (UUVR starts it from its first Start, after every plugin's
+        /// Awake). OpenVR reports controllers without this.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void EnableOpenXrControllers()
+        {
+            try
+            {
+                var profiles = UnityEngine.XR.OpenXR.Features.Interactions.ControllerProfiles.Enable();
+                Log.LogInfo($"[ok] OpenXR controller profiles: {string.Join(", ", profiles)}");
+            }
+            catch (Exception exception)
+            {
+                Log.LogError($"[FAILED] OpenXR controller profiles: {exception.GetBaseException().Message}. " +
+                             "Controllers won't work with OpenXR; OpenVR and the rest of SBGVR work as before.");
+            }
         }
 
         /// <summary>

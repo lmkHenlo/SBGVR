@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SBGVR.Hud
 {
@@ -41,10 +42,29 @@ namespace SBGVR.Hud
 
         private static readonly AccessTools.FieldRef<ReticleManager, Reticle>[] Reticles = CreateReticleRefs();
 
+        /// <summary>
+        /// Whether a weapon reticle that gets an aim line (see <see cref="DrawsAimLine"/>; never the "can't use here" one) is
+        /// drawn in the world this frame, and where.
+        /// Read by <see cref="AimLine"/>.
+        /// </summary>
+        internal static bool AimShowing { get; private set; }
+
+        internal static Vector3 AimPoint { get; private set; }
+
         private readonly RaycastHit[] _hits = new RaycastHit[32];
         private readonly List<Component> _reticles = new List<Component>();
+        /// <summary>For each entry in <see cref="_reticles"/>: whether <see cref="AimLine"/> draws a line to it.</summary>
+        private readonly List<bool> _drawsAimLine = new List<bool>();
         private float _logDistance;
         private bool _wasShowing;
+
+        /// <summary>
+        /// Whether the aim line draws to this reticle: the dueling pistol, elephant gun, rocket launcher and
+        /// freeze bomb, but not the railgun, thunderstorm or flash camera.
+        /// </summary>
+        private static bool DrawsAimLine(string reticleField) =>
+            !reticleField.StartsWith("railgun") && reticleField != "thunderstormReticle" &&
+            reticleField != "flashCameraReticle";
 
         private static AccessTools.FieldRef<ReticleManager, Reticle>[] CreateReticleRefs()
         {
@@ -56,47 +76,116 @@ namespace SBGVR.Hud
         private void LateUpdate()
         {
             _reticles.Clear();
+            _drawsAimLine.Clear();
             if (SingletonBehaviour<ReticleManager>.HasInstance)
             {
                 var manager = SingletonBehaviour<ReticleManager>.Instance;
-                foreach (var reticle in Reticles)
+                for (var i = 0; i < Reticles.Length; i++)
                 {
-                    var component = reticle(manager);
-                    if (component != null) _reticles.Add(component);
+                    var component = Reticles[i](manager);
+                    if (component == null) continue;
+                    _reticles.Add(component);
+                    _drawsAimLine.Add(DrawsAimLine(ReticleFields[i]));
                 }
 
                 var disallowed = DisallowedReticle(manager);
-                if (disallowed != null) _reticles.Add(disallowed.transform);
+                if (disallowed != null)
+                {
+                    _reticles.Add(disallowed.transform);
+                    _drawsAimLine.Add(false);
+                }
             }
 
             var enabled = WorldMarker.Enabled && Settings.WorldSpaceReticles.Value;
             var camera = enabled ? Fades.FullViewFade.ViewCamera() : null;
             var showing = false;
-            foreach (var reticle in _reticles)
+            var weaponShowing = false;
+            for (var i = 0; i < _reticles.Count; i++)
             {
-                if (camera != null && reticle.gameObject.activeSelf) showing = true;
+                if (camera == null || !_reticles[i].gameObject.activeSelf) continue;
+                showing = true;
+                if (_drawsAimLine[i]) weaponShowing = true;
             }
 
             var point = Vector3.zero;
             if (showing)
             {
-                var cameraTransform = camera.transform;
-                var target = Mathf.Log(AimDistance(cameraTransform));
+                // Weapons aim along the camera, or along the controller with VR Controls.ControllerAiming.
+                if (!Controls.ControllerAim.TryGetAimRay(out var origin, out var direction))
+                {
+                    origin = camera.transform.position;
+                    direction = camera.transform.forward;
+                }
+                direction.Normalize();
+
+                var target = Mathf.Log(AimDistance(origin, direction));
                 _logDistance = _wasShowing
                     ? Mathf.Lerp(_logDistance, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / GlideSeconds))
                     : target;
-                point = cameraTransform.position + cameraTransform.forward * Mathf.Exp(_logDistance);
+                point = origin + direction * Mathf.Exp(_logDistance);
             }
 
             _wasShowing = showing;
             foreach (var reticle in _reticles)
                 WorldMarker.Place(reticle, point, showing && reticle.gameObject.activeSelf, reticle: true);
+
+            AimShowing = weaponShowing;
+            AimPoint = point;
+            if (!weaponShowing) return;
+
+            // The line goes to the crosshair's middle as drawn. Some reticles (the freeze bomb's) aren't drawn
+            // centred on their own origin, which is what sits on the aim point.
+            for (var i = 0; i < _reticles.Count; i++)
+            {
+                if (!_drawsAimLine[i] || !_reticles[i].gameObject.activeSelf) continue;
+                if (TryGetDrawnCentre(_reticles[i].transform, out var centre)) AimPoint = centre;
+                LogCentreOffset(_reticles[i], point);
+                break;
+            }
         }
 
-        /// <summary>How far ahead the camera's aim meets something solid, past the local player.</summary>
-        private float AimDistance(Transform camera)
+        private static readonly List<Graphic> Graphics = new List<Graphic>();
+        private static readonly Vector3[] Corners = new Vector3[4];
+        private readonly HashSet<string> _loggedCentres = new HashSet<string>();
+
+        /// <summary>The middle of everything the reticle draws, in world space.</summary>
+        private static bool TryGetDrawnCentre(Transform reticle, out Vector3 centre)
         {
-            var count = Physics.RaycastNonAlloc(camera.position, camera.forward, _hits, MaximumRayDistance,
+            centre = default;
+            var bounds = new Bounds();
+            var any = false;
+            reticle.GetComponentsInChildren(false, Graphics);
+            foreach (var graphic in Graphics)
+            {
+                if (!graphic.enabled || graphic.color.a <= 0f) continue;
+                graphic.rectTransform.GetWorldCorners(Corners);
+                foreach (var corner in Corners)
+                {
+                    if (!any) bounds = new Bounds(corner, Vector3.zero);
+                    else bounds.Encapsulate(corner);
+                    any = true;
+                }
+            }
+
+            Graphics.Clear();
+            if (any) centre = bounds.center;
+            return any;
+        }
+
+        /// <summary>Logs once per reticle how far its drawn middle sits from its origin, for bug reports.</summary>
+        private void LogCentreOffset(Component reticle, Vector3 origin)
+        {
+            if (!Settings.DiagnosticsEnabled.Value || !_loggedCentres.Add(reticle.name)) return;
+            var scale = reticle.transform.lossyScale.y;
+            var offset = scale > 0f ? reticle.transform.InverseTransformVector(AimPoint - origin) : Vector3.zero;
+            Plugin.Log.LogInfo($"[diag] Aim line: '{reticle.name}' is drawn centred {offset.x:0.#}, {offset.y:0.#} " +
+                               "HUD units from its origin; the line ends at the drawn centre.");
+        }
+
+        /// <summary>How far along the aim it meets something solid, past the local player.</summary>
+        private float AimDistance(Vector3 origin, Vector3 direction)
+        {
+            var count = Physics.RaycastNonAlloc(origin, direction, _hits, MaximumRayDistance,
                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
 
             var localPlayer = GameManager.LocalPlayerInfo;

@@ -15,7 +15,6 @@ public class UuvrCore: MonoBehaviour
     }
 #endif
 
-    private readonly KeyboardKey _toggleVrKey = new (KeyboardKey.KeyCode.F3);
     private float _originalFixedDeltaTime;
     
     private VrUiManager? _vrUi;
@@ -82,7 +81,8 @@ public class UuvrCore: MonoBehaviour
 
     private void Update()
     {
-        if (_toggleVrKey.UpdateIsDown()) _vrTogglerManager?.ToggleVr();
+        // SBGVR: no F3 key to turn VR off and on. Toggling VR with it didn't work in Super Battle Golf,
+        // so VR stays on from startup until the game closes.
         UpdatePhysicsRate();
     }
 
