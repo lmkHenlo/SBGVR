@@ -10,7 +10,7 @@ namespace SBGVR
 {
     /// <summary>
     /// Whether VR is running right now: a headset display is up and being rendered to. Follows UUVR's
-    /// F3 toggle, so every VR-only change in SBGVR switches off with it.
+    /// headset session, so every VR-only change in SBGVR is off until VR is running.
     /// </summary>
     internal static class VrState
     {

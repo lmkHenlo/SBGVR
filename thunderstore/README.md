@@ -28,7 +28,6 @@ Then start the game from the mod manager.
 
 | Key | Action |
 | --- | --- |
-| F3 | Turn VR off and on while playing |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead |
 
 Settings are in two files under `BepInEx\config`. In r2modman, open them with **Config editor**.

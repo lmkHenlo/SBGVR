@@ -126,7 +126,6 @@ Start the VR runtime, then the game. UUVR turns VR on at startup.
 
 | Key | Action |
 | --- | --- |
-| F3 | Turn VR off and on. |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead. Set by `RecenterKey`. |
 
 ### Motion controls
@@ -277,6 +276,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Skip UUVR's self-rebuild while the game quits | It recreated itself twice during shutdown. |
 | Draw the VR UI on the last sorting layer at the highest sorting order (`UiSorting`) | Effects with a higher sorting order were drawn over the floating screen, whatever its render queue. |
 | Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
+| Remove the F3 key that turned VR off and on (`UuvrCore`) | Toggling VR with it didn't work in this game. VR now stays on from startup until the game closes. |
 | Restore OpenXR controller input: `Input/OpenXRInput.cs`, `Features/Interactions/` and the call in `OpenXRLoader.StartInternal` | UUVR's copy of the Unity OpenXR plugin left out the code that tells the OpenXR runtime which controller inputs to report, so OpenXR showed no controllers. It's adapted from the plugin's 1.4.2 source, which matches the bundled `UnityOpenXR.dll`: the action set setup and the action maps of the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles, without their Input System layouts. `ControllerProfiles.Enable` turns the profiles on; until something calls it, OpenXR starts exactly as before. |
 
 **SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
@@ -352,13 +352,12 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size).
    - With `AmbientOcclusion` off, the frame rate goes up.
 8. Explosions near you don't flash the view or shake the camera. Another player's flash camera does blind you (`FlashFrames`). The pause menu and the settings opened from it are sharp, not blurred.
-9. F4 recentres the view. F3 turns VR off and on without errors, and the game looks normal on the monitor with VR off.
+9. F4 recentres the view.
 10. The frame rate lines in the log are close to the headset's refresh rate.
 11. Motion controls, with `MotionControls` on (and once with it off, to check nothing changes):
     - The log shows `[ok] OpenXR controller profiles` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
     - Every button in the [Motion controls](#motion-controls) table does what it says, in a match, the golf cart, spectating, the emote wheel and the menus (with the gamepad cursor).
     - A real gamepad, keyboard and mouse still work, before and after using the controllers.
-    - F3 off and on a few times: the controllers keep working, and with VR off they do nothing.
     - With `Preferred VR APi` = `OpenVr`, controllers are known not to work; nothing to test there until that's fixed.
 12. Controller aiming, with `MotionControls` on:
     - Aim each weapon (dueling pistol, elephant gun, rocket launcher, railgun, freeze bomb, thunderstorm): the reticle sits where the right controller points, and shots go there. The log says `Controller aiming: aiming with the right controller` and which pose it uses.

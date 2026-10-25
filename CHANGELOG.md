@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `VR Comfort` → `FlashFrames` is on by default, so a flash camera blinds you in VR as it does on a flat screen. Turn it off to keep the view clear. A settings file you already have keeps its value; change it there, or delete the line to get the new default.
 
+### Removed
+
+- The F3 key that turned VR off and on. It didn't work in this game, so VR now stays on from when the game starts until it closes. To play on a flat screen, disable SBGVR in your mod manager.
+
 ## [1.0.2] - 2026-10-24
 
 ### Changed
