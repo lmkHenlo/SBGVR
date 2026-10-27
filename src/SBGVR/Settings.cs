@@ -54,6 +54,13 @@ namespace SBGVR
         internal static ConfigEntry<float> MotionCameraMaxYaw;
         internal static ConfigEntry<float> MotionCameraMaxPitch;
 
+        internal static ConfigEntry<bool> FirstPerson;
+        internal static ConfigEntry<Key> FirstPersonKey;
+        internal static ConfigEntry<bool> FirstPersonControllerToggle;
+        internal static ConfigEntry<View.TurnMode> FirstPersonTurn;
+        internal static ConfigEntry<float> SnapTurnAngle;
+        internal static ConfigEntry<float> FirstPersonEyeOffset;
+
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
 
@@ -134,8 +141,8 @@ namespace SBGVR
                 "them (dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb, " +
                 "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
                 "follow the camera. Only while you're playing with the controllers: after you use a gamepad, " +
-                "keyboard or mouse, weapons aim along the camera until you use a controller again. Off = weapons " +
-                "always aim along the camera, as on a flat screen.");
+                "keyboard or mouse, weapons aim along the camera (or your head, in first person) until you use a " +
+                "controller again. Off = weapons always aim along the camera (or your head, in first person).");
             DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
                 "The controller weapons aim with: Right or Left. Buttons stay where they are; see MirrorButtons.");
             ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
@@ -173,6 +180,29 @@ namespace SBGVR
                 new ConfigDescription("The furthest the controller tilts the camera up or down while aiming, in degrees. " +
                     "0 = left and right only.",
                     new AcceptableValueRange<float>(0f, 30f)));
+
+            const string firstPerson = "VR First Person";
+            FirstPerson = config.Bind(firstPerson, "FirstPerson", false,
+                "See through your character's eyes in VR instead of from the third-person camera behind them. " +
+                "FirstPersonKey and the controller toggle switch this, and it's remembered. You look around and " +
+                "up and down with your head, and walking goes where you look. The game switches back to the " +
+                "third-person camera on its own while you're knocked out, respawning or spectating, and returns " +
+                "to first person afterwards. VR only: a flat screen always uses the third-person camera.");
+            FirstPersonKey = config.Bind(firstPerson, "FirstPersonKey", Key.F5,
+                "Key that switches between first person and third person in VR. None = no key.");
+            FirstPersonControllerToggle = config.Bind(firstPerson, "FirstPersonControllerToggle", true,
+                "With MotionControls, hold the left grip button and press the right thumbstick to switch between " +
+                "first person and third person (the right grip button and left thumbstick with MirrorButtons). " +
+                "Pressing the thumbstick without the grip button still drops your item.");
+            FirstPersonTurn = config.Bind(firstPerson, "FirstPersonTurn", View.TurnMode.Snap,
+                "How the right thumbstick turns you in first person. Snap = turns in steps of SnapTurnAngle, " +
+                "Smooth = turns continuously, like the third-person camera. A mouse always turns smoothly.");
+            SnapTurnAngle = config.Bind(firstPerson, "SnapTurnAngle", 30f,
+                new ConfigDescription("Degrees each snap turn turns you, with FirstPersonTurn = Snap.",
+                    new AcceptableValueRange<float>(15f, 90f)));
+            FirstPersonEyeOffset = config.Bind(firstPerson, "FirstPersonEyeOffset", 0f,
+                new ConfigDescription("Raises (positive) or lowers (negative) your eyes in first person, in metres.",
+                    new AcceptableValueRange<float>(-0.5f, 0.5f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

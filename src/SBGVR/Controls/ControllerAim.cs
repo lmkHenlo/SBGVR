@@ -46,12 +46,13 @@ namespace SBGVR.Controls
         internal static bool PickingRocketLauncherTarget;
 
         /// <summary>
-        /// The transform the aiming code should read for <paramref name="component"/>: the controller's stand-in
-        /// when it's the game camera and controller aiming applies right now, otherwise its own transform.
+        /// The transform the aiming code should read for <paramref name="component"/>: a stand-in on the
+        /// controller's ray (or, in first person without the controllers, the head's) when it's the game camera,
+        /// otherwise its own transform.
         /// </summary>
         internal static Transform TransformOf(Component component)
         {
-            if (component != null && ReferenceEquals(component, GameManager.Camera) && TryGetAimRay(out var origin, out var direction))
+            if (component != null && ReferenceEquals(component, GameManager.Camera) && TryGetWeaponRay(out var origin, out var direction))
             {
                 var standIn = StandIn();
                 standIn.SetPositionAndRotation(origin, Quaternion.LookRotation(direction, Up(direction)));
@@ -64,6 +65,33 @@ namespace SBGVR.Controls
         /// <summary><see cref="TransformOf"/>, only while the game is picking the rocket launcher's target.</summary>
         internal static Transform TransformOfForRocketLauncher(Component component) =>
             PickingRocketLauncherTarget ? TransformOf(component) : component.transform;
+
+        /// <summary>
+        /// The ray weapons aim along when it isn't the game camera's: the controller's (<see cref="TryGetAimRay"/>),
+        /// or else, in first person, the head's (<see cref="View.FirstPersonView.TryGetHeadAimRay"/>), since the
+        /// first-person camera only turns left and right and your head does the looking up and down.
+        /// </summary>
+        internal static bool TryGetWeaponRay(out Vector3 origin, out Vector3 direction) =>
+            TryGetAimRay(out origin, out direction) || View.FirstPersonView.TryGetHeadAimRay(out origin, out direction);
+
+        /// <summary>
+        /// The headset's pose in the world as you see it: where UUVR's tracking space sits, with the head's
+        /// tracked rotation applied. The position is the game camera's (the tracking frame), which is where
+        /// UUVR draws your eyes from.
+        /// </summary>
+        internal static bool TryGetHeadPose(out Vector3 position, out Quaternion rotation)
+        {
+            position = default;
+            rotation = default;
+            var camera = GameManager.Camera;
+            if (camera == null || !TryGetTrackingFrame(camera, out position, out var frameRotation)) return false;
+
+#pragma warning disable CS0618 // The same head tracking UUVR's cameras follow.
+            var head = InputTracking.GetLocalRotation(XRNode.CenterEye);
+#pragma warning restore CS0618
+            rotation = frameRotation * head;
+            return true;
+        }
 
         /// <summary>
         /// The ray weapons aim along, in world space, while controller aiming applies: VR is running, the

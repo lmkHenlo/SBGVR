@@ -10,6 +10,7 @@ SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Ba
 - Shows menus and the HUD on a floating screen in front of you, and draws markers (your ball, the hole, name tags, the interaction reticle) in the world at their target, so they line up at any distance.
 - Draws the game's ambient occlusion correctly for each eye. Turn `AmbientOcclusion` off for more frame rate.
 - Fades your whole view when the game fades the screen, holds the main menu's background scenes still, and turns off screen shake, explosion flashes, the CRT effect and the pause menu's background blur (which made the menu itself blurry in VR). Camera moves between views are quicker. All of this can be changed in the settings.
+- Optionally shows the game in first person, through your character's eyes (`FirstPerson`, off by default and new).
 - Keeps your usual controls: mouse and keyboard or gamepad. Optionally, your VR controllers can work as a gamepad (`MotionControls`, on by default and new).
 - Only changes what you see. Nothing is sent to other players, so you can play VR in any lobby with flat-screen players.
 
@@ -29,6 +30,7 @@ Then start the game from the mod manager.
 | Key | Action |
 | --- | --- |
 | F4 | Recentre the view: the direction you're facing becomes straight ahead |
+| F5 | Switch between first person and third person |
 
 Settings are in two files under `BepInEx\config`. In r2modman, open them with **Config editor**.
 
@@ -37,6 +39,7 @@ Settings are in two files under `BepInEx\config`. In r2modman, open them with **
   - **VR Comfort:** `ScreenShake` (0 = none, 1 = the game's), `ImpactFrames` (off), `FlashFrames` (being blinded by a flash camera, on), `CameraTransitions` (`Game`, `Fast` or `Instant`), `MenuBackground` (`Moving` or `Still`), `FullViewFades` (on) and `RecenterKey` (F4).
   - **VR Graphics:** `AmbientOcclusion` (on).
   - **VR Controls:** `MotionControls` (on, OpenXR only): your VR controllers work as a gamepad while VR runs. Restart the game after changing it. The left thumbstick moves, the right thumbstick turns the camera, the left trigger button aims, the right trigger button swings, A jumps, B dives, X interacts, Y changes the swing angle, the right grip button and a tap of the left grip button cycle items, and the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. (Button names follow Meta's Quest controllers.) With `ControllerAiming` (on), weapons aim where your `DominantHand` (`Right`) controller points; `MirrorButtons` (off) mirrors the button layout left to right, for example for left-handed play; `ControllerAimPitch` (0) tilts that aim up or down. Golf swings follow the camera, and with `MotionCamera` (on) small controller turns and sideways movements turn the camera while you aim a swing (up to `MotionCameraMaxYaw`, 30°; set `MotionCameraMaxPitch` above 0 to also tilt it).
+  - **VR First Person:** `FirstPerson` (off): see through your character's eyes. Switch with F5 (`FirstPersonKey`) or by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`, on); it's remembered. You look up and down with your head, walking and aiming go where you look, golf swings work as usual, and your own character is hidden. The thumbstick turns you in steps (`FirstPersonTurn` = `Snap`, `SnapTurnAngle` 30°) or smoothly (`Smooth`). `FirstPersonEyeOffset` raises or lowers your eyes. The view goes back to third person while you're knocked out, respawning or spectating.
   - **VR HUD:** `WorldSpaceMarkers` (on), `MarkersOnTop` (draw markers over scenery, on), `MarkerScale` (1), `PlayersCoverMarkers` (player characters cover the markers behind them, on), `WorldSpaceReticles` (weapon reticles drawn on what you aim at, always on top, on), `AimLine` (a white line from your hand to the weapon reticle while you aim, except the railgun, thunderstorm and flash camera, off) and `MarkerViewAngle` (how far from straight ahead icons stay in the world before becoming edge arrows, 70°).
   - **Diagnostics:** logging for bug reports.
 

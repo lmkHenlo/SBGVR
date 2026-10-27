@@ -61,6 +61,7 @@ namespace SBGVR.Controls
         private float _layerGripPressedAt;
         private bool _layerGripLayerUsed;
         private float _leftShoulderPulseUntil = -1f;
+        private bool _viewToggleHeld;
 
         private void OnEnable()
         {
@@ -182,11 +183,16 @@ namespace SBGVR.Controls
 
             // Pressing a thumbstick, on controllers whose primary axis is one (a Vive's is its touchpad). The
             // moving hand's thumbstick interacts, like X (the gamepad's west button), so nothing sends L3 and the
-            // golf cart's honk has no controller input.
+            // golf cart's honk has no controller input. The aiming hand's thumbstick is R3 (drop item), or, with
+            // the grip button held, switches first person (VR First Person.FirstPersonControllerToggle).
             if (move.HasFaceButtons && move.Button(XRCommonUsages.primary2DAxisClick))
                 state = state.WithButton(GamepadButton.West, true);
-            if (aim.HasFaceButtons && aim.Button(XRCommonUsages.primary2DAxisClick))
-                state = state.WithButton(GamepadButton.RightStick, true);
+            var aimStickPressed = aim.HasFaceButtons && aim.Button(XRCommonUsages.primary2DAxisClick);
+            var viewToggle = aimStickPressed && layerGrip && Settings.FirstPersonControllerToggle.Value;
+            if (viewToggle && !_viewToggleHeld) View.FirstPersonView.Toggle();
+            _viewToggleHeld = viewToggle;
+            if (viewToggle) _layerGripLayerUsed = true;
+            else if (aimStickPressed) state = state.WithButton(GamepadButton.RightStick, true);
 
             return state;
         }
@@ -215,6 +221,7 @@ namespace SBGVR.Controls
         {
             _hasSent = false;
             _layerGripHeld = false;
+            _viewToggleHeld = false;
             _leftShoulderPulseUntil = -1f;
             if (_gamepad == null) return;
 
