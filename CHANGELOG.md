@@ -15,7 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - Walking goes where your head looks, and your character faces where you look while aiming, including golf swings. Without the controllers, weapons aim where you look.
   - Your own character is hidden while in first person, as the game does for the railgun's scope. Nothing is sent to other players.
   - The view goes back to third person while you're knocked out, respawning or spectating, and the hole overview plays as usual, each returning to first person afterwards.
-  - `FirstPersonEyeOffset` raises or lowers your eyes.
+  - In a golf cart, the view faces the front of the cart; the thumbstick doesn't turn it.
+  - Your eyes are 1.5 m above your character's feet; `FirstPersonEyeOffset` raises or lowers them.
 
 ### Changed
 

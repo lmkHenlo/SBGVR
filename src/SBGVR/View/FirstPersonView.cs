@@ -20,9 +20,10 @@ namespace SBGVR.View
     /// <para>
     /// The game's <see cref="FirstPersonCameraModule"/> sits at <c>viewer.TransformPoint(localPosition)</c> and
     /// looks along its own yaw and pitch. Its viewer becomes an upright anchor at the character's eye height
-    /// (the height the game's railgun scope uses, times the character's scale), so dives and knockback don't
-    /// swing the view around. In VR its pitch stays level and your head does the looking up and down
-    /// (<see cref="FirstPersonPatches"/>).
+    /// (<see cref="EyeHeight"/> times the character's scale), so dives and knockback don't swing the view
+    /// around. In VR its pitch stays level and your head does the looking up and down
+    /// (<see cref="FirstPersonPatches"/>). In a golf cart, it faces the front of the cart and the stick doesn't
+    /// turn it.
     /// </para>
     /// <para>
     /// The game already moves the character relative to this camera, turns it to face the camera while
@@ -38,8 +39,11 @@ namespace SBGVR.View
         /// <summary>Time constant for following eye height changes (the Jumbo Burger's growth), in seconds.</summary>
         private const float EyeHeightSmoothing = 0.2f;
 
-        /// <summary>Eye height when the game's railgun scope height can't be read, in metres above the feet.</summary>
-        private const float FallbackEyeHeight = 1f;
+        /// <summary>
+        /// Eye height above the feet at normal size, in metres: about 0.2 m above the head bone, where the eyes
+        /// are. (The game's railgun scope uses 1 m, which felt too low.)
+        /// </summary>
+        private const float EyeHeight = 1.5f;
 
         /// <summary>Snap turning: the stick turns you once past this, and again only after going back under the reset.</summary>
         private const float SnapThreshold = 0.7f;
@@ -275,7 +279,25 @@ namespace SBGVR.View
             if (!_owns) return;
             module.SetPitch(0f);
             module.SetRoll(0f);
+            if (TryGetCartYaw(out var cartYaw)) module.SetYaw(cartYaw);
         }
+
+        /// <summary>Whether the local player is in a golf cart, and which way its front faces.</summary>
+        private static bool TryGetCartYaw(out float yaw)
+        {
+            yaw = 0f;
+            var player = GameManager.LocalPlayerInfo;
+            if (player == null) return false;
+
+            var seat = player.ActiveGolfCartSeat;
+            if (!seat.IsValid() || seat.golfCart == null) return false;
+
+            yaw = HorizontalYaw(seat.golfCart.transform.rotation);
+            return true;
+        }
+
+        /// <summary>In a golf cart the view faces the cart's front, so the stick and mouse don't turn it.</summary>
+        internal static bool InGolfCart() => _owns && TryGetCartYaw(out _);
 
         private static void UpdateAnchor(bool snap)
         {
@@ -285,20 +307,13 @@ namespace SBGVR.View
             var root = player.transform;
             var movement = player.Movement;
             var scale = movement != null ? movement.CharacterScale : 1f;
-            var target = BaseEyeHeight() * scale * root.lossyScale.y + Settings.FirstPersonEyeOffset.Value;
+            var target = EyeHeight * scale * root.lossyScale.y + Settings.FirstPersonEyeOffset.Value;
             _eyeHeight = snap
                 ? target
                 : Mathf.Lerp(_eyeHeight, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / EyeHeightSmoothing));
             Anchor().SetPositionAndRotation(root.position + Vector3.up * _eyeHeight, Quaternion.identity);
 
             if (snap) LogEyeHeight(player, scale);
-        }
-
-        private static float BaseEyeHeight()
-        {
-            var settings = GameManager.ItemSettings;
-            var height = settings != null ? settings.RailgunZoomCameraLocalHeight : 0f;
-            return height > 0.1f ? height : FallbackEyeHeight;
         }
 
         private static void LogEyeHeight(PlayerInfo player, float scale)
@@ -308,8 +323,7 @@ namespace SBGVR.View
 
             var head = player.HeadBone;
             var headHeight = head != null ? $"{head.position.y - player.transform.position.y:0.00} m" : "unknown";
-            Plugin.Log.LogInfo($"First person: eyes {_eyeHeight:0.00} m above the feet (railgun scope height " +
-                               $"{BaseEyeHeight():0.00} m × scale {scale:0.##}, offset {Settings.FirstPersonEyeOffset.Value:0.00} m); " +
+            Plugin.Log.LogInfo($"First person: eyes {_eyeHeight:0.00} m above the feet ({EyeHeight:0.00} m × scale {scale:0.##}, offset {Settings.FirstPersonEyeOffset.Value:0.00} m); " +
                                $"head bone {headHeight} above the feet.");
         }
 

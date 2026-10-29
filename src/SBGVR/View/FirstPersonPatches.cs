@@ -39,13 +39,20 @@ namespace SBGVR.View
         /// <summary>
         /// Turning with the right stick or mouse. In first person your head looks up and down, so only the
         /// sideways part is used; with FirstPersonTurn = Snap, a gamepad's (or the controllers') stick turns
-        /// in steps instead.
+        /// in steps instead. In a golf cart they don't turn it at all.
         /// </summary>
         [HarmonyPatch(typeof(FirstPersonCameraModule), nameof(FirstPersonCameraModule.Rotate))]
         [HarmonyPrefix]
         private static bool Turn(FirstPersonCameraModule __instance, ref Vector2 axis)
         {
             if (!FirstPersonView.Shows(__instance)) return true;
+
+            // In a golf cart the view stays on the cart's front.
+            if (FirstPersonView.InGolfCart())
+            {
+                __instance.InformNoRotation();
+                return false;
+            }
 
             axis.y = 0f;
             if (Settings.FirstPersonTurn.Value != TurnMode.Snap || !PlayerInput.UsingGamepad) return true;
