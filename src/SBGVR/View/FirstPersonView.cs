@@ -279,25 +279,32 @@ namespace SBGVR.View
             if (!_owns) return;
             module.SetPitch(0f);
             module.SetRoll(0f);
-            if (TryGetCartYaw(out var cartYaw)) module.SetYaw(cartYaw);
+            if (TryGetCart(out var cart)) module.SetYaw(HorizontalYaw(cart.rotation));
         }
 
-        /// <summary>Whether the local player is in a golf cart, and which way its front faces.</summary>
-        private static bool TryGetCartYaw(out float yaw)
+        /// <summary>Whether the local player is in a golf cart, and the cart's transform (its position and facing).</summary>
+        /// <remarks>
+        /// The game places the camera before <c>PlayerMovement.LateUpdate</c> snaps the player onto the cart
+        /// (<c>FollowGolfCart</c> sets the player to the cart's <see cref="GolfCartMovement"/> pose every frame),
+        /// so the player's own transform is still where the cart was last frame. Reading the cart itself keeps
+        /// the view's position and direction on the cart this frame, with no lag through turns.
+        /// </remarks>
+        private static bool TryGetCart(out Transform cart)
         {
-            yaw = 0f;
+            cart = null;
             var player = GameManager.LocalPlayerInfo;
             if (player == null) return false;
 
             var seat = player.ActiveGolfCartSeat;
             if (!seat.IsValid() || seat.golfCart == null) return false;
 
-            yaw = HorizontalYaw(seat.golfCart.transform.rotation);
+            var movement = seat.golfCart.Movement;
+            cart = movement != null ? movement.transform : seat.golfCart.transform;
             return true;
         }
 
         /// <summary>In a golf cart the view faces the cart's front, so the stick and mouse don't turn it.</summary>
-        internal static bool InGolfCart() => _owns && TryGetCartYaw(out _);
+        internal static bool InGolfCart() => _owns && TryGetCart(out _);
 
         private static void UpdateAnchor(bool snap)
         {
@@ -311,7 +318,9 @@ namespace SBGVR.View
             _eyeHeight = snap
                 ? target
                 : Mathf.Lerp(_eyeHeight, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / EyeHeightSmoothing));
-            Anchor().SetPositionAndRotation(root.position + Vector3.up * _eyeHeight, Quaternion.identity);
+            // In a golf cart, the cart's pose this frame (the player is moved onto it only after the camera).
+            var feet = TryGetCart(out var cart) ? cart.position : root.position;
+            Anchor().SetPositionAndRotation(feet + Vector3.up * _eyeHeight, Quaternion.identity);
 
             if (snap) LogEyeHeight(player, scale);
         }
