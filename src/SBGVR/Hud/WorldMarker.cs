@@ -392,7 +392,7 @@ namespace SBGVR.Hud
         /// <summary>
         /// Markers sort with the scene's transparent objects (sorting order 0, like the floating screen). A
         /// reticle sorts after all of them, on the last sorting layer one order below the floating screen and
-        /// full-view fades (<see cref="Uuvr.VrUi.UiSorting"/>), so those still draw over it.
+        /// full-view fades (<see cref="Uuvr.VrUi.UiSorting.ScreenOrder"/>), so those still draw over it.
         /// </summary>
         private void ApplySorting()
         {
@@ -402,7 +402,7 @@ namespace SBGVR.Hud
             {
                 var layers = SortingLayer.layers;
                 if (layers.Length > 0) layerId = layers[layers.Length - 1].id;
-                order = short.MaxValue - 1;
+                order = Uuvr.VrUi.UiSorting.ScreenOrder - 1;
             }
 
             if (_canvas.sortingLayerID != layerId) _canvas.sortingLayerID = layerId;

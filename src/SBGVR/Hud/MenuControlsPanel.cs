@@ -32,10 +32,12 @@ namespace SBGVR.Hud
     /// and the game window's aspect ratio, so it stays clear of the screen whatever those are.
     /// </para>
     /// <para>
-    /// It's drawn with the floating screen (render queue 5000, sorted like the screen), after the full-view fade
-    /// behind the screen (4999), so the main menu's background cross-fades and scene fades leave it at full
-    /// opacity, and with depth testing off, so scenery never cuts into it. It never overlaps the floating screen,
-    /// so the order between the two doesn't matter; the fades still cover the rest of the view as before.
+    /// It's drawn at the floating screen's render queue (5000) and after both full-view fades: after the one
+    /// behind the screen (4999) by render queue, and after the one over the screen by sorting order (two after
+    /// the screen's, see <c>Uuvr.VrUi.UiSorting</c>). So the main menu's background cross-fades and its fade
+    /// from black leave it at full opacity, and with depth testing off, scenery never cuts into it. It never
+    /// overlaps the floating screen, so the order between the two doesn't matter; the fades still cover the
+    /// rest of the view as before.
     /// </para>
     /// <para>
     /// The image (<c>Assets/controller-layout.png</c>, embedded in the DLL) is rendered from
@@ -47,11 +49,17 @@ namespace SBGVR.Hud
         private const string ImageResource = "SBGVR.controller-layout.png";
 
         /// <summary>
-        /// The floating screen's queue, after the full-view fade behind the screen (4999), so no fade dims it.
-        /// It must not go above 5000: URP only draws transparent objects in queues 2501 to 5000
+        /// The floating screen's queue, after the full-view fade behind the screen (4999), so that fade doesn't
+        /// dim it. It must not go above 5000: URP only draws transparent objects in queues 2501 to 5000
         /// (<c>RenderQueueRange.transparent</c>), and anything higher is never drawn at all.
         /// </summary>
         private const int RenderQueue = 5000;
+
+        /// <summary>
+        /// Sorting orders after the floating screen's: one more than the full-view fade over the screen, so that
+        /// fade doesn't dim it either.
+        /// </summary>
+        private const int OrdersAfterScreen = 2;
 
         /// <summary>Panel width as a share of its distance: about 51° wide, so its smallest text stays readable.</summary>
         private const float WidthPerMetre = 0.95f;
@@ -186,7 +194,7 @@ namespace SBGVR.Hud
                 renderer.receiveShadows = false;
                 renderer.lightProbeUsage = LightProbeUsage.Off;
                 renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-                Uuvr.VrUi.UiSorting.DrawLast(renderer);
+                Uuvr.VrUi.UiSorting.DrawLast(renderer, OrdersAfterScreen);
 
                 // The UI shader UUVR draws its floating screen with: unlit, transparent, culling off.
                 _material = new Material(Canvas.GetDefaultCanvasMaterial())
