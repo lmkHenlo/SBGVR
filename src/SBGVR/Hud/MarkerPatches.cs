@@ -1,6 +1,9 @@
 // SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
+using System;
+using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 
@@ -29,25 +32,6 @@ namespace SBGVR.Hud
             WorldMarker.Place(__instance, ___worldPosition, inWorld, owner);
         }
 
-        /// <summary>
-        /// The game shows an icon as an arrow at the screen edge when its target is outside the flat view. In VR
-        /// the headset shows more than that, so icons stay in the world up to VR HUD.MarkerViewAngle from where
-        /// the camera faces; only beyond that do they become edge arrows on the floating screen.
-        /// </summary>
-        [HarmonyPatch(typeof(WorldspaceIconUi), "<LateUpdate>g__IsOffscreen|18_5")]
-        [HarmonyPrefix]
-        private static bool IconIsOffscreen(Vector3 ___worldPosition, ref bool __result)
-        {
-            if (!WorldMarker.Enabled) return true;
-
-            var camera = GameManager.Camera;
-            if (camera == null) return true;
-
-            var toTarget = ___worldPosition - camera.transform.position;
-            __result = Vector3.Angle(camera.transform.forward, toTarget) > Settings.MarkerViewAngle.Value;
-            return false;
-        }
-
         // Player name tags.
         [HarmonyPatch(typeof(NameTagUi), "LateUpdate")]
         [HarmonyPostfix]
@@ -68,6 +52,40 @@ namespace SBGVR.Hud
         {
             WorldMarker.Place(___reticleVisibilityController, ___lastInteractableReticleWorldPosition, WorldMarker.Enabled);
             WorldMarker.Place(___interactButtonPrompt, ___lastInteractableReticleWorldPosition, WorldMarker.Enabled);
+        }
+    }
+
+    /// <summary>
+    /// The game shows an icon as an arrow at the screen edge when its target is outside the flat view. In VR
+    /// the headset shows more than that, so icons stay in the world up to VR HUD.MarkerViewAngle from where
+    /// the camera faces; only beyond that do they become edge arrows on the floating screen.
+    /// </summary>
+    /// <remarks>
+    /// The check is a local function in WorldspaceIconUi.LateUpdate, whose compiler-made name ends in numbers
+    /// that change when the game's code does ("&lt;LateUpdate&gt;g__IsOffscreen|18_5"), so it's found by the
+    /// rest of its name. It's patched on its own: if a game update moves it, only this wider view angle is
+    /// lost, not the world-space markers.
+    /// </remarks>
+    [HarmonyPatch]
+    internal static class MarkerViewAnglePatches
+    {
+        private const string LocalFunctionPrefix = "<LateUpdate>g__IsOffscreen|";
+
+        private static MethodBase TargetMethod() =>
+            AccessTools.GetDeclaredMethods(typeof(WorldspaceIconUi))
+                .FirstOrDefault(m => m.Name.StartsWith(LocalFunctionPrefix, StringComparison.Ordinal) && m.ReturnType == typeof(bool))
+            ?? throw new MissingMethodException(nameof(WorldspaceIconUi), LocalFunctionPrefix + "...");
+
+        private static bool Prefix(Vector3 ___worldPosition, ref bool __result)
+        {
+            if (!WorldMarker.Enabled) return true;
+
+            var camera = GameManager.Camera;
+            if (camera == null) return true;
+
+            var toTarget = ___worldPosition - camera.transform.position;
+            __result = Vector3.Angle(camera.transform.forward, toTarget) > Settings.MarkerViewAngle.Value;
+            return false;
         }
     }
 }

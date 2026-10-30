@@ -48,6 +48,7 @@ namespace SBGVR
             {
                 Hud.WorldMarker.Initialize();
                 Hud.MarkerOcclusion.Initialize();
+                Patch("World-space markers: icons up to MarkerViewAngle", typeof(Hud.MarkerViewAnglePatches));
                 Add(host, "World-space reticles", typeof(Hud.WorldReticles));
                 Add(host, "Aim line", typeof(Hud.AimLine));
                 Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
