@@ -3,6 +3,7 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Uuvr.VrCamera;
 
 namespace SBGVR.View
 {
@@ -56,6 +57,7 @@ namespace SBGVR.View
         private static bool _snapArmed = true;
         private static string _lastStatus;
         private static bool _loggedEyeHeight;
+        private static bool _wasAimingShot;
 
         /// <summary>
         /// The camera is in first person because of the toggle (not only for the railgun scope). The first-person
@@ -94,6 +96,32 @@ namespace SBGVR.View
         {
             HandleKey();
             Refresh();
+            StartShotAimWhereLooking();
+        }
+
+        /// <summary>
+        /// When you start aiming a swing in first person, the aim starts where you're looking: the camera's yaw
+        /// (which the shot follows, <see cref="IsAimingShot"/>) turns to your head's direction, and UUVR's recentre
+        /// rotation turns back by the same amount, so the world you see doesn't move. After that, only the stick
+        /// or mouse turns the aim.
+        /// </summary>
+        private static void StartShotAimWhereLooking()
+        {
+            var aiming = _owns && IsAimingShot();
+            var started = aiming && !_wasAimingShot;
+            _wasAimingShot = aiming;
+            if (!started) return;
+
+            var module = _anchoredModule;
+            if (!Shows(module) || !SBGVR.Controls.ControllerAim.TryGetHeadPose(out _, out var head)) return;
+
+            var turn = Mathf.DeltaAngle(module.Yaw, HorizontalYaw(head));
+            if (Mathf.Abs(turn) < 0.1f) return;
+
+            module.SetYaw(module.Yaw + turn);
+            VrCameraOffset.RecenterRotation = Quaternion.Euler(0f, -turn, 0f) * VrCameraOffset.RecenterRotation;
+            if (Settings.DiagnosticsEnabled.Value)
+                Plugin.Log.LogInfo($"First person: shot aim starts where you're looking ({turn:+0;-0;0}° from the view's forward).");
         }
 
         private static void HandleKey()
