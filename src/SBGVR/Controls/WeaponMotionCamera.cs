@@ -37,8 +37,8 @@ namespace SBGVR.Controls
     /// </para>
     /// <para>
     /// Tilt is restored, turning isn't. The pitch from before you started aiming is kept (in first person it's
-    /// always level). While the item is in use (the shot), the tilt holds still, so the shot goes where you aimed;
-    /// once the use is over, the pitch eases back to the kept value (<see cref="RestoreSeconds"/>), and if you're
+    /// always level). While the item is being used (the shot; <see cref="IsFiring"/>, not while the railgun
+    /// charges), the tilt holds still, so the shot goes where you aimed; once the use is over, the pitch eases back to the kept value (<see cref="RestoreSeconds"/>), and if you're
     /// still aiming, tilting carries on from there. When you stop aiming, it eases back the same way. Restoring
     /// sets the kept pitch itself rather than undoing the changes, so repeated aiming and firing can't build up an
     /// error. If the camera it was restoring isn't showing any more (you switched between first and third person,
@@ -208,9 +208,9 @@ namespace SBGVR.Controls
                 _appliedYaw = yaw;
             }
 
-            // Up and down, 1:1, except while the item is in use (the shot holds still) and while the tilt eases
+            // Up and down, 1:1, except while the item is being used (the shot holds still) and while the tilt eases
             // back after it. The cameras' pitch grows as they look down, so tilting up lowers it.
-            var inUse = inventory.IsUsingItemAtAll;
+            var inUse = IsFiring(inventory);
             if (_wasUsing && !inUse) _restoring = true;
             _wasUsing = inUse;
 
@@ -282,6 +282,18 @@ namespace SBGVR.Controls
                 default:
                     return CameraView.None;
             }
+        }
+
+        /// <summary>
+        /// Whether the item is being used: its shot or other use (<c>ItemUseType.Regular</c> or <c>Alt</c>). Not
+        /// while the railgun charges (<c>Charging</c>, then <c>FullyCharged</c> until you let go), which is still
+        /// aiming: its shot is taken from the camera when it switches to <c>Regular</c>. The railgun is the only
+        /// item that charges.
+        /// </summary>
+        private static bool IsFiring(PlayerInventory inventory)
+        {
+            var use = inventory.CurrentItemUse;
+            return use == ItemUseType.Regular || use == ItemUseType.Alt;
         }
 
         private static float GetPitch(CameraView view)
