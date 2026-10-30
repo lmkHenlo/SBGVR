@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-29
+
 ### Added
 
 - First person in VR (`VR First Person` → `FirstPerson`, off by default): see the game through your character's eyes. Switch with F5 (`FirstPersonKey`) or, with the controllers, by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`); the choice is remembered.
