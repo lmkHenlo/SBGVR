@@ -56,6 +56,9 @@ namespace SBGVR.Hud
         private static readonly Dictionary<(Material, int, int), Material> DrawnCopies = new Dictionary<(Material, int, int), Material>();
         private static readonly Dictionary<Material, Material> DrawnCopySources = new Dictionary<Material, Material>();
 
+        /// <summary>Shaders already reported in the log by <see cref="LogDrawnCopy"/>.</summary>
+        private static readonly HashSet<string> LoggedShaders = new HashSet<string>();
+
         private int _renderQueue = -1;
         private int _coveringMask;
         private bool _isReticle;
@@ -236,7 +239,14 @@ namespace SBGVR.Hud
             if (DrawnCopies.TryGetValue((source, renderQueue, coveringMask), out var copy) && copy != null) return copy;
 
             copy = new Material(source) { name = $"{source.name} (SBGVR marker {renderQueue}/{coveringMask})" };
-            if (copy.HasProperty(ZTestProperty)) copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
+            // Always set, not only "if HasProperty": the UI shaders (UI/Default, TextMeshPro, SoftMask's) read
+            // their depth test from unity_GUIZTestMode without declaring it in their Properties block, so
+            // HasProperty can be false for it, and a value set on the source isn't certain to survive the copy
+            // (or a mask's own copy before it). The copies every marker is drawn with then kept the world-space
+            // canvas's depth test, and scenery and characters covered markers even with MarkersOnTop on.
+            // Setting it on a shader that doesn't use it changes nothing.
+            LogDrawnCopy(source, copy);
+            copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
             if (coveringMask != 0 && copy.HasProperty("_StencilComp"))
             {
                 copy.SetInt("_Stencil", 0);
@@ -250,6 +260,18 @@ namespace SBGVR.Hud
             DrawnCopies[(source, renderQueue, coveringMask)] = copy;
             DrawnCopySources[copy] = source;
             return copy;
+        }
+
+        /// <summary>
+        /// With Diagnostics on, logs once per shader what a marker material looked like before it was set to
+        /// ignore depth, for bug reports.
+        /// </summary>
+        private static void LogDrawnCopy(Material source, Material copy)
+        {
+            if (!Settings.DiagnosticsEnabled.Value || source.shader == null || !LoggedShaders.Add(source.shader.name)) return;
+            Plugin.Log.LogInfo($"[diag] Markers on top: '{source.shader.name}' ({(copy.HasProperty(ZTestProperty) ? "declares" : "doesn't declare")} " +
+                               $"{ZTestProperty}; depth test {(CompareFunction)source.GetInt(ZTestProperty)} on '{source.name}', " +
+                               $"{(CompareFunction)copy.GetInt(ZTestProperty)} on its copy before SBGVR sets it to Always).");
         }
 
         private void ApplyRenderQueue()
