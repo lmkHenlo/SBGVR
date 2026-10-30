@@ -16,7 +16,7 @@ namespace SBGVR
     {
         public const string Guid = "com.sbgvr";
         public const string Name = "SBGVR";
-        public const string Version = "1.3.1";
+        public const string Version = "1.3.2";
 
         /// <summary>UUVR's BepInEx plugin ID (the Unity 2020+ Mono build).</summary>
         internal const string UuvrGuid = "raicuparta.uuvr-modern";
