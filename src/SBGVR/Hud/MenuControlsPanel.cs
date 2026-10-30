@@ -29,8 +29,10 @@ namespace SBGVR.Hud
     /// and the game window's aspect ratio, so it stays clear of the screen whatever those are.
     /// </para>
     /// <para>
-    /// It's drawn just before the floating screen and the full-view fades (render queue 4998, sorted with the
-    /// floating screen), so the screen always draws over it and a fade covers it, and scenery never cuts into it.
+    /// It's drawn after everything else, the full-view fades included (render queue 5002, sorted with the floating
+    /// screen), so the main menu's background cross-fades and scene fades leave it at full opacity, and scenery
+    /// never cuts into it. It never overlaps the floating screen, so drawing after the screen changes nothing
+    /// there; the fades still cover the rest of the view and the screen exactly as before.
     /// </para>
     /// <para>
     /// The image (<c>Assets/controller-layout.png</c>, embedded in the DLL) is rendered from
@@ -41,8 +43,11 @@ namespace SBGVR.Hud
     {
         private const string ImageResource = "SBGVR.controller-layout.png";
 
-        /// <summary>Drawn before the "behind the screen" fade (4999) and the floating screen (5000).</summary>
-        private const int RenderQueue = 4998;
+        /// <summary>
+        /// After the full-view fade behind the screen (4999), the floating screen (5000) and the fade over the
+        /// screen (5001), so no fade dims it.
+        /// </summary>
+        private const int RenderQueue = 5002;
 
         /// <summary>Panel width as a share of its distance: about 51° wide, so its smallest text stays readable.</summary>
         private const float WidthPerMetre = 0.95f;
@@ -83,11 +88,14 @@ namespace SBGVR.Hud
             Place();
         }
 
-        /// <summary>Shows the panel only in the main menu, while VR runs with motion controls, and not while loading.</summary>
+        /// <summary>
+        /// Shows the panel for as long as the main menu exists, while VR runs with motion controls: through its
+        /// fade-in and fade-out too, so it stays fully visible until the menu is gone.
+        /// </summary>
         private static bool ShouldShow()
         {
             return VrState.IsRunning && Settings.MenuControls.Value && Settings.MotionControls.Value &&
-                   SingletonBehaviour<MainMenu>.HasInstance && !LoadingScreen.IsVisible;
+                   SingletonBehaviour<MainMenu>.HasInstance;
         }
 
         private void Place()
