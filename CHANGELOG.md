@@ -12,7 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - First person in VR (`VR First Person` → `FirstPerson`, off by default): see the game through your character's eyes. Switch with F5 (`FirstPersonKey`) or, with the controllers, by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`); the choice is remembered.
   - You look up and down with your head; the thumbstick only turns you, in 30° steps by default (`FirstPersonTurn` = `Snap` or `Smooth`, `SnapTurnAngle`).
-  - Walking goes where your head looks, and your character faces where you look while aiming, including golf swings. Without the controllers, weapons aim where you look.
+  - Walking goes where your head looks. Without the controllers, weapons aim where you look.
+  - Golf swings aim like in third person: your head doesn't move the aim, and the thumbstick turns it smoothly while you aim, even with snap turning.
   - Your own character is hidden while in first person, as the game does for the railgun's scope. Nothing is sent to other players.
   - The view goes back to third person while you're knocked out, respawning or spectating, and the hole overview plays as usual, each returning to first person afterwards.
   - In a golf cart, the view faces the front of the cart; the thumbstick doesn't turn it.

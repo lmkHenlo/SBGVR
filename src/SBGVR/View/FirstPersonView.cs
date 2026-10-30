@@ -348,21 +348,37 @@ namespace SBGVR.View
         }
 
         /// <summary>
+        /// While the local player aims, charges or plays a golf swing (golf club, rocket club, or the Jumbo
+        /// Burger's giant swing). Shots then aim like in third person: along the first-person camera's own yaw,
+        /// which only the stick or mouse turns, not your head.
+        /// </summary>
+        internal static bool IsAimingShot()
+        {
+            var golfer = GameManager.LocalPlayerAsGolfer;
+            return golfer != null && (golfer.IsAimingSwing || golfer.IsChargingSwing || golfer.IsSwinging);
+        }
+
+        /// <summary>
         /// The yaw the game should treat as the first-person camera's: where your head is facing while SBGVR shows
-        /// first person (so walking and aiming follow your head), otherwise the camera's own.
+        /// first person (so walking and weapon aiming follow your head), otherwise, and while aiming a shot
+        /// (<see cref="IsAimingShot"/>), the camera's own.
         /// </summary>
         internal static float YawOf(FirstPersonCameraModule module)
         {
-            if (Shows(module) && SBGVR.Controls.ControllerAim.TryGetHeadPose(out _, out var rotation))
+            if (Shows(module) && !IsAimingShot() && SBGVR.Controls.ControllerAim.TryGetHeadPose(out _, out var rotation))
                 return HorizontalYaw(rotation);
             return module.Yaw;
         }
 
-        /// <summary>Your head's ray while SBGVR shows first person: weapons aim along it without controllers.</summary>
+        /// <summary>
+        /// Your head's ray while SBGVR shows first person: weapons aim along it without controllers. Not while
+        /// aiming a shot, so releasing a swing (which turns the character to the camera) ignores your head.
+        /// </summary>
         internal static bool TryGetHeadAimRay(out Vector3 origin, out Vector3 direction)
         {
             direction = default;
-            if (!Shows(_anchoredModule) || !SBGVR.Controls.ControllerAim.TryGetHeadPose(out origin, out var rotation))
+            if (!Shows(_anchoredModule) || IsAimingShot() ||
+                !SBGVR.Controls.ControllerAim.TryGetHeadPose(out origin, out var rotation))
             {
                 origin = default;
                 return false;
