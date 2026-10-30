@@ -16,6 +16,13 @@ Each change is its own commit, and README.md (How it works) lists them; changed 
 the changes with `SBGVR:` comments. SBGVR's full source, including its copy of UUVR, is at
 <https://github.com/lmkHenlo/SBGVR>.
 
+SBGVR's controller layout image (`Assets/controller-layout.png` in the source, embedded in
+`plugins/SBGVR.dll`; source in `tools/controller-layout/`) contains Meta's official Meta Quest Touch
+Plus controller artwork (`tools/controller-layout/meta-quest-touch-plus.svg`, converted from Meta's
+controller asset pack). That artwork belongs to Meta Platforms, Inc., is used with permission for this
+controller documentation, and is not covered by SBGVR's GPL licence. The image's text is set in Inter
+(SIL Open Font License 1.1); the font files themselves aren't included.
+
 UUVR in turn includes the components below, which keep their own licences.
 
 | Files in this package | Component | Licence |

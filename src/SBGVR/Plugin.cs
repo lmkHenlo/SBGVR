@@ -53,6 +53,7 @@ namespace SBGVR
                 Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
             }
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
+            Add(host, "Controller layout in the main menu", typeof(Hud.MenuControlsPanel));
             Add(host, "Recenter key", typeof(Comfort.Recenter));
             if (Settings.MotionControls.Value)
             {
