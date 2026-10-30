@@ -110,8 +110,9 @@ namespace SBGVR.Hud
             var point = Vector3.zero;
             if (showing)
             {
-                // Weapons aim along the camera, or along the controller with VR Controls.ControllerAiming.
-                if (!Controls.ControllerAim.TryGetAimRay(out var origin, out var direction))
+                // Weapons aim along the camera, along the controller with VR Controls.ControllerAiming, or along
+                // your head in first person.
+                if (!Controls.ControllerAim.TryGetWeaponRay(out var origin, out var direction))
                 {
                     origin = camera.transform.position;
                     direction = camera.transform.forward;

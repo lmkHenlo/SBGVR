@@ -54,13 +54,20 @@ namespace SBGVR
         internal static ConfigEntry<float> MotionCameraMaxYaw;
         internal static ConfigEntry<float> MotionCameraMaxPitch;
 
+        internal static ConfigEntry<bool> FirstPerson;
+        internal static ConfigEntry<Key> FirstPersonKey;
+        internal static ConfigEntry<bool> FirstPersonControllerToggle;
+        internal static ConfigEntry<View.TurnMode> FirstPersonTurn;
+        internal static ConfigEntry<float> SnapTurnAngle;
+        internal static ConfigEntry<float> FirstPersonEyeOffset;
+
         internal static ConfigEntry<bool> DiagnosticsEnabled;
         internal static ConfigEntry<float> PerformanceLogInterval;
 
         internal static void Bind(ConfigFile config)
         {
             const string comfort = "VR Comfort";
-            ScreenShake = config.Bind(comfort, "ScreenShake", 0f,
+            ScreenShake = config.Bind(comfort, "ScreenShake", 0.25f,
                 new ConfigDescription(
                     "Camera shake in VR, as a share of the shake the game would use with your Screen shake setting. " +
                     "0 = no shake, 1 = the game's shake.",
@@ -71,7 +78,7 @@ namespace SBGVR
             FlashFrames = config.Bind(comfort, "FlashFrames", true,
                 "Show the game's flash frames in VR: the full-view flash with a doubled picture that blinds you " +
                 "when another player's flash camera catches you. Off = you aren't blinded in VR.");
-            CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Fast,
+            CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Game,
                 "How the camera moves when the game switches views, for example to the hole overview and back. " +
                 "Game = the game's own sweep, Fast = the same sweep in about a third of the time, Instant = a cut.");
             MenuBackground = config.Bind(comfort, "MenuBackground", MenuBackgroundMode.Still,
@@ -109,7 +116,7 @@ namespace SBGVR
                 "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
                 "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
                 "thunderstorm or flash camera.");
-            PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
+            PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", false,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
                 "to, and weapon reticles aren't covered at all.");
@@ -134,8 +141,8 @@ namespace SBGVR
                 "them (dueling pistol, elephant gun, rocket launcher and its lock-on, railgun, freeze bomb, " +
                 "thunderstorm), and your character turns to face that way when you use them. Golf swings still " +
                 "follow the camera. Only while you're playing with the controllers: after you use a gamepad, " +
-                "keyboard or mouse, weapons aim along the camera until you use a controller again. Off = weapons " +
-                "always aim along the camera, as on a flat screen.");
+                "keyboard or mouse, weapons aim along the camera (or your head, in first person) until you use a " +
+                "controller again. Off = weapons always aim along the camera (or your head, in first person).");
             DominantHand = config.Bind(controls, "DominantHand", Controls.ControllerHand.Right,
                 "The controller weapons aim with: Right or Left. Buttons stay where they are; see MirrorButtons.");
             ControllerAimPitch = config.Bind(controls, "ControllerAimPitch", 0f,
@@ -155,7 +162,8 @@ namespace SBGVR
                 "or down). Your character faces the " +
                 "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
                 "controller when you start aiming and stops when you swing; the thumbstick still works. Only while " +
-                "you're playing with the controllers, not a gamepad, keyboard or mouse.");
+                "you're playing with the controllers, not a gamepad, keyboard or mouse. Works in first person too " +
+                "(left and right only).");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
                 new ConfigDescription(
                     "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +
@@ -173,6 +181,29 @@ namespace SBGVR
                 new ConfigDescription("The furthest the controller tilts the camera up or down while aiming, in degrees. " +
                     "0 = left and right only.",
                     new AcceptableValueRange<float>(0f, 30f)));
+
+            const string firstPerson = "VR First Person";
+            FirstPerson = config.Bind(firstPerson, "FirstPerson", false,
+                "See through your character's eyes in VR instead of from the third-person camera behind them. " +
+                "FirstPersonKey and the controller toggle switch this, and it's remembered. You look around and " +
+                "up and down with your head, and walking goes where you look. The game switches back to the " +
+                "third-person camera on its own while you're knocked out, respawning or spectating, and returns " +
+                "to first person afterwards. VR only: a flat screen always uses the third-person camera.");
+            FirstPersonKey = config.Bind(firstPerson, "FirstPersonKey", Key.F5,
+                "Key that switches between first person and third person in VR. None = no key.");
+            FirstPersonControllerToggle = config.Bind(firstPerson, "FirstPersonControllerToggle", true,
+                "With MotionControls, hold the left grip button and press the right thumbstick to switch between " +
+                "first person and third person (the right grip button and left thumbstick with MirrorButtons). " +
+                "Pressing the thumbstick without the grip button still drops your item.");
+            FirstPersonTurn = config.Bind(firstPerson, "FirstPersonTurn", View.TurnMode.Smooth,
+                "How the right thumbstick turns you in first person. Snap = turns in steps of SnapTurnAngle, " +
+                "Smooth = turns continuously, like the third-person camera. A mouse always turns smoothly.");
+            SnapTurnAngle = config.Bind(firstPerson, "SnapTurnAngle", 30f,
+                new ConfigDescription("Degrees each snap turn turns you, with FirstPersonTurn = Snap.",
+                    new AcceptableValueRange<float>(15f, 90f)));
+            FirstPersonEyeOffset = config.Bind(firstPerson, "FirstPersonEyeOffset", 0f,
+                new ConfigDescription("Raises (positive) or lowers (negative) your eyes in first person, in metres.",
+                    new AcceptableValueRange<float>(-0.5f, 0.5f)));
 
             const string diagnostics = "Diagnostics";
             DiagnosticsEnabled = config.Bind(diagnostics, "Enabled", true,

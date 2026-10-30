@@ -8,6 +8,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- First person in VR (`VR First Person` → `FirstPerson`, off by default): see the game through your character's eyes. Switch with F5 (`FirstPersonKey`) or, with the controllers, by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`); the choice is remembered.
+  - You look up and down with your head; the thumbstick only turns you, smoothly by default (`FirstPersonTurn` = `Smooth`, or `Snap` with `SnapTurnAngle`).
+  - Walking goes where your head looks. Without the controllers, weapons aim where you look.
+  - Golf swings aim like in third person: the aim starts where you're looking when you start aiming, then your head doesn't move it, and the thumbstick turns it smoothly, even with snap turning.
+  - The motion camera (`MotionCamera`) fine-tunes golf club and rocket club swings in first person too, by turning or moving your controller, as in third person. Tilting the controller does nothing in first person.
+  - Your own character is hidden while in first person, as the game does for the railgun's scope. Nothing is sent to other players.
+  - The view goes back to third person while you're knocked out, respawning or spectating, and the hole overview plays as usual, each returning to first person afterwards.
+  - In a golf cart, the view faces the front of the cart; the thumbstick doesn't turn it.
+  - Your eyes are 1.5 m above your character's feet; `FirstPersonEyeOffset` raises or lowers them.
+
+### Changed
+
+- New defaults: `VR Comfort` → `ScreenShake` is `0.25` (a quarter of the game's shake; was `0`), `VR Comfort` → `CameraTransitions` is `Game` (the game's own camera moves; was `Fast`) and `VR HUD` → `PlayersCoverMarkers` is `false` (markers stay on top of player characters; was `true`). A settings file you already have keeps its values; change them there, or delete those lines to get the new defaults.
+- Pressing the right thumbstick while holding the left grip button now switches first person instead of dropping your item (pressing it alone still drops it). Turn `FirstPersonControllerToggle` off to keep the old behaviour.
+- The weapon aiming patches are now always applied, so first person can aim with your head; while neither controller aiming nor first person applies, weapons aim along the camera exactly as before.
+
 ## [1.1.1] - 2026-10-25
 
 ### Changed

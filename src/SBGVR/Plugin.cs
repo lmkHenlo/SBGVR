@@ -60,11 +60,20 @@ namespace SBGVR
                 Add(host, "Motion controls", typeof(Controls.MotionControls));
                 if (Settings.MotionCamera.Value)
                     Add(host, "Motion camera", typeof(Controls.MotionCamera));
-                if (Settings.ControllerAiming.Value && Patch("Controller aiming", typeof(Controls.ControllerAimPatches)) &&
-                    Patch("Controller aiming for the rocket launcher's lock-on", typeof(Controls.ControllerAimLockOnPatches)))
-                {
-                    Patch("Controller aiming for the rocket launcher's lock-on (scope)", typeof(Controls.ControllerAimLockOnPatches.RocketLauncherScope));
-                }
+            }
+
+            // Weapons aim along the controller (VR Controls.ControllerAiming) or, in first person, the head. While
+            // neither applies, the patched methods read the game camera exactly as before.
+            if (Patch("Aiming with the controller or head", typeof(Controls.ControllerAimPatches)) &&
+                Patch("Aiming with the controller or head: rocket launcher lock-on", typeof(Controls.ControllerAimLockOnPatches)))
+            {
+                Patch("Aiming with the controller or head: rocket launcher lock-on (scope)", typeof(Controls.ControllerAimLockOnPatches.RocketLauncherScope));
+            }
+
+            if (Patch("First person", typeof(View.FirstPersonPatches)))
+            {
+                Patch("First person: walking and aiming where you look", typeof(View.FirstPersonMovementPatches));
+                Add(host, "First person toggle", typeof(View.FirstPersonView));
             }
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
