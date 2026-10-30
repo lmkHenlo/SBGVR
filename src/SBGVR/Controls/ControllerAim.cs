@@ -204,7 +204,9 @@ namespace SBGVR.Controls
                                    $"controller (\"{_device.name}\"), using its {(usesPointer ? "pointing" : "grip")} pose.");
             }
 
-            return rotation != default;
+            // Not an all-zero rotation (an unset pose). Unity's == and != on rotations compare them only
+            // approximately, through their dot product, so "rotation != default" would always be true.
+            return Quaternion.Dot(rotation, rotation) > 0.5f;
         }
 
         private static Vector3 Up(Vector3 direction) =>
