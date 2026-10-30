@@ -15,8 +15,8 @@ namespace SBGVR.Fades
     /// While VR runs, those images are hidden and their colour and strength go to two spheres around the
     /// camera instead:
     /// <list type="bullet">
-    /// <item>"Over": ColorOverlay, the game's fade from black as the main menu appears, which covers the
-    /// menu too. Drawn after the floating screen: same render queue (5000, the last URP draws), one sorting
+    /// <item>"Over": ColorOverlay, the game's fade from black into the main menu (used when the game starts by
+    /// joining a Steam lobby), which covers the menu too. Drawn after the floating screen: same render queue (5000, the last URP draws), one sorting
     /// order later.</item>
     /// <item>"Behind": the main menu's fade between background scenes, which sits behind the menu. Drawn before
     /// the floating screen, so the menu stays readable as it does on a flat screen.</item>

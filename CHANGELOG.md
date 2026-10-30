@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- With `FullViewFades` on, the fade from black as the main menu appears now shows in VR. The game's own fade was hidden and its replacement was never drawn. The controller layout panel still isn't dimmed by it.
+- With `FullViewFades` on, the game's fade from black into the main menu now shows in VR (the game uses it when it starts by joining a Steam lobby, for example from an invite). The game's own fade was hidden and its replacement was never drawn. The controller layout panel still isn't dimmed by it.
 - A controller that reports an unset (all-zero) pointing pose can no longer make weapons aim along a fixed world direction for that frame.
 
 ### Changed
