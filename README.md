@@ -103,8 +103,6 @@ Super Battle Golf/
 
 Install the new zip the same way: import it in r2modman, or run the commands above again. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
 
-Coming from 0.2.14 or earlier, when the package was named `SBG_VR`: remove that mod first (in r2modman, or delete `BepInEx\plugins\SBG_VR` and `BepInEx\patchers\SBG_VR`), so the game doesn't end up with two copies. Your settings carry over, since the settings file is still `com.sbgvr.cfg`.
-
 ### Uninstalling
 
 Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`.

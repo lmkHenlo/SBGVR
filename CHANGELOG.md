@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers use Thunderstore's `Major.Minor.Patch` format.
 
-1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Versions 0.1.0 to 0.2.14 were named SBG VR, with the Thunderstore package `SBG_VR`. Dates are in US Central time (UTC−05:00).
+1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Dates are in US Central time (UTC−05:00).
 
 ## [Unreleased]
 
@@ -152,11 +152,6 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 
 ### Changed
 
-- The project is renamed from SBG VR to SBGVR, without a space:
-  - The Thunderstore package is `SBGVR` (it was `SBG_VR`), and the zip is `lmkHenlo-SBGVR-<version>.zip`.
-  - The plugin is `SBGVR.dll` (it was `SbgVr.dll`), and the build file is `SBGVR.proj` (it was `SBG_VR.proj`).
-  - The plugin ID `com.sbgvr` and the settings file `com.sbgvr.cfg` are unchanged, so your settings carry over.
-  - Remove the old `SBG_VR` mod before installing this one, so the game doesn't end up with two copies.
 - The package description is shorter and matches the README's.
 - The README follows the [Standard Readme](https://github.com/RichardLitt/standard-readme) specification. It now has install and usage examples, how to update and uninstall, and how to contribute.
 
@@ -274,7 +269,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
   - `FullViewFades` (on by default): the game's fades darken your whole view, not just the floating screen.
   - `RecenterKey` (F4 by default): turns the view so the direction you're facing becomes straight ahead.
 - World-space markers: icons (your ball, the hole), name tags and the interaction reticle are drawn in the world at their target, at the right depth for each eye, instead of doubled on the floating screen. Their settings are in `VR HUD`: `WorldSpaceMarkers`, `MarkersOnTop`, `MarkerScale` and `MarkerViewAngle`.
-- Each SBG VR feature is applied on its own. If one fails to load (after a game update, say), it's turned off and logged, and the rest keep working.
+- Each SBGVR feature is applied on its own. If one fails to load (after a game update, say), it's turned off and logged, and the rest keep working.
 
 ### Fixed
 
@@ -291,5 +286,5 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
   - Its patcher removes leftover copies of `ucrtbased.dll` and `OVRPlugin.dll` from the game folder.
   - The package includes only the 64-bit VR libraries the game loads.
 - The `com.sbgvr` plugin, which logs VR, camera, renderer and frame rate details for bug reports. The `Diagnostics` → `Enabled` and `PerformanceLogInterval` settings control it.
-- `build.ps1` and `SBG_VR.proj`, which build everything and make the Thunderstore zip.
+- `build.ps1` and `SBGVR.proj`, which build everything and make the Thunderstore zip.
 - `THIRD_PARTY_NOTICES.md`, with the licences of the bundled VR libraries.
