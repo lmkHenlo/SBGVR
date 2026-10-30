@@ -46,9 +46,12 @@ namespace SBGVR.View
     /// the camera's move into the scope and the shot, until you stop) and it aims along the camera
     /// (<see cref="AimsAlongCamera"/>):
     /// <list type="bullet">
-    /// <item>Rotation: UUVR draws the view with the game camera's rotation and your headset's on top. The
-    /// headset's yaw, pitch and roll are left out (<see cref="Uuvr.VrCamera.VrCamera.HeadRotationWeight"/> 0), so
-    /// the view is the game camera, which is the railgun's aim.</item>
+    /// <item>Rotation: UUVR draws the view with the game camera's rotation and your headset's on top. Where the
+    /// view looks comes from the game camera alone, which is the railgun's aim: the headset's turn and up and down
+    /// tilt are left out (<see cref="Uuvr.VrCamera.VrCamera.LookWhereGameCameraLooks"/>). Its roll (tilting toward
+    /// a shoulder) is kept: it only turns the picture around the line of sight, so the aim and the crosshair stay
+    /// put, and the headset shows each frame as if drawn from your head, so a picture without your roll would tilt
+    /// with your head against the room. With it the horizon stays level with the room, as in normal VR.</item>
     /// <item>Position: UUVR never moves the camera with the headset, but the controller's aim starts at your hand,
     /// placed relative to your headset, so moving your head moved the aim's start, the crosshair and the shot's
     /// ray. While locked the railgun's aim starts at the camera itself (<see cref="Controls.ControllerAim"/>), as on
@@ -182,7 +185,7 @@ namespace SBGVR.View
         {
             var locked = IsAimingRailgun() && AimsAlongCamera();
             ViewLocked = locked;
-            Uuvr.VrCamera.VrCamera.HeadRotationWeight = locked ? 0f : 1f;
+            Uuvr.VrCamera.VrCamera.LookWhereGameCameraLooks = locked;
 
             if (locked == _loggedLock || !Settings.DiagnosticsEnabled.Value) return;
             _loggedLock = locked;
@@ -216,7 +219,7 @@ namespace SBGVR.View
             RestoreScreen();
             Application.onBeforeRender -= UpdateViewLock;
             ViewLocked = false;
-            Uuvr.VrCamera.VrCamera.HeadRotationWeight = 1f;
+            Uuvr.VrCamera.VrCamera.LookWhereGameCameraLooks = false;
         }
 
         private void RestoreScreen()
