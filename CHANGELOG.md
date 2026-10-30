@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - Gun crosshairs (dueling pistol, elephant gun, rocket launcher, railgun) sit exactly where the shot will go: at the game's own aim point, with the gun's own range and the surfaces it can hit. SBGVR's separate raycast could put them on a surface the shot passes through, on something between the camera and your character in third person, or at a fixed 50 m in the sky, which from your eyes is a different place, since the aim starts at your hand. Aiming far to the side of your character shows where the shot goes after the game turns your character. Other crosshairs are unchanged.
+- While your smoke bomb hides you, the floating screen no longer has a purple frame around it. The game draws the smoke bomb's purple look on every camera that uses its main renderer, including the UUVR camera that draws the floating screen's picture, so the effect's noisy purple edge was painted around the floating screen. That camera now skips it; your view is still tinted purple as before.
 
 ## [1.3.1] - 2026-10-29
 

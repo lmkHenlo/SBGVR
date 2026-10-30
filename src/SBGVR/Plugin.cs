@@ -39,6 +39,7 @@ namespace SBGVR
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
+            Patch("Smoke bomb frame kept off the floating screen", typeof(Rendering.StealthFramePatches));
             if (Patch("Ambient occlusion for each eye", typeof(Rendering.AmbientOcclusionEyePatches)))
                 Rendering.AmbientOcclusionEyePatches.Verify();
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
