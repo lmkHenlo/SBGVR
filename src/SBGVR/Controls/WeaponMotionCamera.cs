@@ -17,8 +17,13 @@ namespace SBGVR.Controls
     /// It works like <see cref="MotionCamera"/> does for golf swings: when you start aiming, the controller's
     /// heading and tilt in tracking space (the room) are remembered, and each frame the change since then turns
     /// the camera, adding only the change since the last frame, so the thumbstick keeps working alongside.
-    /// Unlike golf, the turn is 1:1, with no scaling, dead zone, limit or smoothing (the game's own pitch limit,
+    /// Unlike golf, the turn is 1:1, with no scaling, dead zone or limit (the game's own pitch limit,
     /// <c>maxPitch</c>, still applies), and sideways hand movement doesn't count.
+    /// </para>
+    /// <para>
+    /// The controller's turn and tilt are smoothed with a One Euro filter (<see cref="OneEuroFilter"/>) before
+    /// they turn the camera: hand tremor while you hold still is cut to about a tenth, while a quick turn is
+    /// followed within a few milliseconds of your hand stopping. It doesn't change how far the camera turns.
     /// </para>
     /// <para>
     /// The camera is the game's camera module for the view you're in. In third person that's
@@ -92,6 +97,13 @@ namespace SBGVR.Controls
         private float _appliedYaw;
         private float _referenceTilt;
         private float _appliedTilt;
+
+        // The controller's turn since aiming started (unwrapped, so it can go past 180 degrees) and its tilt,
+        // before and after smoothing.
+        private float _rawYaw;
+        private float _lastWrappedYaw;
+        private OneEuroFilter _yawFilter;
+        private OneEuroFilter _tiltFilter;
         private bool _wasUsing;
 
         // The pitch from before you started aiming, for the camera it was kept for, and whether it's being eased
@@ -162,8 +174,12 @@ namespace SBGVR.Controls
             }
 
             var pointing = rotation * Vector3.forward;
-            var tilt = TiltOf(pointing);
-            if (_view == CameraView.None)
+            var dt = Time.unscaledDeltaTime;
+            var starting = _view == CameraView.None;
+            // A new aim starts from where the controller is, with nothing to catch up.
+            if (starting) _tiltFilter.Reset();
+            var tilt = _tiltFilter.Filter(TiltOf(pointing), dt);
+            if (starting)
             {
                 ResolveKeptView();
 
@@ -177,6 +193,9 @@ namespace SBGVR.Controls
                 _view = view;
                 _referenceForward = Horizontal(pointing);
                 _appliedYaw = 0f;
+                _rawYaw = 0f;
+                _lastWrappedYaw = 0f;
+                _yawFilter.Reset();
                 _referenceTilt = tilt;
                 _appliedTilt = 0f;
                 _wasUsing = false;
@@ -197,8 +216,11 @@ namespace SBGVR.Controls
             // Left and right, 1:1. Pointing almost straight up or down has no useful heading: hold the yaw.
             if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 0.01f)
             {
-                var yaw = Vector3.SignedAngle(_referenceForward, Horizontal(pointing), Vector3.up);
-                var yawChange = Mathf.DeltaAngle(_appliedYaw, yaw);
+                var wrappedYaw = Vector3.SignedAngle(_referenceForward, Horizontal(pointing), Vector3.up);
+                _rawYaw += Mathf.DeltaAngle(_lastWrappedYaw, wrappedYaw);
+                _lastWrappedYaw = wrappedYaw;
+                var yaw = _yawFilter.Filter(_rawYaw, dt);
+                var yawChange = yaw - _appliedYaw;
                 if (yawChange != 0f)
                 {
                     if (view == CameraView.ThirdPerson) orbit.SetYaw(orbit.Yaw + yawChange);
@@ -422,6 +444,51 @@ namespace SBGVR.Controls
             _wasUsing = false;
             _steering = false;
             if (_keptView != CameraView.None) _restoring = true;
+        }
+
+        /// <summary>
+        /// A One Euro filter (Casiez, Roussel and Vogel, CHI 2012) for one angle in degrees: a low-pass filter whose
+        /// cutoff rises with the angle's speed. Held nearly still, the cutoff is <see cref="MinCutoff"/>, which takes
+        /// out hand tremor (around 8 to 12 Hz); moving, it rises by <see cref="Beta"/> per degree a second, so quick
+        /// turns follow the hand closely. It passes a steady angle through unchanged, so the turn stays 1:1.
+        /// </summary>
+        private struct OneEuroFilter
+        {
+            /// <summary>Cutoff while the hand is still, in hertz.</summary>
+            private const float MinCutoff = 1f;
+
+            /// <summary>Extra cutoff per degree a second of movement, in hertz.</summary>
+            private const float Beta = 0.04f;
+
+            /// <summary>Cutoff for the speed estimate itself, in hertz.</summary>
+            private const float SpeedCutoff = 1f;
+
+            private bool _primed;
+            private float _value;
+            private float _speed;
+
+            internal void Reset() => _primed = false;
+
+            internal float Filter(float value, float dt)
+            {
+                if (!_primed || dt <= 0f)
+                {
+                    _primed = true;
+                    _value = value;
+                    _speed = 0f;
+                    return value;
+                }
+
+                _speed += Alpha(SpeedCutoff, dt) * ((value - _value) / dt - _speed);
+                _value += Alpha(MinCutoff + Beta * Mathf.Abs(_speed), dt) * (value - _value);
+                return _value;
+            }
+
+            private static float Alpha(float cutoff, float dt)
+            {
+                var r = 2f * Mathf.PI * cutoff * dt;
+                return r / (r + 1f);
+            }
         }
 
         private static Vector3 Horizontal(Vector3 direction)
