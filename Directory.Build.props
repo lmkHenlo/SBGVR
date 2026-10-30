@@ -32,6 +32,12 @@
     <StageDir>$(ArtifactsDir)stage\</StageDir>
 
     <Deterministic>true</Deterministic>
+    <!--
+      Source paths in the debug information (embedded in SBGVR.dll) start at the repository, not the folder
+      it was built in, so builds of the same commit are identical wherever they're made and don't record
+      the builder's folders (and so their user name).
+    -->
+    <PathMap>$(RepoRoot)=/_/</PathMap>
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 
