@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers in third person, turning or tilting the controller turns the camera by the same angle (1:1, no smoothing or limit), and weapons aim along the camera, as the golf club's swing does. Before, weapons aimed along the controller and the camera stayed put. While a shot fires the tilt holds still; after each shot and when you stop aiming, the camera's tilt eases back to where it was before you aimed, exactly, however often you aim and fire. Left and right stays where you turned it. Golf swings, the rocket club, the Jumbo Burger, first person and gamepad, keyboard and mouse aiming are unchanged.
+- With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers, in third or first person, turning or tilting the controller turns the camera by the same angle (1:1, no smoothing or limit), and weapons aim along the camera, as the golf club's swing does. Before, weapons aimed along the controller and the camera stayed put. While a shot fires the tilt holds still; after each shot and when you stop aiming, the camera's tilt eases back to where it was before you aimed, exactly, however often you aim and fire. Left and right stays where you turned it. In first person the tilt eases back to level, and while you aim your character faces the camera rather than your head. Golf swings, the rocket club, the Jumbo Burger and gamepad, keyboard and mouse aiming are unchanged.
 
 ### Fixed
 

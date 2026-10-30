@@ -305,7 +305,8 @@ namespace SBGVR.View
             module.SetViewer(_anchor);
             module.SetLocalPosition(Vector3.zero);
             if (!_owns) return;
-            module.SetPitch(0f);
+            // Level (your head looks up and down), unless the controller tilts it while you aim a weapon.
+            module.SetPitch(SBGVR.Controls.WeaponMotionCamera.FirstPersonPitch);
             module.SetRoll(0f);
             if (TryGetCart(out var cart)) module.SetYaw(HorizontalYaw(cart.rotation));
         }
@@ -393,7 +394,9 @@ namespace SBGVR.View
         /// </summary>
         internal static float YawOf(FirstPersonCameraModule module)
         {
-            if (Shows(module) && !IsAimingShot() && SBGVR.Controls.ControllerAim.TryGetHeadPose(out _, out var rotation))
+            // While the controller turns the camera for a weapon, the camera is the aim, as in third person.
+            if (Shows(module) && !IsAimingShot() && !SBGVR.Controls.WeaponMotionCamera.SteersFirstPerson &&
+                SBGVR.Controls.ControllerAim.TryGetHeadPose(out _, out var rotation))
                 return HorizontalYaw(rotation);
             return module.Yaw;
         }
