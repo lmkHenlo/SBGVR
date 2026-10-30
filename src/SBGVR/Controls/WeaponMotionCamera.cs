@@ -3,8 +3,6 @@
 
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.XR;
-using Uuvr.VrCamera;
 
 namespace SBGVR.Controls
 {
@@ -51,15 +49,6 @@ namespace SBGVR.Controls
     /// error. If the camera it was restoring isn't showing any more (you switched between first and third person,
     /// say), or a golf club, rocket club or Jumbo Burger swing starts, the kept pitch is set at once instead, so no
     /// tilt is left behind. The camera's yaw stays where you turned it, as it does after the thumbstick.
-    /// </para>
-    /// <para>
-    /// The railgun's scope locks your view to the gun (<see cref="UpdateViewLock"/>): while it's open and this
-    /// steers the camera, VR draws the view with the camera's own rotation instead of adding your head's
-    /// (<see cref="VrCamera.IgnoreHeadRotation"/>), so the view looks exactly where the railgun aims, as the
-    /// flat-screen scope does, and the controller turns it. Turning your head doesn't move it meanwhile. When the
-    /// lock starts, the way your head faces is turned into the camera, so the view doesn't jump; when it ends,
-    /// the way your head faces then is taken back out of the camera (the third-person camera, once the scope has
-    /// closed), so it doesn't jump back either, and the tilt then eases back as usual.
     /// </para>
     /// <para>
     /// Only the camera's yaw and pitch change: nothing moves your character, and UUVR's recentre rotation is left
@@ -116,9 +105,6 @@ namespace SBGVR.Controls
         private OneEuroFilter _yawFilter;
         private OneEuroFilter _tiltFilter;
         private bool _wasUsing;
-
-        // Whether the view is locked to the railgun's aim (its scope is open).
-        private bool _locked;
 
         // The pitch from before you started aiming, for the camera it was kept for, and whether it's being eased
         // back to.
@@ -272,128 +258,10 @@ namespace SBGVR.Controls
                 _appliedTilt = tiltNow;
             }
 
-            UpdateViewLock(view, inventory, firstPerson);
-
             _steering = true;
             _steeringFrame = Time.frameCount;
             _steeringView = view;
         }
-
-        /// <summary>Whether the railgun's scope is open: the local player aims the railgun.</summary>
-        private static bool IsRailgunScoped(PlayerInventory inventory)
-        {
-            var player = GameManager.LocalPlayerInfo;
-            return inventory != null && inventory.IsInFirstPersonAim && player != null &&
-                   player.NetworkedEquippedItem == ItemType.Railgun;
-        }
-
-        /// <summary>
-        /// Locks the view to the camera, and so to the railgun's aim, while the railgun's scope is open in SBGVR's
-        /// first person or from third person; unlocks it otherwise. The camera is turned so the view doesn't
-        /// jump either way.
-        /// </summary>
-        private void UpdateViewLock(CameraView view, PlayerInventory inventory, FirstPersonCameraModule module)
-        {
-            var lockView = (view == CameraView.RailgunScope || view == CameraView.FirstPerson) &&
-                           module != null && IsRailgunScoped(inventory);
-            if (lockView && !_locked) Lock(view, module);
-            else if (!lockView && _locked) Unlock(view);
-            VrCamera.IgnoreHeadRotation = _locked;
-        }
-
-        /// <summary>Turns the camera to where your head looks through it now, then stops adding your head's turn.</summary>
-        private void Lock(CameraView view, FirstPersonCameraModule module)
-        {
-            var camera = Quaternion.Euler(GetPitch(view), module.Yaw, 0f);
-            var forward = camera * HeadInCamera() * Vector3.forward;
-            if (new Vector2(forward.x, forward.z).sqrMagnitude >= 1e-4f)
-                module.SetYaw(module.Yaw + Mathf.DeltaAngle(module.Yaw, YawOf(forward)));
-            SetPitch(view, -TiltOf(forward));
-            _locked = true;
-            if (Settings.DiagnosticsEnabled.Value)
-                Plugin.Log.LogInfo($"Motion camera: railgun scope view locked to the aim (yaw {module.Yaw:0.0}°, pitch {GetPitch(view):0.0}°).");
-        }
-
-        /// <summary>
-        /// Turns the camera that shows next so that, with your head's turn added again, the view stays where it
-        /// was. Solved exactly rather than by subtracting your head's angles, so aiming again and again can't
-        /// build up a turn.
-        /// </summary>
-        private void Unlock(CameraView view)
-        {
-            _locked = false;
-            VrCamera.IgnoreHeadRotation = false;
-
-            // The scope from third person has handed its yaw and pitch to the third-person camera once it closes.
-            var inventory = GameManager.LocalPlayerInventory;
-            var next = view == CameraView.RailgunScope && (inventory == null || !inventory.IsInFirstPersonAim)
-                ? CameraView.ThirdPerson
-                : view;
-            float yaw;
-            OrbitCameraModule orbit = null;
-            FirstPersonCameraModule module = null;
-            if (next == CameraView.ThirdPerson)
-            {
-                if (!CameraModuleController.TryGetOrbitModule(out orbit) || orbit == null) return;
-                yaw = orbit.Yaw;
-            }
-            else
-            {
-                if (!CameraModuleController.TryGetFirstPersonModule(out module) || module == null) return;
-                yaw = module.Yaw;
-            }
-
-            // Where the view looks now, and the camera that makes your head look there once its turn is added.
-            var pitch = GetPitch(next);
-            var looking = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
-            var head = HeadInCamera() * Vector3.forward;
-            if (!SolveCamera(head, looking, pitch - TiltOf(head), out var newPitch, out var newYaw)) return;
-
-            newYaw = yaw + Mathf.DeltaAngle(yaw, newYaw);
-            if (orbit != null) orbit.SetYaw(newYaw);
-            else module.SetYaw(newYaw);
-            SetPitch(next, newPitch);
-            if (Settings.DiagnosticsEnabled.Value)
-                Plugin.Log.LogInfo($"Motion camera: railgun scope view unlocked; camera turned {Mathf.DeltaAngle(yaw, newYaw):+0.0;-0.0;0}° and " +
-                                   $"{newPitch - pitch:+0.0;-0.0;0}° so your head's turn doesn't move the view.");
-        }
-
-        /// <summary>
-        /// The camera pitch and yaw (no roll) with <c>Euler(pitch, yaw, 0) * head == view</c>: the camera through
-        /// which your head, facing <paramref name="head"/> relative to the camera, looks along
-        /// <paramref name="view"/>. Of the two pitches that do, the one nearer <paramref name="guessPitch"/>. If your
-        /// head is tilted so far that no level camera can, the nearest pitch.
-        /// </summary>
-        private static bool SolveCamera(Vector3 head, Vector3 view, float guessPitch, out float pitch, out float yaw)
-        {
-            pitch = guessPitch;
-            yaw = 0f;
-            // Euler(pitch, 0, 0) turns (y, z) to (y cos p - z sin p, y sin p + z cos p): the height is r cos(p - phi).
-            var r = Mathf.Sqrt(head.y * head.y + head.z * head.z);
-            if (r < 1e-4f || new Vector2(view.x, view.z).sqrMagnitude < 1e-6f) return false;
-
-            var phi = Mathf.Atan2(-head.z, head.y) * Mathf.Rad2Deg;
-            var offset = Mathf.Acos(Mathf.Clamp(view.y / r, -1f, 1f)) * Mathf.Rad2Deg;
-            var first = phi + offset;
-            var second = phi - offset;
-            pitch = Mathf.Abs(Mathf.DeltaAngle(guessPitch, first)) <= Mathf.Abs(Mathf.DeltaAngle(guessPitch, second)) ? first : second;
-            pitch = guessPitch + Mathf.DeltaAngle(guessPitch, pitch);
-
-            var turned = Quaternion.Euler(pitch, 0f, 0f) * head;
-            if (new Vector2(turned.x, turned.z).sqrMagnitude < 1e-6f) return false;
-            yaw = YawOf(view) - YawOf(turned);
-            return true;
-        }
-
-        /// <summary>Your head's rotation relative to the game camera, as UUVR applies it (its recentre rotation, then the headset's).</summary>
-        private static Quaternion HeadInCamera()
-        {
-#pragma warning disable CS0618 // The same head tracking UUVR's cameras follow.
-            return VrCameraOffset.RecenterRotation * InputTracking.GetLocalRotation(XRNode.CenterEye);
-#pragma warning restore CS0618
-        }
-
-        private static float YawOf(Vector3 forward) => Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
 
         /// <summary>
         /// The camera the controller should steer for a weapon, or None. It starts when you aim an item and carries
@@ -566,8 +434,6 @@ namespace SBGVR.Controls
 
         private void StopSteering()
         {
-            if (_locked) Unlock(_view);
-            VrCamera.IgnoreHeadRotation = false;
             if (_view == CameraView.None) return;
             if (Settings.DiagnosticsEnabled.Value)
                 Plugin.Log.LogInfo($"Motion camera: turned the {(_view == CameraView.FirstPerson ? "first-person" : _view == CameraView.RailgunScope ? "railgun scope's" : "third-person")} " +

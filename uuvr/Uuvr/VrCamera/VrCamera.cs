@@ -13,10 +13,11 @@ public class VrCamera : UuvrBehaviour
     public static readonly HashSet<Camera> IgnoredCameras = new();
     public static VrCamera? HighestDepthVrCamera { get; private set; }
 
-    // SBGVR: while true, VR cameras render with the game camera's own rotation instead of adding the
-    // headset's (RelativeTransform tracking only), so the view looks where the game camera does. Set each
-    // frame by SBGVR while the railgun's scope is locked to the controller.
-    public static bool IgnoreHeadRotation;
+    // SBGVR: how much of the headset's rotation VR cameras add to the game camera's when they render
+    // (RelativeTransform tracking only): 1 is normal head tracking, 0 renders with the game camera's own
+    // rotation, so the view looks exactly where the game camera does. SBGVR lowers it while the railgun's
+    // scope is open.
+    public static float HeadRotationWeight = 1f;
 
 #if MODERN
     private Quaternion _rotationBeforeRender;
@@ -56,7 +57,9 @@ public class VrCamera : UuvrBehaviour
         if (ModConfiguration.Instance.CameraTracking.Value != ModConfiguration.CameraTrackingMode.RelativeTransform) return;
         
         _rotationBeforeRender = transform.rotation;
-        if (!IgnoreHeadRotation) transform.rotation = _childCamera.transform.rotation;
+        if (HeadRotationWeight >= 1f) transform.rotation = _childCamera.transform.rotation;
+        else if (HeadRotationWeight > 0f)
+            transform.rotation = Quaternion.Slerp(_rotationBeforeRender, _childCamera.transform.rotation, HeadRotationWeight);
     }
 
     protected override void OnEndFrameRendering()

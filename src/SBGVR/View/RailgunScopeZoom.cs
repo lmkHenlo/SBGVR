@@ -14,7 +14,8 @@ using UnityEngine.XR;
 namespace SBGVR.View
 {
     /// <summary>
-    /// The railgun scope's zoom in VR, by the same magnification as on a flat screen.
+    /// The railgun scope in VR: its zoom, by the same magnification as on a flat screen, and its view, locked to
+    /// the railgun's aim so your head doesn't turn it.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -33,18 +34,31 @@ namespace SBGVR.View
     /// <item>World-space markers, crosshairs and the aim line are drawn <see cref="HudScale"/> times their size
     /// (<see cref="Hud.WorldMarker"/>, <see cref="Hud.AimLine"/>), so they look the same size as before.</item>
     /// <item>UUVR's floating screen, which follows the game camera, is moved <see cref="Factor"/> times further
-    /// away at the same size. With the controllers the scope locks your view to the game camera
-    /// (<see cref="Controls.WeaponMotionCamera"/>), so the screen is on your view's axis, and magnified it looks
+    /// away at the same size. With the view locked (below) it's on your view's axis, so magnified it looks
     /// exactly as before to both eyes (same place, same size, same depth), rather than several times closer.
-    /// With a gamepad your head still turns the view, and the further you look away from the screen's middle,
-    /// the less exact that is. It's drawn over the scenery that may
-    /// then be in front of it, through a copy of its material that skips the depth test.</item>
+    /// It's drawn over the scenery that may then be in front of it, through a copy of its material that skips
+    /// the depth test.</item>
     /// </list>
+    /// </para>
+    /// <para>
+    /// The view lock: in VR, UUVR draws the view with the game camera's rotation and then your headset's on top.
+    /// While the railgun's scope is open (<see cref="IsScoped"/>: from the moment the game opens it, through the
+    /// camera's move into it, until it closes) and the railgun aims along the camera (<see cref="AimsAlongCamera"/>), your headset's rotation (yaw, pitch and roll) is taken out of
+    /// the view (<see cref="Uuvr.VrCamera.VrCamera.HeadRotationWeight"/>), so the view is the game camera, which
+    /// is the railgun's aim: the controller (<see cref="Controls.WeaponMotionCamera"/>), thumbstick or mouse turns
+    /// it, and tilting or turning your head doesn't. The headset's rotation fades out over
+    /// <see cref="LockSeconds"/> as the scope opens and back in as it closes, so the view eases from where you
+    /// looked to the aim and back, without a jump. Only how the view is drawn changes: no camera is turned and
+    /// your character isn't moved, so nothing can build up over repeated aiming, and head tracking is back to
+    /// normal once the scope has closed.
     /// </para>
     /// </remarks>
     internal sealed class RailgunScopeZoom : MonoBehaviour
     {
         private const float MaxFactor = 20f;
+
+        /// <summary>How long the headset's rotation takes to fade out of the view as the scope opens, and back in.</summary>
+        private const float LockSeconds = 0.2f;
         private const string ZTestProperty = "unity_GUIZTestMode";
 
         private static int _factorFrame = -1;
@@ -57,6 +71,10 @@ namespace SBGVR.View
         private Material _onTopMaterial;
         private Vector3 _screenPosition;
         private bool _screenMoved;
+
+        // 0 with normal head tracking, 1 with the view locked to the railgun's aim.
+        private float _lock;
+        private bool _loggedLock;
 
         /// <summary>How much the railgun scope magnifies this frame: 1 when it isn't up or VR isn't running.</summary>
         internal static float Factor
@@ -113,6 +131,49 @@ namespace SBGVR.View
                                $"magnifies {Magnification(items.RailgunZoomInitialFov):0.00}x to {Magnification(items.RailgunZoomFinalFov):0.00}x.");
         }
 
+        /// <summary>Whether the local player's railgun scope is open in VR: they're aiming the railgun.</summary>
+        internal static bool IsScoped()
+        {
+            if (!VrState.IsRunning) return false;
+            var inventory = GameManager.LocalPlayerInventory;
+            var player = GameManager.LocalPlayerInfo;
+            return inventory != null && inventory.IsInFirstPersonAim && player != null &&
+                   player.NetworkedEquippedItem == ItemType.Railgun;
+        }
+
+        private void Update()
+        {
+            UpdateViewLock();
+        }
+
+        /// <summary>
+        /// Whether the railgun aims along the game camera, so locking the view to it locks it to the aim. With the
+        /// controllers (VR Controls.ControllerAiming) it does while the motion camera steers it (MotionCamera);
+        /// otherwise the controller's own ray aims. Without them, the scope from third person aims along the
+        /// camera, but SBGVR's first person aims along your head, which is then also the only way to look up and
+        /// down, so the view isn't locked there.
+        /// </summary>
+        private static bool AimsAlongCamera()
+        {
+            var controllers = Settings.MotionControls.Value && Settings.ControllerAiming.Value && Controls.MotionControls.InUse;
+            return controllers ? Settings.MotionCamera.Value : !FirstPersonView.Owns;
+        }
+
+        /// <summary>Fades the headset's rotation out of the view while the scope is open, and back in after.</summary>
+        private void UpdateViewLock()
+        {
+            var scoped = IsScoped() && AimsAlongCamera();
+            _lock = Mathf.MoveTowards(_lock, scoped ? 1f : 0f, Time.unscaledDeltaTime / LockSeconds);
+            // Eased at both ends, so the view starts and stops moving gently.
+            Uuvr.VrCamera.VrCamera.HeadRotationWeight = 1f - Mathf.SmoothStep(0f, 1f, _lock);
+
+            if (scoped == _loggedLock || !Settings.DiagnosticsEnabled.Value) return;
+            _loggedLock = scoped;
+            Plugin.Log.LogInfo(scoped
+                ? "Railgun scope: view locked to the aim; your headset's rotation is taken out of it."
+                : "Railgun scope: closed; head tracking is back.");
+        }
+
         private void LateUpdate()
         {
             var factor = Factor;
@@ -136,6 +197,8 @@ namespace SBGVR.View
         private void OnDisable()
         {
             RestoreScreen();
+            _lock = 0f;
+            Uuvr.VrCamera.VrCamera.HeadRotationWeight = 1f;
         }
 
         private void RestoreScreen()
@@ -146,7 +209,7 @@ namespace SBGVR.View
             DrawScreenOnTop(false);
         }
 
-        /// <summary>UUVR's floating screen: the quad under its VrUiManager's container, which follows your head.</summary>
+        /// <summary>UUVR's floating screen: the quad under its VrUiManager's container, which follows the game camera.</summary>
         private bool FindScreen()
         {
             if (_screen != null) return true;
