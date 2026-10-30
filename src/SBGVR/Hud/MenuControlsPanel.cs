@@ -18,7 +18,10 @@ namespace SBGVR.Hud
 
     /// <summary>
     /// VR HUD.MenuControls: shows the VR controller layout on its own panel beside UUVR's floating screen while
-    /// you're in the main menu, so the controls are there as soon as the game starts.
+    /// you're in the main menu (so the controls are there as soon as the game starts) and while the pause menu is
+    /// open. Whether to show it is decided every frame, just before rendering, from the game's own state
+    /// (<c>MainMenu</c> exists, <c>PauseMenu.IsPaused</c>), so it appears and disappears in the same frame as
+    /// the menu.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -63,7 +66,7 @@ namespace SBGVR.Hud
         private Texture2D _texture;
         private float _aspect = 1100f / 1440f;
         private bool _failed;
-        private bool _logged;
+        private string _loggedWhere;
 
         private void OnEnable()
         {
@@ -89,20 +92,24 @@ namespace SBGVR.Hud
         }
 
         /// <summary>
-        /// Shows the panel for as long as the main menu exists, while VR runs with motion controls: through its
-        /// fade-in and fade-out too, so it stays fully visible until the menu is gone.
+        /// Where the panel shows right now, or null: while VR runs with motion controls, for as long as the main
+        /// menu exists (through its fade-in and fade-out too, so it stays fully visible until the menu is gone),
+        /// and while the pause menu is open (the game's own flag, set when it opens and cleared when it closes).
         /// </summary>
-        private static bool ShouldShow()
+        private static string ShowingFor()
         {
-            return VrState.IsRunning && Settings.MenuControls.Value && Settings.MotionControls.Value &&
-                   SingletonBehaviour<MainMenu>.HasInstance;
+            if (!VrState.IsRunning || !Settings.MenuControls.Value || !Settings.MotionControls.Value) return null;
+            if (SingletonBehaviour<MainMenu>.HasInstance) return "the main menu";
+            if (PauseMenu.IsPaused) return "the pause menu";
+            return null;
         }
 
         private void Place()
         {
             if (_failed) return;
 
-            var camera = ShouldShow() ? Fades.FullViewFade.ViewCamera() : null;
+            var where = ShowingFor();
+            var camera = where != null ? Fades.FullViewFade.ViewCamera() : null;
             if (camera == null)
             {
                 if (_panel != null && _panel.activeSelf) _panel.SetActive(false);
@@ -153,9 +160,9 @@ namespace SBGVR.Hud
             _panel.layer = LayerHelper.GetVrUiLayer();
             if (!_panel.activeSelf) _panel.SetActive(true);
 
-            if (_logged) return;
-            _logged = true;
-            Plugin.Log.LogInfo($"Menu controls: controller layout shown {(side == MenuControlsSide.Below ? "below" : side == MenuControlsSide.Left ? "left of" : "right of")} " +
+            if (where == _loggedWhere) return;
+            _loggedWhere = where;
+            Plugin.Log.LogInfo($"Menu controls: controller layout shown in {where}, {(side == MenuControlsSide.Below ? "below" : side == MenuControlsSide.Left ? "left of" : "right of")} " +
                                $"the floating screen, {Mathf.Abs(angle):0}° from straight ahead, {width:0.00} m wide at {distance:0.00} m.");
         }
 

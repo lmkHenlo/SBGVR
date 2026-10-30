@@ -120,10 +120,10 @@ namespace SBGVR
                 "thunderstorm or flash camera.");
             MenuControls = config.Bind(hud, "MenuControls", true,
                 "With MotionControls, show the VR controller layout on a panel next to the floating screen while " +
-                "you're in the main menu, from the moment the game starts. It never covers the menu: look down " +
-                "(or to the side, see MenuControlsSide) to read it.");
+                "you're in the main menu (from the moment the game starts) and while the pause menu is open. It " +
+                "never covers the menu: look down (or to the side, see MenuControlsSide) to read it.");
             MenuControlsSide = config.Bind(hud, "MenuControlsSide", Hud.MenuControlsSide.Below,
-                "Where the main menu's controller layout is: Below the floating screen, tilted towards you, or to its " +
+                "Where the menus' controller layout is: Below the floating screen, tilted towards you, or to its " +
                 "Left or Right.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", false,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
