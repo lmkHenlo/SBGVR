@@ -9,7 +9,7 @@ SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/u
 
 The repository and the package are both named `SBGVR`. Versions up to 0.2.14 were named SBG VR (package `SBG_VR`).
 
-SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. It's published on [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases); Thunderstore didn't accept it (see [Known issues](#known-issues)). [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
+SBGVR 1.0.0 is the first public release. Players have tested it on Steam Frame, Valve Index and Meta Quest 3. It's published on [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases). [CHANGELOG.md](CHANGELOG.md) lists what each version changed, including the unpublished test builds before 1.0.0.
 
 ## Table of Contents
 
@@ -275,8 +275,6 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 3. Set `Camera` → `Camera Tracking Mode` to `RelativeMatrix` or `Absolute`.
 
 ## Known issues
-
-- **Not on Thunderstore.** Thunderstore's moderators rejected the package because UUVR's patcher writes VR runtime files into the game's own `Super Battle Golf_Data` folder (see [Uninstalling](#uninstalling)), outside BepInEx. Unity only looks for a VR runtime there. Install from [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases) instead.
 
 - **The game's field of view doesn't apply in VR.** The headset decides the field of view, so the game's FOV slider has no effect yet, and the railgun's zoomed aim shows its reticle without zooming.
 - **The SteamVR menu opens on launch or when a match starts.** Steam shows Super Battle Golf as a flat game on SteamVR's theatre screen before the mod starts VR. SteamVR then docks that screen into its dashboard when the game becomes a VR app or stalls while loading, and there's no API for the mod to close the dashboard. Turn the theatre off in one of two ways:

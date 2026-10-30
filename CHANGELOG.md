@@ -73,7 +73,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 
 ### Changed
 
-- Install instructions point to [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases) instead of Thunderstore. Thunderstore's moderators rejected the package because UUVR's patcher writes VR runtime files into the game's `Super Battle Golf_Data` folder, outside BepInEx; the README's Known issues say so. The manual install also finds a zip in your Downloads folder.
+- Install instructions point to [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases) instead of Thunderstore.
 
 ## [1.0.1] - 2026-10-24
 
