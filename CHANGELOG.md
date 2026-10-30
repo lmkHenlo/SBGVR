@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-29
+
 ### Fixed
 
 - With `FullViewFades` on, the fade from black as the main menu appears now shows in VR. The game's own fade was hidden and its replacement was never drawn. The controller layout panel still isn't dimmed by it.
