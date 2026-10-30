@@ -59,6 +59,8 @@ namespace SBGVR.Controls
             None,
             ThirdPerson,
             FirstPerson,
+            /// <summary>The railgun's scope from third person: the game's own first-person camera, not SBGVR's.</summary>
+            RailgunScope,
         }
 
         /// <summary>Time constant of the tilt easing back after a shot or aiming, in seconds.</summary>
@@ -138,6 +140,10 @@ namespace SBGVR.Controls
                     if (!CameraModuleController.TryGetFirstPersonModule(out var firstPerson) || firstPerson == null) return false;
                     rotation = Quaternion.Euler(FirstPersonPitch, firstPerson.Yaw, 0f);
                     return true;
+                case CameraView.RailgunScope:
+                    if (!CameraModuleController.TryGetFirstPersonModule(out var scope) || scope == null) return false;
+                    rotation = Quaternion.Euler(scope.Pitch, scope.Yaw, 0f);
+                    return true;
                 default:
                     return false;
             }
@@ -159,7 +165,13 @@ namespace SBGVR.Controls
             var tilt = TiltOf(pointing);
             if (_view == CameraView.None)
             {
-                // A restore for the other camera can't carry on now: finish it at once.
+                ResolveKeptView();
+
+                // The railgun's scope opened while the third-person camera was still easing back: the game copied
+                // that camera's pitch into the scope, so the scope's kept pitch is the one from before, carried over.
+                if (_keptView == CameraView.ThirdPerson && view == CameraView.RailgunScope) _keptView = view;
+
+                // A restore for another camera can't carry on now: finish it at once.
                 if (_restoring && _keptView != view) FinishRestoreNow();
 
                 _view = view;
@@ -172,7 +184,11 @@ namespace SBGVR.Controls
                 if (_keptView != view)
                 {
                     _keptView = view;
-                    _keptPitch = view == CameraView.ThirdPerson ? orbit.Pitch : 0f;
+                    // Level in SBGVR's first person; the railgun's scope starts at the third-person camera's pitch,
+                    // which the game copies into it.
+                    _keptPitch = view == CameraView.ThirdPerson ? orbit.Pitch
+                        : view == CameraView.RailgunScope ? firstPerson.Pitch
+                        : 0f;
                 }
 
                 _restoring = false;
@@ -248,13 +264,21 @@ namespace SBGVR.Controls
                 case CameraModuleType.Orbit:
                     if (!CameraModuleController.TryGetOrbitModule(out orbit) || orbit == null || _yawLocked(orbit))
                         return CameraView.None;
+                    // Aiming the railgun in third person switches to its scope: leave the third-person camera
+                    // alone meanwhile, since the game copies its pitch and yaw into the scope.
+                    var player = GameManager.LocalPlayerInfo;
+                    if (player != null && player.NetworkedEquippedItem == ItemType.Railgun) return CameraView.None;
                     return CameraView.ThirdPerson;
                 case CameraModuleType.FirstPerson:
-                    // Only SBGVR's first person, and not in a golf cart, where it faces the cart's front.
-                    if (!CameraModuleController.TryGetFirstPersonModule(out firstPerson) ||
-                        !View.FirstPersonView.Shows(firstPerson) || View.FirstPersonView.InGolfCart())
+                    if (!CameraModuleController.TryGetFirstPersonModule(out firstPerson) || firstPerson == null)
                         return CameraView.None;
-                    return CameraView.FirstPerson;
+                    // SBGVR's first person (its railgun scope included), not in a golf cart, where it faces the
+                    // cart's front.
+                    if (View.FirstPersonView.Shows(firstPerson))
+                        return View.FirstPersonView.InGolfCart() ? CameraView.None : CameraView.FirstPerson;
+                    // The railgun's scope from third person.
+                    if (!View.FirstPersonView.Owns && inventory.IsInFirstPersonAim) return CameraView.RailgunScope;
+                    return CameraView.None;
                 default:
                     return CameraView.None;
             }
@@ -263,6 +287,8 @@ namespace SBGVR.Controls
         private static float GetPitch(CameraView view)
         {
             if (view == CameraView.FirstPerson) return FirstPersonPitch;
+            if (view == CameraView.RailgunScope)
+                return CameraModuleController.TryGetFirstPersonModule(out var scope) && scope != null ? scope.Pitch : 0f;
             return CameraModuleController.TryGetOrbitModule(out var orbit) && orbit != null ? orbit.Pitch : 0f;
         }
 
@@ -279,16 +305,22 @@ namespace SBGVR.Controls
                 return;
             }
 
+            if (view == CameraView.RailgunScope)
+            {
+                if (CameraModuleController.TryGetFirstPersonModule(out var scope) && scope != null) scope.SetPitch(pitch);
+                return;
+            }
+
             if (CameraModuleController.TryGetOrbitModule(out var orbit) && orbit != null) orbit.SetPitch(pitch);
         }
 
         /// <summary>
-        /// Whether the kept pitch's camera is showing and free to ease back: not during a camera transition or a
-        /// golf club, rocket club or Jumbo Burger swing.
+        /// Whether the kept pitch's camera is showing and free to ease back: not during a golf club, rocket club or
+        /// Jumbo Burger swing.
         /// </summary>
         private static bool CanEase(CameraView view)
         {
-            if (!VrState.IsRunning || CameraModuleController.IsTransitioning) return false;
+            if (!VrState.IsRunning) return false;
 
             var golfer = GameManager.LocalPlayerAsGolfer;
             if (golfer != null && (golfer.IsAimingSwing || golfer.IsChargingSwing || golfer.IsSwinging)) return false;
@@ -301,6 +333,10 @@ namespace SBGVR.Controls
                     return CameraModuleController.CurrentModuleType == CameraModuleType.FirstPerson &&
                            CameraModuleController.TryGetFirstPersonModule(out var firstPerson) &&
                            View.FirstPersonView.Shows(firstPerson);
+                case CameraView.RailgunScope:
+                    var inventory = GameManager.LocalPlayerInventory;
+                    return CameraModuleController.CurrentModuleType == CameraModuleType.FirstPerson &&
+                           !View.FirstPersonView.Owns && inventory != null && inventory.IsInFirstPersonAim;
                 default:
                     return false;
             }
@@ -310,6 +346,11 @@ namespace SBGVR.Controls
         private void UpdateRestore()
         {
             if (!_restoring) return;
+
+            // Wait for a camera transition to finish, then see which camera is showing.
+            if (CameraModuleController.IsTransitioning) return;
+
+            ResolveKeptView();
             if (!CanEase(_keptView))
             {
                 FinishRestoreNow();
@@ -329,10 +370,29 @@ namespace SBGVR.Controls
             SetPitch(view, next);
         }
 
+        /// <summary>
+        /// Leaving the railgun's scope, the game copies the scope's pitch and yaw into the third-person camera: once
+        /// that camera is back, it's the one to ease back to the pitch from before the scope.
+        /// </summary>
+        private void ResolveKeptView()
+        {
+            if (_keptView == CameraView.RailgunScope && !CameraModuleController.IsTransitioning &&
+                CameraModuleController.CurrentModuleType == CameraModuleType.Orbit)
+                _keptView = CameraView.ThirdPerson;
+        }
+
         /// <summary>Sets the kept pitch at once and forgets it, so no tilt is left behind.</summary>
         private void FinishRestoreNow()
         {
-            if (_keptView != CameraView.None && (_restoring || _view == CameraView.None)) SetPitch(_keptView, _keptPitch);
+            if (_keptView != CameraView.None && (_restoring || _view == CameraView.None))
+            {
+                SetPitch(_keptView, _keptPitch);
+                // A railgun scope that has closed already handed its pitch to the third-person camera.
+                var inventory = GameManager.LocalPlayerInventory;
+                if (_keptView == CameraView.RailgunScope && (inventory == null || !inventory.IsInFirstPersonAim))
+                    SetPitch(CameraView.ThirdPerson, _keptPitch);
+            }
+
             if (_keptView == CameraView.FirstPerson) FirstPersonPitch = 0f;
             _restoring = false;
             _keptView = CameraView.None;
@@ -342,7 +402,7 @@ namespace SBGVR.Controls
         {
             if (_view == CameraView.None) return;
             if (Settings.DiagnosticsEnabled.Value)
-                Plugin.Log.LogInfo($"Motion camera: turned the {(_view == CameraView.FirstPerson ? "first-person" : "third-person")} " +
+                Plugin.Log.LogInfo($"Motion camera: turned the {(_view == CameraView.FirstPerson ? "first-person" : _view == CameraView.RailgunScope ? "railgun scope's" : "third-person")} " +
                                    $"camera {_appliedYaw:+0.0;-0.0;0}° while aiming an item; tilt eases back to {_keptPitch:0.0}°.");
             _view = CameraView.None;
             _appliedYaw = 0f;
