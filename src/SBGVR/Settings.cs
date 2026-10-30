@@ -172,9 +172,10 @@ namespace SBGVR
                 "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
                 "controller when you start aiming and stops when you swing; the thumbstick still works. Only while " +
                 "you're playing with the controllers, not a gamepad, keyboard or mouse. Works in first person too " +
-                "(left and right only). While you aim an item in third person (with ControllerAiming), turning the " +
-                "controller left or right turns the camera by the same angle, 1:1, and weapons aim along the camera, " +
-                "with the controller's own up and down tilt; the MotionCamera settings below are for swings only.");
+                "(left and right only). While you aim an item in third person (with ControllerAiming), turning or " +
+                "tilting the controller turns the camera by the same angle, 1:1, and weapons aim along the camera; " +
+                "after each shot and when you stop aiming, the camera's tilt eases back to where it was. The " +
+                "MotionCamera settings below are for swings only.");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
                 new ConfigDescription(
                     "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +

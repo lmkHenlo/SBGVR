@@ -123,13 +123,9 @@ namespace SBGVR.Controls
             origin = framePosition + frameRotation * (handPosition - headPosition);
             direction = frameRotation * handRotation * pitch * Vector3.forward;
 
-            // While the controller turns the camera for a weapon (WeaponMotionCamera), the aim's heading is the
-            // camera's, as on a flat screen; the controller still sets how far up or down it aims.
-            if (WeaponMotionCamera.TryGetHeading(out var heading))
-            {
-                var elevation = Mathf.Asin(Mathf.Clamp(direction.normalized.y, -1f, 1f)) * Mathf.Rad2Deg;
-                direction = Quaternion.Euler(-elevation, heading, 0f) * Vector3.forward;
-            }
+            // While the controller turns the camera for a weapon (WeaponMotionCamera), weapons aim along the camera,
+            // as on a flat screen.
+            if (WeaponMotionCamera.TryGetCameraAim(out var cameraAim)) direction = cameraAim * Vector3.forward;
 
             return direction.sqrMagnitude > 0.5f;
         }
