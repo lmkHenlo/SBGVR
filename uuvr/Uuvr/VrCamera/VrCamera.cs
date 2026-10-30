@@ -13,6 +13,11 @@ public class VrCamera : UuvrBehaviour
     public static readonly HashSet<Camera> IgnoredCameras = new();
     public static VrCamera? HighestDepthVrCamera { get; private set; }
 
+    // SBGVR: while true, VR cameras render with the game camera's own rotation instead of adding the
+    // headset's (RelativeTransform tracking only), so the view looks where the game camera does. Set each
+    // frame by SBGVR while the railgun's scope is locked to the controller.
+    public static bool IgnoreHeadRotation;
+
 #if MODERN
     private Quaternion _rotationBeforeRender;
 #endif
@@ -51,7 +56,7 @@ public class VrCamera : UuvrBehaviour
         if (ModConfiguration.Instance.CameraTracking.Value != ModConfiguration.CameraTrackingMode.RelativeTransform) return;
         
         _rotationBeforeRender = transform.rotation;
-        transform.rotation = _childCamera.transform.rotation;
+        if (!IgnoreHeadRotation) transform.rotation = _childCamera.transform.rotation;
     }
 
     protected override void OnEndFrameRendering()

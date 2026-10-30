@@ -32,9 +32,12 @@ namespace SBGVR.View
     /// <list type="bullet">
     /// <item>World-space markers, crosshairs and the aim line are drawn <see cref="HudScale"/> times their size
     /// (<see cref="Hud.WorldMarker"/>, <see cref="Hud.AimLine"/>), so they look the same size as before.</item>
-    /// <item>UUVR's floating screen, which follows your head on your view's axis, is moved <see cref="Factor"/>
-    /// times further away at the same size. Magnified, that looks exactly as before to both eyes (same place,
-    /// same size, same depth), rather than looking several times closer. It's drawn over the scenery that may
+    /// <item>UUVR's floating screen, which follows the game camera, is moved <see cref="Factor"/> times further
+    /// away at the same size. With the controllers the scope locks your view to the game camera
+    /// (<see cref="Controls.WeaponMotionCamera"/>), so the screen is on your view's axis, and magnified it looks
+    /// exactly as before to both eyes (same place, same size, same depth), rather than several times closer.
+    /// With a gamepad your head still turns the view, and the further you look away from the screen's middle,
+    /// the less exact that is. It's drawn over the scenery that may
     /// then be in front of it, through a copy of its material that skips the depth test.</item>
     /// </list>
     /// </para>
