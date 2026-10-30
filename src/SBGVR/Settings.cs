@@ -40,6 +40,8 @@ namespace SBGVR
         internal static ConfigEntry<bool> PlayersCoverMarkers;
         internal static ConfigEntry<bool> WorldSpaceReticles;
         internal static ConfigEntry<bool> AimLine;
+        internal static ConfigEntry<bool> MenuControls;
+        internal static ConfigEntry<Hud.MenuControlsSide> MenuControlsSide;
 
         internal static ConfigEntry<bool> AmbientOcclusion;
 
@@ -116,6 +118,13 @@ namespace SBGVR
                 "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
                 "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
                 "thunderstorm or flash camera.");
+            MenuControls = config.Bind(hud, "MenuControls", true,
+                "With MotionControls, show the VR controller layout on a panel next to the floating screen while " +
+                "you're in the main menu (from the moment the game starts) and while the pause menu is open. It " +
+                "never covers the menu: look down (or to the side, see MenuControlsSide) to read it.");
+            MenuControlsSide = config.Bind(hud, "MenuControlsSide", Hud.MenuControlsSide.Below,
+                "Where the menus' controller layout is: Below the floating screen, tilted towards you, or to its " +
+                "Left or Right.");
             PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", false,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +

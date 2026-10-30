@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SBGVR controller layout</title>
+<!-- Source of src/SBGVR/Assets/controller-layout.png (the main menu's controller layout panel in VR).
+     Rendered by render.py. Inter comes from the @fontsource/inter npm package (see README.md). -->
+<style>
+@font-face{font-family:Inter;font-weight:400;src:url(fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:600;src:url(fonts/inter-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:700;src:url(fonts/inter-latin-700-normal.woff2) format("woff2")}
+html,body{margin:0;background:transparent}
+</style>
+</head>
+<body>
+<div id="layout" style="width: 1440px; height: 1100px; box-sizing: border-box; padding: 56px; background: #F1F2F4; border-radius: 32px; overflow: hidden; font-family: Inter, system-ui, sans-serif; color: #161B26; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h1 style="margin: 0; font-size: 40px; line-height: 1.1; font-weight: 700; letter-spacing: -0.01em">SBGVR Controller Layout</h1>
+
+</div>
+
+</div>
+
+<section style="background: #FFFFFF; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: center">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="display: inline-block; padding: 4px 10px; border-radius: 999px; background: #1D4ED8; color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.06em">LEFT</span>
+<h2 style="margin: 0; font-size: 22px; font-weight: 600">Left Controller</h2>
+</div>
+<p style="margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; color: #4B5563; text-align: center">META QUEST TOUCH PLUS</p>
+<div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px">
+<h2 style="margin: 0; font-size: 22px; font-weight: 600">Right Controller</h2>
+<span style="display: inline-block; padding: 4px 10px; border-radius: 999px; background: #B4440F; color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.06em">RIGHT</span>
+</div>
+</div>
+<div style="position: relative; width: 1280px; height: 490px">
+<img src="meta-quest-touch-plus.svg" alt="Meta Quest Touch Plus left and right controllers" style="position: absolute; left: 282px; top: 29px; width: 716px; height: 452px">
+<svg width="1280" height="490" viewBox="0 0 1280 490" aria-hidden="true" style="position: absolute; left: 0; top: 0">
+<g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"><polyline points="263,50 320,50 453.0,70.0"></polyline><polyline points="263,120 320,120 485.4,108.6"></polyline><polyline points="263,190 320,190 390.9,138.1"></polyline><polyline points="263,260 320,260 429.9,146.5"></polyline><polyline points="263,330 320,330 596.0,169.0"></polyline><polyline points="263,400 320,400 435.0,282.0"></polyline></g><g fill="none" stroke="#4B5563" stroke-width="1.25" stroke-linejoin="round"><polyline points="263,50 320,50 453.0,70.0"></polyline><polyline points="263,120 320,120 485.4,108.6"></polyline><polyline points="263,190 320,190 390.9,138.1"></polyline><polyline points="263,260 320,260 429.9,146.5"></polyline><polyline points="263,330 320,330 596.0,169.0"></polyline><polyline points="263,400 320,400 435.0,282.0"></polyline></g><g fill="#1D4ED8" stroke="#FFFFFF" stroke-width="1.5"><circle cx="453.0" cy="70.0" r="3.5"></circle><circle cx="485.4" cy="108.6" r="3.5"></circle><circle cx="390.9" cy="138.1" r="3.5"></circle><circle cx="429.9" cy="146.5" r="3.5"></circle><circle cx="596.0" cy="169.0" r="3.5"></circle><circle cx="435.0" cy="282.0" r="3.5"></circle></g>
+<g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"><polyline points="1017,50 960,50 825.0,70.0"></polyline><polyline points="1017,120 960,120 792.7,109.6"></polyline><polyline points="1017,190 960,190 888.7,137.9"></polyline><polyline points="1017,260 960,260 848.3,146.8"></polyline><polyline points="1017,330 960,330 680.0,169.0"></polyline><polyline points="1017,400 960,400 840.0,282.0"></polyline></g><g fill="none" stroke="#4B5563" stroke-width="1.25" stroke-linejoin="round"><polyline points="1017,50 960,50 825.0,70.0"></polyline><polyline points="1017,120 960,120 792.7,109.6"></polyline><polyline points="1017,190 960,190 888.7,137.9"></polyline><polyline points="1017,260 960,260 848.3,146.8"></polyline><polyline points="1017,330 960,330 680.0,169.0"></polyline><polyline points="1017,400 960,400 840.0,282.0"></polyline></g><g fill="#B4440F" stroke="#FFFFFF" stroke-width="1.5"><circle cx="825.0" cy="70.0" r="3.5"></circle><circle cx="792.7" cy="109.6" r="3.5"></circle><circle cx="888.7" cy="137.9" r="3.5"></circle><circle cx="848.3" cy="146.8" r="3.5"></circle><circle cx="680.0" cy="169.0" r="3.5"></circle><circle cx="840.0" cy="282.0" r="3.5"></circle></g>
+</svg>
+<div style="position: absolute; left: 0; top: 18px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Thumbstick</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Move · Menu Cursor</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Press: Interact</div></div>
+<div style="position: absolute; left: 0; top: 88px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Y button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Swing Angle</div></div>
+<div style="position: absolute; left: 0; top: 158px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Menu button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Pause</div></div>
+<div style="position: absolute; left: 0; top: 228px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">X button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Interact</div></div>
+<div style="position: absolute; left: 0; top: 298px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Trigger button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Aim</div></div>
+<div style="position: absolute; left: 0; top: 368px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Grip button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Tap: Previous item</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Hold: combos (below)</div></div>
+<div style="position: absolute; left: 1025px; top: 18px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Thumbstick</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Turn the camera</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Press: Drop item</div></div>
+<div style="position: absolute; left: 1025px; top: 88px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">B button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Dive</div></div>
+<div style="position: absolute; left: 1025px; top: 158px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Meta button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Headset Menu</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Not used by the game</div></div>
+<div style="position: absolute; left: 1025px; top: 228px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">A button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Jump</div></div>
+<div style="position: absolute; left: 1025px; top: 298px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Trigger button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Swing (hold to charge)</div></div>
+<div style="position: absolute; left: 1025px; top: 368px; width: 255px; height: 64px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left"><div style="font-size: 17px; font-weight: 600; line-height: 1.3">Grip button</div><div style="font-size: 14.5px; line-height: 1.35; color: #4B5563">Next item</div></div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+
+<section style="background: #FFFFFF; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 600">While holding the left Grip button</h2>
+<div style="display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 12px 16px; font-size: 15px; line-height: 1.35">
+<div style="font-weight: 600">Right Thumbstick (tilt)</div>
+<div style="color: #4B5563">D-pad: emotes, push to talk, votes, restart</div>
+<div style="font-weight: 600">Right Thumbstick (press)</div>
+<div style="color: #4B5563">Switch First Person / Third Person</div>
+<div style="font-weight: 600">A button</div>
+<div style="color: #4B5563">Pause</div>
+<div style="font-weight: 600">B button</div>
+<div style="color: #4B5563">Scoreboard</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 600">Motion (right controller)</h2>
+<div style="display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 12px 16px; font-size: 15px; line-height: 1.35">
+<div style="font-weight: 600">Point</div>
+<div style="color: #4B5563">Aims weapons while you aim or use them</div>
+<div style="font-weight: 600">Turn or move sideways</div>
+<div style="color: #4B5563">Fine-tunes a golf club or rocket club swing while you aim it</div>
+</div>
+</section>
+
+<section style="background: #FFFFFF; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 600">Keyboard</h2>
+<div style="display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 12px 16px; font-size: 15px; line-height: 1.35">
+<div style="font-weight: 600">F4</div>
+<div style="color: #4B5563">Recentre the view</div>
+<div style="font-weight: 600">F5</div>
+<div style="color: #4B5563">Switch first person / third person</div>
+</div>
+</section>
+
+</div>
+<p style="margin: 0; font-size: 13px; line-height: 1.4; color: #4B5563">Controller artwork: Meta Quest Touch Plus, from Meta’s official controller assets. Control names follow Meta’s controller guidelines.</p>
+</div>
+</body>
+</html>

@@ -8,3 +8,6 @@ artifacts/
 .idea/
 *.user
 *.suo
+
+# Fonts for tools/controller-layout (not redistributed)
+tools/controller-layout/fonts/

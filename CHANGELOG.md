@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- The main menu and the pause menu show the VR controller layout (`VR HUD` → `MenuControls`, on with `MotionControls`): every button on both controllers and what it does, on a panel just below the floating screen, from the moment the game starts and whenever the pause menu is open. It never covers the menu, and the menu's fades don't dim it. `MenuControlsSide` moves it to the left or right of the screen.
+
 ## [1.2.0] - 2026-10-29
 
 ### Added
