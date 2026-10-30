@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [1.3.1] - 2026-10-29
 
+### Added
+
+- `VR HUD` → `BallAndHoleIconsOnTop` (off by default): draws the golf ball and hole icons over everything, as the game does on a flat screen, so scenery, player characters and effects never hide them. Menus still cover them, and other markers are unchanged.
+
 ### Fixed
 
 - With `FullViewFades` on, the game's fade from black into the main menu now shows in VR (the game uses it when it starts by joining a Steam lobby, for example from an invite). The game's own fade was hidden and its replacement was never drawn. The controller layout panel still isn't dimmed by it.

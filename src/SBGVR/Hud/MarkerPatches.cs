@@ -29,7 +29,23 @@ namespace SBGVR.Hud
             var owner = inWorld && ___parent != null && ___settings == WorldspaceIconManager.TeammateIconSettings
                 ? ___parent.GetComponentInParent<PlayerInfo>()
                 : null;
-            WorldMarker.Place(__instance, ___worldPosition, inWorld, owner);
+            WorldMarker.Place(__instance, ___worldPosition, inWorld, owner,
+                alwaysOnTop: inWorld && IsBallOrHoleIconOnTop(___settings));
+        }
+
+        /// <summary>
+        /// VR HUD.BallAndHoleIconsOnTop: the golf ball and hole icons are drawn like weapon reticles, over scenery,
+        /// characters and effects (see <see cref="WorldMarker.AlwaysOnTop"/>), as the game's flat-screen HUD
+        /// draws them. An icon is told which it is by its settings, which stay the hole's while the tutorial
+        /// shows its objective sprite on the hole.
+        /// </summary>
+        private static bool IsBallOrHoleIconOnTop(WorldspaceIconUiSettings settings)
+        {
+            if (!Settings.BallAndHoleIconsOnTop.Value || settings == null ||
+                !SingletonBehaviour<WorldspaceIconManager>.HasInstance) return false;
+
+            return ReferenceEquals(settings, WorldspaceIconManager.HoleIconSettings) ||
+                   ReferenceEquals(settings, WorldspaceIconManager.BallIconSettings);
         }
 
         // Player name tags.

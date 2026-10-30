@@ -38,6 +38,7 @@ namespace SBGVR
         internal static ConfigEntry<float> MarkerScale;
         internal static ConfigEntry<float> MarkerViewAngle;
         internal static ConfigEntry<bool> PlayersCoverMarkers;
+        internal static ConfigEntry<bool> BallAndHoleIconsOnTop;
         internal static ConfigEntry<bool> WorldSpaceReticles;
         internal static ConfigEntry<bool> AimLine;
         internal static ConfigEntry<bool> MenuControls;
@@ -129,6 +130,10 @@ namespace SBGVR
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
                 "to, and weapon reticles aren't covered at all.");
+            BallAndHoleIconsOnTop = config.Bind(hud, "BallAndHoleIconsOnTop", false,
+                "Draw the golf ball and hole icons over everything, as the game does on a flat screen: scenery, " +
+                "player characters (yours too) and effects never hide them, whatever MarkersOnTop and " +
+                "PlayersCoverMarkers say. Menus on the floating screen still cover them. Other markers are unchanged.");
 
             const string graphics = "VR Graphics";
             AmbientOcclusion = config.Bind(graphics, "AmbientOcclusion", true,
