@@ -159,9 +159,11 @@ namespace SBGVR.Hud
 
             var mesh = original.sharedMesh;
             var parts = mesh != null ? mesh.subMeshCount : 0;
-            var twinMaterials = twin.sharedMaterials;
-            var changed = twinMaterials.Length != parts;
-            for (var i = 0; !changed && i < parts; i++) changed = twinMaterials[i] != material;
+            // Read into a reused list: the sharedMaterials property allocates a new array every frame.
+            twin.GetSharedMaterials(Materials);
+            var changed = Materials.Count != parts;
+            for (var i = 0; !changed && i < parts; i++) changed = Materials[i] != material;
+            Materials.Clear();
             if (changed)
             {
                 var materials = new Material[parts];

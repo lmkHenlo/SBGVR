@@ -15,16 +15,21 @@ namespace SBGVR.Fades
     /// While VR runs, those images are hidden and their colour and strength go to two spheres around the
     /// camera instead:
     /// <list type="bullet">
-    /// <item>"Over": ColorOverlay, the game's scene-change fade, which covers the HUD too. Drawn after the
-    /// floating screen.</item>
+    /// <item>"Over": ColorOverlay, the game's fade from black into the main menu (used when the game starts by
+    /// joining a Steam lobby), which covers the menu too. Drawn after the floating screen: same render queue (5000, the last URP draws), one sorting
+    /// order later.</item>
     /// <item>"Behind": the main menu's fade between background scenes, which sits behind the menu. Drawn before
     /// the floating screen, so the menu stays readable as it does on a flat screen.</item>
     /// </list>
     /// </summary>
     internal sealed class FullViewFade : MonoBehaviour
     {
+        // URP draws transparent objects only in render queues 2501 to 5000 (RenderQueueRange.transparent), so
+        // the "over" sphere can't use a queue above the floating screen's (5000) to come after it; its sorting
+        // order does that (Uuvr.VrUi.UiSorting).
         private const int BehindUiQueue = 4999;
-        private const int OverUiQueue = 5001;
+        private const int OverUiQueue = 5000;
+        private const int OverUiOrdersAfterScreen = 1;
 
         private static readonly AccessTools.FieldRef<ColorOverlay, Image> OverlayImage =
             AccessTools.FieldRefAccess<ColorOverlay, Image>("overlay");
@@ -52,8 +57,8 @@ namespace SBGVR.Fades
         private void Awake()
         {
             _instance = this;
-            _over = new FadeSphere("SBGVR fade (over UI)", OverUiQueue, transform);
-            _behind = new FadeSphere("SBGVR fade (behind UI)", BehindUiQueue, transform);
+            _over = new FadeSphere("SBGVR fade (over UI)", OverUiQueue, OverUiOrdersAfterScreen, transform);
+            _behind = new FadeSphere("SBGVR fade (behind UI)", BehindUiQueue, 0, transform);
         }
 
         private void OnEnable()
@@ -168,14 +173,14 @@ namespace SBGVR.Fades
             return Camera.main;
         }
 
-        /// <summary>A sphere around the camera, drawn without depth testing at a fixed render queue.</summary>
+        /// <summary>A sphere around the camera, drawn without depth testing at a fixed render queue and sorting order.</summary>
         private sealed class FadeSphere
         {
             private readonly GameObject _object;
             private readonly Renderer _renderer;
             private readonly Material _material;
 
-            internal FadeSphere(string name, int renderQueue, Transform parent)
+            internal FadeSphere(string name, int renderQueue, int ordersAfterScreen, Transform parent)
             {
                 _object = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 _object.name = name;
@@ -187,9 +192,9 @@ namespace SBGVR.Fades
                 _renderer.shadowCastingMode = ShadowCastingMode.Off;
                 _renderer.receiveShadows = false;
                 // Sorted with the floating screen, after every other transparent object, so effects with a
-                // higher sorting order can't show through a fade; the render queue puts it behind or over the
-                // floating screen.
-                Uuvr.VrUi.UiSorting.DrawLast(_renderer);
+                // higher sorting order can't show through a fade. "Behind" shares the screen's sorting order and
+                // its lower render queue puts it first; "over" is one sorting order after the screen.
+                Uuvr.VrUi.UiSorting.DrawLast(_renderer, ordersAfterScreen);
 
                 // The same UI shader UUVR draws its floating screen with, which is known to render in this game's
                 // VR setup. Culling is off in it, so the sphere is visible from inside.

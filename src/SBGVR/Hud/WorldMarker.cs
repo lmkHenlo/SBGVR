@@ -30,7 +30,9 @@ namespace SBGVR.Hud
     ///
     /// Weapon reticles (and the lock-on reticle) are always drawn on top: over scenery whatever MarkersOnTop
     /// says, never covered by player characters, and after every other transparent object (effects with a
-    /// high sorting order included). Menus and full-view fades, drawn last of all, still cover them.
+    /// high sorting order included). With MarkersOnTop, the other markers are drawn after every other
+    /// transparent object too, like the game's HUD. Menus and full-view fades, drawn last of all, still
+    /// cover them.
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -56,6 +58,9 @@ namespace SBGVR.Hud
         private static readonly Dictionary<(Material, int, int), Material> DrawnCopies = new Dictionary<(Material, int, int), Material>();
         private static readonly Dictionary<Material, Material> DrawnCopySources = new Dictionary<Material, Material>();
 
+        /// <summary>Shaders already reported in the log by <see cref="LogDrawnCopy"/>.</summary>
+        private static readonly HashSet<string> LoggedShaders = new HashSet<string>();
+
         private int _renderQueue = -1;
         private int _coveringMask;
         private bool _isReticle;
@@ -76,6 +81,9 @@ namespace SBGVR.Hud
         private readonly List<KeyValuePair<Graphic, Material>> _originalMaterials = new List<KeyValuePair<Graphic, Material>>();
         private readonly List<KeyValuePair<TMP_Text, Material>> _originalFontMaterials = new List<KeyValuePair<TMP_Text, Material>>();
         private readonly List<Graphic> _visibleGraphics = new List<Graphic>();
+
+        /// <summary>Reused by <see cref="UpdateMaterials"/> each frame, so it doesn't allocate an array per marker.</summary>
+        private static readonly List<Graphic> AllGraphics = new List<Graphic>();
         private readonly Vector3[] _corners = new Vector3[4];
 
         /// <summary>The player the marker belongs to (a name tag's or teammate icon's), or null.</summary>
@@ -233,7 +241,14 @@ namespace SBGVR.Hud
             if (DrawnCopies.TryGetValue((source, renderQueue, coveringMask), out var copy) && copy != null) return copy;
 
             copy = new Material(source) { name = $"{source.name} (SBGVR marker {renderQueue}/{coveringMask})" };
-            if (copy.HasProperty(ZTestProperty)) copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
+            // Always set, not only "if HasProperty": the UI shaders (UI/Default, TextMeshPro, SoftMask's) read
+            // their depth test from unity_GUIZTestMode without declaring it in their Properties block, so
+            // HasProperty can be false for it, and a value set on the source isn't certain to survive the copy
+            // (or a mask's own copy before it). The copies every marker is drawn with then kept the world-space
+            // canvas's depth test, and scenery and characters covered markers even with MarkersOnTop on.
+            // Setting it on a shader that doesn't use it changes nothing.
+            LogDrawnCopy(source, copy);
+            copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
             if (coveringMask != 0 && copy.HasProperty("_StencilComp"))
             {
                 copy.SetInt("_Stencil", 0);
@@ -247,6 +262,18 @@ namespace SBGVR.Hud
             DrawnCopies[(source, renderQueue, coveringMask)] = copy;
             DrawnCopySources[copy] = source;
             return copy;
+        }
+
+        /// <summary>
+        /// With Diagnostics on, logs once per shader what a marker material looked like before it was set to
+        /// ignore depth, for bug reports.
+        /// </summary>
+        private static void LogDrawnCopy(Material source, Material copy)
+        {
+            if (!Settings.DiagnosticsEnabled.Value || source.shader == null || !LoggedShaders.Add(source.shader.name)) return;
+            Plugin.Log.LogInfo($"[diag] Markers on top: '{source.shader.name}' ({(copy.HasProperty(ZTestProperty) ? "declares" : "doesn't declare")} " +
+                               $"{ZTestProperty}; depth test {(CompareFunction)source.GetInt(ZTestProperty)} on '{source.name}', " +
+                               $"{(CompareFunction)copy.GetInt(ZTestProperty)} on its copy before SBGVR sets it to Always).");
         }
 
         private void ApplyRenderQueue()
@@ -380,8 +407,7 @@ namespace SBGVR.Hud
             _anchor.hideFlags = HideFlags.DontSave;
             _canvas = _anchor.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.WorldSpace;
-            // Left at sorting order 0, like the floating screen: Unity sorts transparent objects by sorting
-            // order before render queue, so a higher order would draw markers over the floating screen.
+            // Sorting order 0 to start with; ApplySorting sets it each frame.
             _canvas.sortingOrder = 0;
             _canvasGroup = _anchor.AddComponent<CanvasGroup>();
             _canvasGroup.interactable = false;
@@ -390,19 +416,23 @@ namespace SBGVR.Hud
         }
 
         /// <summary>
-        /// Markers sort with the scene's transparent objects (sorting order 0, like the floating screen). A
-        /// reticle sorts after all of them, on the last sorting layer one order below the floating screen and
-        /// full-view fades (<see cref="Uuvr.VrUi.UiSorting"/>), so those still draw over it.
+        /// A marker drawn on top (a reticle, or any marker with MarkersOnTop) sorts after every other transparent
+        /// object, effects and glows with a high sorting order included, as the game's HUD is drawn over all
+        /// of them: on the last sorting layer, one order below the floating screen and full-view fades
+        /// (<see cref="Uuvr.VrUi.UiSorting.ScreenOrder"/>), so those still draw over it. Unity sorts transparent
+        /// objects by sorting layer and order before render queue, so the queue alone can't do this. A marker
+        /// that isn't drawn on top (MarkersOnTop off) sorts with the scene's transparent objects (the default
+        /// layer, order 0), so effects in front of it cover it like the scenery does.
         /// </summary>
         private void ApplySorting()
         {
             var layerId = 0;
             var order = 0;
-            if (_alwaysOnTop)
+            if (_alwaysOnTop || _materialsSwapped)
             {
                 var layers = SortingLayer.layers;
                 if (layers.Length > 0) layerId = layers[layers.Length - 1].id;
-                order = short.MaxValue - 1;
+                order = Uuvr.VrUi.UiSorting.ScreenOrder - 1;
             }
 
             if (_canvas.sortingLayerID != layerId) _canvas.sortingLayerID = layerId;
@@ -494,12 +524,16 @@ namespace SBGVR.Hud
                 return;
             }
 
-            var graphics = GetComponentsInChildren<Graphic>(true);
-            if (_materialsSwapped && graphics.Length == _graphicCount) return;
+            GetComponentsInChildren(true, AllGraphics);
+            if (_materialsSwapped && AllGraphics.Count == _graphicCount)
+            {
+                AllGraphics.Clear();
+                return;
+            }
 
             RestoreMaterials();
-            _graphicCount = graphics.Length;
-            foreach (var graphic in graphics)
+            _graphicCount = AllGraphics.Count;
+            foreach (var graphic in AllGraphics)
             {
                 if (graphic is TMP_Text text)
                 {
@@ -514,6 +548,7 @@ namespace SBGVR.Hud
                 _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
             }
 
+            AllGraphics.Clear();
             _materialsSwapped = true;
             _renderQueue = TopRenderQueue;
             ApplyRenderQueue();

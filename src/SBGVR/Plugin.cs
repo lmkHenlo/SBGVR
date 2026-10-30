@@ -16,7 +16,7 @@ namespace SBGVR
     {
         public const string Guid = "com.sbgvr";
         public const string Name = "SBGVR";
-        public const string Version = "1.3.0";
+        public const string Version = "1.3.1";
 
         /// <summary>UUVR's BepInEx plugin ID (the Unity 2020+ Mono build).</summary>
         internal const string UuvrGuid = "raicuparta.uuvr-modern";
@@ -48,6 +48,7 @@ namespace SBGVR
             {
                 Hud.WorldMarker.Initialize();
                 Hud.MarkerOcclusion.Initialize();
+                Patch("World-space markers: icons up to MarkerViewAngle", typeof(Hud.MarkerViewAnglePatches));
                 Add(host, "World-space reticles", typeof(Hud.WorldReticles));
                 Add(host, "Aim line", typeof(Hud.AimLine));
                 Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
