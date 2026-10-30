@@ -117,7 +117,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 ### Changed
 
 - First public release. The mod itself is unchanged from 0.2.17, the last pre-release test build, which players tested on Steam Frame, Valve Index and Meta Quest 3.
-- The READMEs no longer call SBGVR experimental, list the tested headsets, and say that MaxFOVSlider 0.2.1 and later work alongside SBGVR (they pause their own projection in VR).
+- The READMEs no longer call SBGVR experimental, and they list the tested headsets.
 - Install instructions start with installing from Thunderstore; installing a local build is still described.
 
 ### Added
@@ -137,7 +137,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 
 ### Added
 
-- The game's field of view in VR. `VR Graphics` → `FieldOfView` (`Setting` by default) makes the game's Field of view slider work in VR, MaxFOVSlider's range included. At the game's default of 60 you get the headset's own view; higher values show more of the world, squeezed into the headset, and lower ones magnify it. `Headset` keeps the headset's view, and `Game` also follows the game's own changes, such as the overview camera. The floating screen, markers and reticles keep their size, and icons turn into edge arrows at the new edge of the view.
+- The game's field of view in VR. `VR Graphics` → `FieldOfView` (`Setting` by default) makes the game's Field of view slider work in VR. At the game's default of 60 you get the headset's own view; higher values show more of the world, squeezed into the headset, and lower ones magnify it. `Headset` keeps the headset's view, and `Game` also follows the game's own changes, such as the overview camera. The floating screen, markers and reticles keep their size, and icons turn into edge arrows at the new edge of the view.
 - `VR Graphics` → `RailgunZoom` (on by default): the railgun's aim zooms the view in VR, as it does on a flat screen. While the view is magnified, the eyes are drawn closer together by the same amount, so it stays easy to focus.
 
 ### Fixed
