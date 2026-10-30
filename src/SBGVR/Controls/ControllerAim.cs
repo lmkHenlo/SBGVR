@@ -135,6 +135,21 @@ namespace SBGVR.Controls
         }
 
         /// <summary>
+        /// Where the dominant controller points in the world as you see it (with VR Controls.ControllerAimPitch),
+        /// whatever the weapon aims along. Used to start the weapon motion camera's aim where you point.
+        /// </summary>
+        internal static bool TryGetPointingDirection(out Vector3 direction)
+        {
+            direction = default;
+            var camera = GameManager.Camera;
+            if (camera == null || !TryGetTrackingFrame(camera, out _, out var frameRotation)) return false;
+            if (!TryGetControllerPose(out _, out var handRotation)) return false;
+
+            direction = frameRotation * handRotation * Quaternion.Euler(Settings.ControllerAimPitch.Value, 0f, 0f) * Vector3.forward;
+            return direction.sqrMagnitude > 0.5f;
+        }
+
+        /// <summary>
         /// Where UUVR's tracking space sits in the world: the point and rotation the headset's tracked pose is
         /// applied under, so a tracked pose relative to the head lands in the world as you see it.
         /// </summary>

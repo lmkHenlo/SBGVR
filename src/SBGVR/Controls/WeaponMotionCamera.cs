@@ -21,6 +21,16 @@ namespace SBGVR.Controls
     /// <c>maxPitch</c>, still applies), and sideways hand movement doesn't count.
     /// </para>
     /// <para>
+    /// The aim starts where the controller points (<see cref="StartAimWherePointing"/>): when you start aiming,
+    /// the camera turns and tilts, over <see cref="AcquireSeconds"/>, until it looks where the controller points
+    /// in the world as you see it, and from then on the change turns it 1:1. Without that, the aim started
+    /// wherever the camera faced, as far from the controller as you held it from the camera's direction, and
+    /// with the aim at a different height from your hand, the same turn of your hand moved the aim further or
+    /// less far than the controller (1.16 times as far held 30 degrees down, 1.41 times at 45). Starting where you
+    /// point, the aim moves exactly as far as the controller does. The pitch kept for afterwards is the camera's
+    /// from before this.
+    /// </para>
+    /// <para>
     /// The controller's turn and tilt are smoothed with a One Euro filter (<see cref="OneEuroFilter"/>) before
     /// they turn the camera: hand tremor while you hold still is cut to about a tenth, while a quick turn is
     /// followed within a few milliseconds of your hand stopping. It doesn't change how far the camera turns.
@@ -71,6 +81,9 @@ namespace SBGVR.Controls
         /// <summary>Time constant of the tilt easing back after a shot or aiming, in seconds.</summary>
         private const float RestoreSeconds = 0.12f;
 
+        /// <summary>How long the camera takes to turn to where the controller points when you start aiming, in seconds.</summary>
+        private const float AcquireSeconds = 0.15f;
+
         /// <summary>Within this many degrees of the kept pitch, the restore finishes on it exactly.</summary>
         private const float RestoreSnapDegrees = 0.05f;
 
@@ -105,6 +118,13 @@ namespace SBGVR.Controls
         private OneEuroFilter _yawFilter;
         private OneEuroFilter _tiltFilter;
         private bool _wasUsing;
+
+        // The turn and tilt that bring the camera to where the controller pointed when aiming started, and how
+        // much of them has been added (eased in over AcquireSeconds).
+        private float _acquireYaw;
+        private float _acquirePitch;
+        private float _acquireTime;
+        private float _acquireApplied;
 
         // The pitch from before you started aiming, for the camera it was kept for, and whether it's being eased
         // back to.
@@ -211,7 +231,10 @@ namespace SBGVR.Controls
                 }
 
                 _restoring = false;
+                StartAimWherePointing(view, orbit, firstPerson);
             }
+
+            UpdateAcquire(view, orbit, firstPerson, dt);
 
             // Left and right, 1:1. Pointing almost straight up or down has no useful heading: hold the yaw.
             if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 0.01f)
@@ -262,6 +285,44 @@ namespace SBGVR.Controls
             _steeringFrame = Time.frameCount;
             _steeringView = view;
         }
+
+        /// <summary>
+        /// When aiming starts: the turn and tilt from where the camera looks to where the controller points, to
+        /// be eased in by <see cref="UpdateAcquire"/>.
+        /// </summary>
+        private void StartAimWherePointing(CameraView view, OrbitCameraModule orbit, FirstPersonCameraModule firstPerson)
+        {
+            _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
+            if (!ControllerAim.TryGetPointingDirection(out var pointing)) return;
+
+            var yaw = view == CameraView.ThirdPerson ? orbit.Yaw : firstPerson.Yaw;
+            var pitch = GetPitch(view);
+            var looking = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
+            if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 1e-4f && new Vector2(looking.x, looking.z).sqrMagnitude >= 1e-4f)
+                _acquireYaw = Mathf.DeltaAngle(HeadingOf(looking), HeadingOf(pointing));
+            // The cameras' pitch grows as they look down.
+            _acquirePitch = -TiltOf(pointing) - pitch;
+            if (Settings.DiagnosticsEnabled.Value)
+                Plugin.Log.LogInfo($"Motion camera: aim starts where the controller points, {_acquireYaw:+0.0;-0.0;0}° and " +
+                                   $"{-_acquirePitch:+0.0;-0.0;0}° from where the camera looked.");
+        }
+
+        /// <summary>Eases the turn to where the controller pointed into the camera, on top of the 1:1 steering.</summary>
+        private void UpdateAcquire(CameraView view, OrbitCameraModule orbit, FirstPersonCameraModule firstPerson, float dt)
+        {
+            if (_acquireApplied >= 1f || (_acquireYaw == 0f && _acquirePitch == 0f)) return;
+
+            _acquireTime += dt;
+            var target = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_acquireTime / AcquireSeconds));
+            var step = target - _acquireApplied;
+            _acquireApplied = target;
+
+            if (view == CameraView.ThirdPerson) orbit.SetYaw(orbit.Yaw + _acquireYaw * step);
+            else firstPerson.SetYaw(firstPerson.Yaw + _acquireYaw * step);
+            SetPitch(view, GetPitch(view) + _acquirePitch * step);
+        }
+
+        private static float HeadingOf(Vector3 direction) => Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         /// <summary>
         /// The camera the controller should steer for a weapon, or None. It starts when you aim an item and carries
