@@ -8,6 +8,7 @@ SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Ba
 
 - Starts VR when the game starts. The game is shown in stereo in your headset and follows your head.
 - Shows menus and the HUD on a floating screen in front of you, and draws markers (your ball, the hole, name tags, the interaction reticle) in the world at their target, so they line up at any distance.
+- Zooms the railgun's scope by the same magnification as on a flat screen (your whole view zooms while scoped).
 - Draws the game's ambient occlusion correctly for each eye. Turn `AmbientOcclusion` off for more frame rate.
 - Fades your whole view when the game fades the screen, holds the main menu's background scenes still, reduces screen shake to a quarter, and turns off explosion flashes, the CRT effect and the pause menu's background blur (which made the menu itself blurry in VR). All of this can be changed in the settings.
 - Optionally shows the game in first person, through your character's eyes (`FirstPerson`, off by default and new).

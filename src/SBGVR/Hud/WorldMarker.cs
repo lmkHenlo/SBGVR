@@ -485,7 +485,8 @@ namespace SBGVR.Hud
             _anchor.transform.SetPositionAndRotation(
                 cameraTransform.position + direction * distance,
                 Quaternion.LookRotation(direction, cameraTransform.up));
-            _anchor.transform.localScale = Vector3.one * (MetresPerHudUnitAtOneMetre() * distance);
+            // The railgun scope's zoom magnifies the world, and so the marker; this cancels that out.
+            _anchor.transform.localScale = Vector3.one * (MetresPerHudUnitAtOneMetre() * distance * View.RailgunScopeZoom.HudScale);
             ((RectTransform)_anchor.transform).sizeDelta = _isReticle && _hudCanvas != null
                 ? ((RectTransform)_hudCanvas.transform).rect.size
                 : Vector2.zero;
