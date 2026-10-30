@@ -450,7 +450,7 @@ SBGVR/
 
 ## AI assistance
 
-SBGVR was developed with the help of Claude, an AI model made by Anthropic. Claude wrote most of the code and documentation in this repository, including the changes to UUVR, working from lmkHenlo's requests. lmkHenlo set the goals and requirements, chose between the approaches Claude proposed, tested the builds in a VR headset and reported what needed fixing, and decides what is released. The commit history doesn't mark which commits Claude helped write; this section covers the project as a whole.
+SBGVR was developed with the help of Claude, an AI model made by Anthropic.
 
 ## API
 
