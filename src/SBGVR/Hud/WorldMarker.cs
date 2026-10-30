@@ -30,7 +30,9 @@ namespace SBGVR.Hud
     ///
     /// Weapon reticles (and the lock-on reticle) are always drawn on top: over scenery whatever MarkersOnTop
     /// says, never covered by player characters, and after every other transparent object (effects with a
-    /// high sorting order included). Menus and full-view fades, drawn last of all, still cover them.
+    /// high sorting order included). With MarkersOnTop, the other markers are drawn after every other
+    /// transparent object too, like the game's HUD. Menus and full-view fades, drawn last of all, still
+    /// cover them.
     /// </summary>
     internal sealed class WorldMarker : MonoBehaviour
     {
@@ -405,8 +407,7 @@ namespace SBGVR.Hud
             _anchor.hideFlags = HideFlags.DontSave;
             _canvas = _anchor.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.WorldSpace;
-            // Left at sorting order 0, like the floating screen: Unity sorts transparent objects by sorting
-            // order before render queue, so a higher order would draw markers over the floating screen.
+            // Sorting order 0 to start with; ApplySorting sets it each frame.
             _canvas.sortingOrder = 0;
             _canvasGroup = _anchor.AddComponent<CanvasGroup>();
             _canvasGroup.interactable = false;
@@ -415,15 +416,19 @@ namespace SBGVR.Hud
         }
 
         /// <summary>
-        /// Markers sort with the scene's transparent objects (sorting order 0, like the floating screen). A
-        /// reticle sorts after all of them, on the last sorting layer one order below the floating screen and
-        /// full-view fades (<see cref="Uuvr.VrUi.UiSorting.ScreenOrder"/>), so those still draw over it.
+        /// A marker drawn on top (a reticle, or any marker with MarkersOnTop) sorts after every other transparent
+        /// object, effects and glows with a high sorting order included, as the game's HUD is drawn over all
+        /// of them: on the last sorting layer, one order below the floating screen and full-view fades
+        /// (<see cref="Uuvr.VrUi.UiSorting.ScreenOrder"/>), so those still draw over it. Unity sorts transparent
+        /// objects by sorting layer and order before render queue, so the queue alone can't do this. A marker
+        /// that isn't drawn on top (MarkersOnTop off) sorts with the scene's transparent objects (the default
+        /// layer, order 0), so effects in front of it cover it like the scenery does.
         /// </summary>
         private void ApplySorting()
         {
             var layerId = 0;
             var order = 0;
-            if (_alwaysOnTop)
+            if (_alwaysOnTop || _materialsSwapped)
             {
                 var layers = SortingLayer.layers;
                 if (layers.Length > 0) layerId = layers[layers.Length - 1].id;

@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - With `FullViewFades` on, the game's fade from black into the main menu now shows in VR (the game uses it when it starts by joining a Steam lobby, for example from an invite). The game's own fade was hidden and its replacement was never drawn. The controller layout panel still isn't dimmed by it.
-- `MarkersOnTop` draws markers over scenery and characters again, as the game draws its HUD on a flat screen: the ball and hole icons, name tags, distance labels and the other world-space markers were covered by terrain and player characters even with it on. The copies of their materials that SBGVR draws them with only set "ignore depth" when the shader declared that setting, which Unity's UI and TextMeshPro shaders don't. With `MarkersOnTop` off, scenery covers markers as before.
+- `MarkersOnTop` draws markers over scenery and characters again, as the game draws its HUD on a flat screen: the ball and hole icons, name tags, distance labels and the other world-space markers were covered by terrain and player characters even with it on. The copies of their materials that SBGVR draws them with only set "ignore depth" when the shader declared that setting, which Unity's UI and TextMeshPro shaders don't. They're also drawn after the game's see-through effects and glows now (such as the glow around item boxes), which no longer show over them. With `MarkersOnTop` off, scenery and effects cover markers as before.
 - A controller that reports an unset (all-zero) pointing pose can no longer make weapons aim along a fixed world direction for that frame.
 
 ### Changed
