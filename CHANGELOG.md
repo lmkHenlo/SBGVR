@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   - You look up and down with your head; the thumbstick only turns you, smoothly by default (`FirstPersonTurn` = `Smooth`, or `Snap` with `SnapTurnAngle`).
   - Walking goes where your head looks. Without the controllers, weapons aim where you look.
   - Golf swings aim like in third person: the aim starts where you're looking when you start aiming, then your head doesn't move it, and the thumbstick turns it smoothly, even with snap turning.
+  - The motion camera (`MotionCamera`) fine-tunes golf club and rocket club swings in first person too, by turning or moving your controller, as in third person. Tilting the controller does nothing in first person.
   - Your own character is hidden while in first person, as the game does for the railgun's scope. Nothing is sent to other players.
   - The view goes back to third person while you're knocked out, respawning or spectating, and the hole overview plays as usual, each returning to first person afterwards.
   - In a golf cart, the view faces the front of the cart; the thumbstick doesn't turn it.

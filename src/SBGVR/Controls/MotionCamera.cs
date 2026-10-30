@@ -22,6 +22,11 @@ namespace SBGVR.Controls
     ///
     /// The swing itself is the game's own: while you aim, your character faces the orbit camera's direction,
     /// and the swing goes that way, exactly as when you turn the camera with the thumbstick.
+    ///
+    /// In SBGVR's first person the shot follows the first-person camera's yaw instead
+    /// (<see cref="View.FirstPersonView.IsAimingShot"/>), so the same yaw goes into
+    /// <c>FirstPersonCameraModule.SetYaw</c>. Its pitch stays level there (your head looks up and down), so
+    /// tilting the controller does nothing in first person.
     /// </remarks>
     internal sealed class MotionCamera : MonoBehaviour
     {
@@ -70,8 +75,23 @@ namespace SBGVR.Controls
                 return;
             }
 
-            if (CameraModuleController.CurrentModuleType != CameraModuleType.Orbit || CameraModuleController.IsTransitioning) return;
-            if (!CameraModuleController.TryGetOrbitModule(out var orbit) || orbit == null) return;
+            if (CameraModuleController.IsTransitioning) return;
+            OrbitCameraModule orbit = null;
+            FirstPersonCameraModule firstPerson = null;
+            switch (CameraModuleController.CurrentModuleType)
+            {
+                case CameraModuleType.Orbit:
+                    if (!CameraModuleController.TryGetOrbitModule(out orbit) || orbit == null) return;
+                    break;
+                case CameraModuleType.FirstPerson:
+                    // Only SBGVR's first person, not the railgun scope.
+                    if (!CameraModuleController.TryGetFirstPersonModule(out firstPerson) ||
+                        !View.FirstPersonView.Shows(firstPerson)) return;
+                    break;
+                default:
+                    return;
+            }
+
             if (!ControllerAim.TryGetControllerPose(out var position, out var rotation)) return;
 
             var forward = rotation * Vector3.forward;
@@ -101,10 +121,21 @@ namespace SBGVR.Controls
             var maxPitch = Settings.MotionCameraMaxPitch.Value;
             var pitch = Mathf.Clamp(DeadZone(tilt, RotationDeadZone) * strength, -maxPitch, maxPitch);
 
+            // First person keeps its pitch level: your head looks up and down there.
+            if (firstPerson != null) pitch = 0f;
+
             var yawChange = yaw - _appliedYaw;
             var pitchChange = pitch - _appliedPitch;
-            if (yawChange != 0f) orbit.SetYaw(orbit.Yaw + yawChange);
-            if (pitchChange != 0f) orbit.SetPitch(orbit.Pitch - pitchChange);
+            if (orbit != null)
+            {
+                if (yawChange != 0f) orbit.SetYaw(orbit.Yaw + yawChange);
+                if (pitchChange != 0f) orbit.SetPitch(orbit.Pitch - pitchChange);
+            }
+            else if (yawChange != 0f)
+            {
+                firstPerson.SetYaw(firstPerson.Yaw + yawChange);
+            }
+
             _appliedYaw = yaw;
             _appliedPitch = pitch;
         }
