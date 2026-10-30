@@ -61,7 +61,10 @@ namespace SBGVR
                 EnableOpenXrControllers();
                 Add(host, "Motion controls", typeof(Controls.MotionControls));
                 if (Settings.MotionCamera.Value)
+                {
                     Add(host, "Motion camera", typeof(Controls.MotionCamera));
+                    Add(host, "Motion camera for weapons", typeof(Controls.WeaponMotionCamera));
+                }
             }
 
             // Weapons aim along the controller (VR Controls.ControllerAiming) or, in first person, the head. While

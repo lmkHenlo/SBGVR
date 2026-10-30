@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [1.3.2] - 2026-10-30
 
+### Changed
+
+- With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers in third person, turning the controller left or right turns the camera by the same angle (1:1, no smoothing or limit), and weapons aim along the camera, as the golf club's swing does, while the controller's tilt still aims them up and down. Before, weapons aimed along the controller and the camera stayed put. Golf swings, first person and gamepad, keyboard and mouse aiming are unchanged.
+
 ### Fixed
 
 - Gun crosshairs (dueling pistol, elephant gun, rocket launcher, railgun) sit exactly where the shot will go: at the game's own aim point, with the gun's own range and the surfaces it can hit. SBGVR's separate raycast could put them on a surface the shot passes through, on something between the camera and your character in third person, or at a fixed 50 m in the sky, which from your eyes is a different place, since the aim starts at your hand. Aiming far to the side of your character shows where the shot goes after the game turns your character. Other crosshairs are unchanged.
