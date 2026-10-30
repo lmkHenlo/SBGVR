@@ -76,6 +76,9 @@ namespace SBGVR.Hud
         private readonly List<KeyValuePair<Graphic, Material>> _originalMaterials = new List<KeyValuePair<Graphic, Material>>();
         private readonly List<KeyValuePair<TMP_Text, Material>> _originalFontMaterials = new List<KeyValuePair<TMP_Text, Material>>();
         private readonly List<Graphic> _visibleGraphics = new List<Graphic>();
+
+        /// <summary>Reused by <see cref="UpdateMaterials"/> each frame, so it doesn't allocate an array per marker.</summary>
+        private static readonly List<Graphic> AllGraphics = new List<Graphic>();
         private readonly Vector3[] _corners = new Vector3[4];
 
         /// <summary>The player the marker belongs to (a name tag's or teammate icon's), or null.</summary>
@@ -494,12 +497,16 @@ namespace SBGVR.Hud
                 return;
             }
 
-            var graphics = GetComponentsInChildren<Graphic>(true);
-            if (_materialsSwapped && graphics.Length == _graphicCount) return;
+            GetComponentsInChildren(true, AllGraphics);
+            if (_materialsSwapped && AllGraphics.Count == _graphicCount)
+            {
+                AllGraphics.Clear();
+                return;
+            }
 
             RestoreMaterials();
-            _graphicCount = graphics.Length;
-            foreach (var graphic in graphics)
+            _graphicCount = AllGraphics.Count;
+            foreach (var graphic in AllGraphics)
             {
                 if (graphic is TMP_Text text)
                 {
@@ -514,6 +521,7 @@ namespace SBGVR.Hud
                 _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
             }
 
+            AllGraphics.Clear();
             _materialsSwapped = true;
             _renderQueue = TopRenderQueue;
             ApplyRenderQueue();
