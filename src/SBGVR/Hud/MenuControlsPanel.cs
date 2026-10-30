@@ -32,10 +32,10 @@ namespace SBGVR.Hud
     /// and the game window's aspect ratio, so it stays clear of the screen whatever those are.
     /// </para>
     /// <para>
-    /// It's drawn after everything else, the full-view fades included (render queue 5002, sorted with the floating
-    /// screen), so the main menu's background cross-fades and scene fades leave it at full opacity, and scenery
-    /// never cuts into it. It never overlaps the floating screen, so drawing after the screen changes nothing
-    /// there; the fades still cover the rest of the view and the screen exactly as before.
+    /// It's drawn with the floating screen (render queue 5000, sorted like the screen), after the full-view fade
+    /// behind the screen (4999), so the main menu's background cross-fades and scene fades leave it at full
+    /// opacity, and with depth testing off, so scenery never cuts into it. It never overlaps the floating screen,
+    /// so the order between the two doesn't matter; the fades still cover the rest of the view as before.
     /// </para>
     /// <para>
     /// The image (<c>Assets/controller-layout.png</c>, embedded in the DLL) is rendered from
@@ -47,10 +47,11 @@ namespace SBGVR.Hud
         private const string ImageResource = "SBGVR.controller-layout.png";
 
         /// <summary>
-        /// After the full-view fade behind the screen (4999), the floating screen (5000) and the fade over the
-        /// screen (5001), so no fade dims it.
+        /// The floating screen's queue, after the full-view fade behind the screen (4999), so no fade dims it.
+        /// It must not go above 5000: URP only draws transparent objects in queues 2501 to 5000
+        /// (<c>RenderQueueRange.transparent</c>), and anything higher is never drawn at all.
         /// </summary>
-        private const int RenderQueue = 5002;
+        private const int RenderQueue = 5000;
 
         /// <summary>Panel width as a share of its distance: about 51° wide, so its smallest text stays readable.</summary>
         private const float WidthPerMetre = 0.95f;
