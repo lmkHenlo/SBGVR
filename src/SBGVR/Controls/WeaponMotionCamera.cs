@@ -3,6 +3,8 @@
 
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.XR;
+using Uuvr.VrCamera;
 
 namespace SBGVR.Controls
 {
@@ -29,6 +31,12 @@ namespace SBGVR.Controls
     /// less far than the controller (1.16 times as far held 30 degrees down, 1.41 times at 45). Starting where you
     /// point, the aim moves exactly as far as the controller does. The pitch kept for afterwards is the camera's
     /// from before this.
+    /// </para>
+    /// <para>
+    /// Turning your whole body counts once (<see cref="UpdateBodyTurn"/>): the part of your head's turn that the
+    /// controller shares is taken out of the view through UUVR's recentre rotation, so the view turns as far as
+    /// you do and the crosshair stays where you point, while the camera, and so your character and the aim, still
+    /// follow the controller.
     /// </para>
     /// <para>
     /// The controller's turn and tilt are smoothed with a One Euro filter (<see cref="OneEuroFilter"/>) before
@@ -126,6 +134,13 @@ namespace SBGVR.Controls
         private float _acquireTime;
         private float _acquireApplied;
 
+        // Your head's turn since aiming started (unwrapped, in the room), its heading last frame, and how much of
+        // your body's turn has been taken out of the view so far.
+        private float _headYaw;
+        private float _lastHeadHeading;
+        private bool _headHeadingValid;
+        private float _bodyTurnApplied;
+
         // The pitch from before you started aiming, for the camera it was kept for, and whether it's being eased
         // back to.
         private CameraView _keptView;
@@ -216,6 +231,7 @@ namespace SBGVR.Controls
                 _rawYaw = 0f;
                 _lastWrappedYaw = 0f;
                 _yawFilter.Reset();
+                StartBodyTurn();
                 _referenceTilt = tilt;
                 _appliedTilt = 0f;
                 _wasUsing = false;
@@ -253,6 +269,8 @@ namespace SBGVR.Controls
                 _appliedYaw = yaw;
             }
 
+            UpdateBodyTurn();
+
             // Up and down, 1:1, except while the item is being used (the shot holds still) and while the tilt eases
             // back after it. The cameras' pitch grows as they look down, so tilting up lowers it.
             var inUse = IsFiring(inventory);
@@ -284,6 +302,56 @@ namespace SBGVR.Controls
             _steering = true;
             _steeringFrame = Time.frameCount;
             _steeringView = view;
+        }
+
+        /// <summary>When aiming starts: nothing of your body's turn is counted yet.</summary>
+        private void StartBodyTurn()
+        {
+            _headYaw = 0f;
+            _bodyTurnApplied = 0f;
+            _headHeadingValid = TryGetHeadHeading(out _lastHeadHeading);
+        }
+
+        /// <summary>
+        /// Counts turning your whole body once. The camera turns with the controller's heading in the room, and UUVR
+        /// adds your headset's turn on top for the view, so turning your body (head and controller together) turned
+        /// the view twice as far and left the crosshair behind. Your body's turn is the part of your head's turn
+        /// since aiming started that the controller's turn shares: same direction, the smaller of the two. It's taken
+        /// out of the view through UUVR's recentre rotation, as recentring does, so the view turns as far as you do
+        /// and the crosshair stays where you point. A turn of the controller alone (your wrist) still turns the
+        /// camera 1:1, and a turn of your head alone still looks around. Compared from the start rather than frame
+        /// by frame, it doesn't build up from shaking or smoothing, and turning back undoes it.
+        /// </summary>
+        private void UpdateBodyTurn()
+        {
+            if (TryGetHeadHeading(out var heading))
+            {
+                // Looking almost straight up or down when aiming started: count from the first usable heading.
+                if (_headHeadingValid) _headYaw += Mathf.DeltaAngle(_lastHeadHeading, heading);
+                _lastHeadHeading = heading;
+                _headHeadingValid = true;
+            }
+
+            var body = Shared(_appliedYaw, _headYaw);
+            var change = body - _bodyTurnApplied;
+            if (change == 0f) return;
+            VrCameraOffset.RecenterRotation = Quaternion.Euler(0f, -change, 0f) * VrCameraOffset.RecenterRotation;
+            _bodyTurnApplied = body;
+        }
+
+        /// <summary>The part two turns share: their common direction, as far as the smaller one goes.</summary>
+        private static float Shared(float a, float b) => a * b > 0f ? Mathf.Sign(a) * Mathf.Min(Mathf.Abs(a), Mathf.Abs(b)) : 0f;
+
+        /// <summary>The headset's heading in the room (tracking space), or false while it looks almost straight up or down.</summary>
+        private static bool TryGetHeadHeading(out float heading)
+        {
+#pragma warning disable CS0618 // The same head tracking UUVR's cameras follow.
+            var forward = InputTracking.GetLocalRotation(XRNode.CenterEye) * Vector3.forward;
+#pragma warning restore CS0618
+            heading = 0f;
+            if (new Vector2(forward.x, forward.z).sqrMagnitude < 0.01f) return false;
+            heading = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+            return true;
         }
 
         /// <summary>
