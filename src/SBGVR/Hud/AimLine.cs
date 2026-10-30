@@ -77,10 +77,8 @@ namespace SBGVR.Hud
             var eye = camera.transform.position;
             _line.SetPosition(0, start);
             _line.SetPosition(1, end);
-            // The railgun scope's zoom magnifies the world, and so the line; this cancels that out.
-            var width = WidthPerMetre * View.RailgunScopeZoom.HudScale;
-            _line.startWidth = width * Vector3.Distance(eye, start);
-            _line.endWidth = width * Vector3.Distance(eye, end);
+            _line.startWidth = WidthPerMetre * Vector3.Distance(eye, start);
+            _line.endWidth = WidthPerMetre * Vector3.Distance(eye, end);
             _line.enabled = true;
         }
 
