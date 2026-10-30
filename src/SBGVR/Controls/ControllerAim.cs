@@ -127,6 +127,10 @@ namespace SBGVR.Controls
             // as on a flat screen.
             if (WeaponMotionCamera.TryGetCameraAim(out var cameraAim)) direction = cameraAim * Vector3.forward;
 
+            // While the railgun's view is locked to the camera, its aim starts at the camera too, as on a flat screen,
+            // so moving your head (which moves your hand relative to it) doesn't move the aim.
+            if (View.RailgunScopeZoom.ViewLocked) origin = framePosition;
+
             return direction.sqrMagnitude > 0.5f;
         }
 
