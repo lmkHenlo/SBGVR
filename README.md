@@ -149,7 +149,7 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 | X button / Y button | X / Y | Interact / swing angle |
 | Right grip button | RB | Next item |
 | Tap the left grip button | LB | Previous item |
-| Menu button (left controller) | Start | Pause |
+| Menu button (left controller) | Start | Pause (SteamVR keeps this button for its own menu, so through SteamVR pause with the left grip button + A) |
 | Press the left thumbstick | X | Interact (same as the X button) |
 | Press the right thumbstick | R3 | Drop item |
 | Hold the left grip button + right thumbstick | D-pad | Emotes, push to talk, votes, restart |

@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The controller layout panel (main menu and pause menu) shows the left Menu button as opening the Steam menu, which is what it does through SteamVR (pause with the left grip button + A), calls the motion controller the dominant controller (the one `DominantHand` picks), spells out the left grip button's combinations, and leaves out the artwork credit line (Meta's artwork is still credited in `THIRD_PARTY_NOTICES.md`).
+
 - With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers, in third or first person, turning or tilting the controller turns the camera by the same angle (1:1, with no limit, and smoothed so hand tremor doesn't shake the view while quick turns still follow closely), and weapons aim along the camera, as the golf club's swing does. Before, weapons aimed along the controller and the camera stayed put. While a shot fires the tilt holds still (not while the railgun charges); after each shot and when you stop aiming, the camera's tilt eases back to where it was before you aimed, exactly, however often you aim and fire. Left and right stays where you turned it. In first person the tilt eases back to level, and while you aim your character faces the camera rather than your head. The railgun's scope from third person works the same way, and closing it eases the third-person camera back to its tilt from before. Golf swings, the rocket club, the Jumbo Burger and gamepad, keyboard and mouse aiming are unchanged.
 
 ### Fixed
