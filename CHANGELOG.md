@@ -11,7 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - First person in VR (`VR First Person` → `FirstPerson`, off by default): see the game through your character's eyes. Switch with F5 (`FirstPersonKey`) or, with the controllers, by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`); the choice is remembered.
-  - You look up and down with your head; the thumbstick only turns you, in 30° steps by default (`FirstPersonTurn` = `Snap` or `Smooth`, `SnapTurnAngle`).
+  - You look up and down with your head; the thumbstick only turns you, smoothly by default (`FirstPersonTurn` = `Smooth`, or `Snap` with `SnapTurnAngle`).
   - Walking goes where your head looks. Without the controllers, weapons aim where you look.
   - Golf swings aim like in third person: the aim starts where you're looking when you start aiming, then your head doesn't move it, and the thumbstick turns it smoothly, even with snap turning.
   - Your own character is hidden while in first person, as the game does for the railgun's scope. Nothing is sent to other players.
@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- New defaults: `VR Comfort` → `ScreenShake` is `0.25` (a quarter of the game's shake; was `0`), `VR Comfort` → `CameraTransitions` is `Game` (the game's own camera moves; was `Fast`) and `VR HUD` → `PlayersCoverMarkers` is `false` (markers stay on top of player characters; was `true`). A settings file you already have keeps its values; change them there, or delete those lines to get the new defaults.
 - Pressing the right thumbstick while holding the left grip button now switches first person instead of dropping your item (pressing it alone still drops it). Turn `FirstPersonControllerToggle` off to keep the old behaviour.
 - The weapon aiming patches are now always applied, so first person can aim with your head; while neither controller aiming nor first person applies, weapons aim along the camera exactly as before.
 

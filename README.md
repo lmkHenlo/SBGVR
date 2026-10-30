@@ -193,7 +193,7 @@ Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality c
 
 In VR you can see the game through your character's eyes instead of from the camera behind them. Off by default (`VR First Person` → `FirstPerson`). Switch with **F5** (`FirstPersonKey`), or on the controllers by holding the left grip button and pressing the right thumbstick (`FirstPersonControllerToggle`). The switch is remembered for next time.
 
-- **Looking:** you look around and up and down with your head. The right thumbstick (or the mouse) only turns you left and right, so the horizon never tilts. By default the thumbstick turns you in 30° steps (`FirstPersonTurn` = `Snap`, `SnapTurnAngle`); set `FirstPersonTurn` to `Smooth` to turn continuously. A mouse always turns smoothly.
+- **Looking:** you look around and up and down with your head. The right thumbstick (or the mouse) only turns you left and right, so the horizon never tilts. By default the thumbstick turns you smoothly (`FirstPersonTurn` = `Smooth`); set `FirstPersonTurn` to `Snap` to turn in 30° steps (`SnapTurnAngle`). A mouse always turns smoothly.
 - **Walking and aiming** go where your head is looking. **Golf swings** (golf club, rocket club, and the Jumbo Burger's giant swing) aim like in third person, starting where you're looking: when you start aiming, the shot points the way your head faces. From then until the swing is over, only the thumbstick or mouse turns the aim (smoothly, even with snap turning, so you can fine-tune it), never your head, so you can look down at the ball or around freely. The trajectory preview shows where the shot goes. Weapons aim where your dominant hand's controller points while you play with the controllers (`ControllerAiming`), and where you look with a gamepad, keyboard or mouse.
 - **Your own character is hidden**, including what you're holding, so you don't see the inside of your head. The game does this itself whenever its first-person camera is on (it uses the same camera for the railgun's scope). Other players see you as usual: nothing is sent over the network.
 - **Third person when needed:** while you're knocked out, respawning or spectating, the view goes back to third person, and returns to first person afterwards. The hole overview plays as usual, then returns to first person. The railgun's scope keeps the way you're facing.
@@ -205,11 +205,11 @@ The motion camera only turns the third-person camera, so it doesn't act in first
 
 ### Settings
 
-Settings are in `BepInEx\config`. In r2modman, open them with **Config editor**. Change them with the game closed, since BepInEx reads the files when the game starts. For example, these lines in `com.sbgvr.cfg` keep a little camera shake and turn ambient occlusion off for a higher frame rate:
+Settings are in `BepInEx\config`. In r2modman, open them with **Config editor**. Change them with the game closed, since BepInEx reads the files when the game starts. For example, these lines in `com.sbgvr.cfg` turn camera shake off completely and turn ambient occlusion off for a higher frame rate:
 
 ```ini
 [VR Comfort]
-ScreenShake = 0.25
+ScreenShake = 0
 
 [VR Graphics]
 AmbientOcclusion = false
@@ -223,10 +223,10 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `raicuparta.uuvr-modern.cfg` | `Camera` → `Camera Tracking Mode` | `RelativeTransform` | How the game camera follows the headset: `Absolute`, `RelativeMatrix`, `RelativeTransform` or `Child`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `UI Patch Mode` | `Mirror` | How the 2D interface reaches the floating screen: `None`, `Mirror` or `CanvasRedirect`. |
 | `raicuparta.uuvr-modern.cfg` | `UI` → `Preferred UI Plane Render Mode` | `InWorld` | `InWorld` (scenery can cover it) or `OverlayCamera` (always on top). |
-| `com.sbgvr.cfg` | `VR Comfort` → `ScreenShake` | `0` | Camera shake in VR as a share of the game's (0–1). |
+| `com.sbgvr.cfg` | `VR Comfort` → `ScreenShake` | `0.25` | Camera shake in VR as a share of the game's (0–1). |
 | `com.sbgvr.cfg` | `VR Comfort` → `ImpactFrames` | `false` | Show impact frames (explosion flashes) in VR. |
 | `com.sbgvr.cfg` | `VR Comfort` → `FlashFrames` | `true` | Show flash frames in VR: the full-view flash that blinds you when another player's flash camera catches you. `false` = you aren't blinded in VR. |
-| `com.sbgvr.cfg` | `VR Comfort` → `CameraTransitions` | `Fast` | Camera moves between views: `Game`, `Fast` (about a third of the time) or `Instant` (a cut). |
+| `com.sbgvr.cfg` | `VR Comfort` → `CameraTransitions` | `Game` | Camera moves between views: `Game`, `Fast` (about a third of the time) or `Instant` (a cut). |
 | `com.sbgvr.cfg` | `VR Comfort` → `MenuBackground` | `Still` | Main menu background scenes: `Moving` (the game's pans) or `Still`. |
 | `com.sbgvr.cfg` | `VR Comfort` → `FullViewFades` | `true` | Fade the whole view, not only the floating screen, when the game fades. |
 | `com.sbgvr.cfg` | `VR Comfort` → `RecenterKey` | `F4` | Key that recentres the view. `None` = no key. |
@@ -236,7 +236,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR HUD` → `MarkerViewAngle` | `70` | Degrees from straight ahead within which icons stay in the world; further round they become edge arrows (30–120). |
 | `com.sbgvr.cfg` | `VR HUD` → `WorldSpaceReticles` | `true` | Draw weapon reticles in the world at the point you're aiming at, always on top of scenery and characters, instead of doubled on the floating screen. |
 | `com.sbgvr.cfg` | `VR HUD` → `AimLine` | `false` | With `WorldSpaceReticles`, draw a thin white line from your character's hand to the weapon reticle while you aim (not for the railgun, thunderstorm or flash camera). |
-| `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `true` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
+| `com.sbgvr.cfg` | `VR HUD` → `PlayersCoverMarkers` | `false` | With `MarkersOnTop`, player characters in front of a marker cover it, while scenery still doesn't. A name tag or teammate icon isn't covered by its own player, and weapon reticles aren't covered at all. |
 | `com.sbgvr.cfg` | `VR Graphics` → `AmbientOcclusion` | `true` | The game's ambient occlusion in VR. It costs more than on a flat screen, since each eye is drawn at the headset's resolution. |
 | `com.sbgvr.cfg` | `VR Controls` → `MotionControls` | `true` | Use your VR controllers as a gamepad while VR runs (see [Motion controls](#motion-controls)). Restart the game after changing it. |
 | `com.sbgvr.cfg` | `VR Controls` → `ControllerAiming` | `true` | With `MotionControls`, weapons aim where your `DominantHand` controller points. Off = they aim along the camera. |
@@ -251,7 +251,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 | `com.sbgvr.cfg` | `VR First Person` → `FirstPerson` | `false` | See through your character's eyes in VR (see [First person](#first-person)). The toggles change this, and it's remembered. |
 | `com.sbgvr.cfg` | `VR First Person` → `FirstPersonKey` | `F5` | Key that switches between first person and third person. `None` = no key. |
 | `com.sbgvr.cfg` | `VR First Person` → `FirstPersonControllerToggle` | `true` | With `MotionControls`, hold the left grip button and press the right thumbstick to switch views (mirrored with `MirrorButtons`). |
-| `com.sbgvr.cfg` | `VR First Person` → `FirstPersonTurn` | `Snap` | How the thumbstick turns you in first person: `Snap` (steps) or `Smooth`. A mouse always turns smoothly. |
+| `com.sbgvr.cfg` | `VR First Person` → `FirstPersonTurn` | `Smooth` | How the thumbstick turns you in first person: `Snap` (steps) or `Smooth`. A mouse always turns smoothly. |
 | `com.sbgvr.cfg` | `VR First Person` → `SnapTurnAngle` | `30` | Degrees per snap turn (15–90). |
 | `com.sbgvr.cfg` | `VR First Person` → `FirstPersonEyeOffset` | `0` | Raises (positive) or lowers (negative) your eyes in first person, in metres (−0.5 to 0.5). |
 | `com.sbgvr.cfg` | `Diagnostics` → `Enabled` | `true` | Log VR, camera and renderer details to `LogOutput.log`. |
@@ -357,7 +357,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - The fade between scenes darkens the whole view behind the menu.
    - The mouse cursor is visible, and clicks land where it points.
 3. Settings, lobby and match setup menus work, and item effects don't show through them. Joining or leaving a match fades the whole view.
-4. Play a hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views are quick.
+4. Play a hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views use the game's own sweep (`CameraTransitions` = `Game`).
 5. Markers:
    - Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. So do name tags and the interaction reticle.
    - Icons for targets behind you show as arrows at the edge of the floating screen.
@@ -377,7 +377,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - Ambient occlusion (soft shading where surfaces meet, under your character and in corners) looks the same in both eyes, and doesn't smear or flicker when you turn your head.
    - The log says `Ambient occlusion: draws for each eye in VR` and `drawn for each eye at 2528x2704` (your headset's eye size).
    - With `AmbientOcclusion` off, the frame rate goes up.
-8. Explosions near you don't flash the view or shake the camera. Another player's flash camera does blind you (`FlashFrames`). The pause menu and the settings opened from it are sharp, not blurred.
+8. Explosions near you don't flash the view, and shake the camera only a little (a quarter of the game's shake, `ScreenShake` = 0.25). Another player's flash camera does blind you (`FlashFrames`). The pause menu and the settings opened from it are sharp, not blurred.
 9. F4 recentres the view.
 10. The frame rate lines in the log are close to the headset's refresh rate.
 11. Motion controls, with `MotionControls` on (and once with it off, to check nothing changes):
@@ -404,7 +404,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - F5 and holding the left grip button + pressing the right thumbstick both switch views, and the log says `First person: on` / `off`. Restart the game: it starts in the view you left. Pressing the right thumbstick alone still drops your item.
     - The log has one `First person: eyes … m above the feet` line; it should say 1.50 m with `FirstPersonEyeOffset` at 0; note whether that feels right, and the `FirstPersonEyeOffset` that fixes it if not.
     - Your own body, head and held item aren't visible. Another player sees you as usual.
-    - The thumbstick's up and down does nothing, and the horizon never tilts. Snap turns 30° per push; with `FirstPersonTurn` = `Smooth` it turns smoothly. Switching views doesn't move the world.
+    - The thumbstick's up and down does nothing, and the horizon never tilts. The thumbstick turns smoothly; with `FirstPersonTurn` = `Snap` it turns 30° per push. Switching views doesn't move the world.
     - Walking goes where your head looks, also looking nearly straight down.
     - Aim, charge and hit golf club and rocket club swings: when you start aiming, the trajectory preview points where you're looking (the view doesn't jump; the log says `First person: shot aim starts where you're looking`); after that it doesn't move when you turn your head; the thumbstick turns the aim smoothly (also with `FirstPersonTurn` = `Snap`). The ball goes where the preview showed. Outside swings, walking and weapons still follow your head.
     - Each weapon with the controllers aims where the controller points; with a gamepad or the mouse, where you look (the reticle follows your head). The rocket launcher's lock-on follows the same aim.

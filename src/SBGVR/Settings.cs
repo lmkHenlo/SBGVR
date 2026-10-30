@@ -67,7 +67,7 @@ namespace SBGVR
         internal static void Bind(ConfigFile config)
         {
             const string comfort = "VR Comfort";
-            ScreenShake = config.Bind(comfort, "ScreenShake", 0f,
+            ScreenShake = config.Bind(comfort, "ScreenShake", 0.25f,
                 new ConfigDescription(
                     "Camera shake in VR, as a share of the shake the game would use with your Screen shake setting. " +
                     "0 = no shake, 1 = the game's shake.",
@@ -78,7 +78,7 @@ namespace SBGVR
             FlashFrames = config.Bind(comfort, "FlashFrames", true,
                 "Show the game's flash frames in VR: the full-view flash with a doubled picture that blinds you " +
                 "when another player's flash camera catches you. Off = you aren't blinded in VR.");
-            CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Fast,
+            CameraTransitions = config.Bind(comfort, "CameraTransitions", CameraTransitionMode.Game,
                 "How the camera moves when the game switches views, for example to the hole overview and back. " +
                 "Game = the game's own sweep, Fast = the same sweep in about a third of the time, Instant = a cut.");
             MenuBackground = config.Bind(comfort, "MenuBackground", MenuBackgroundMode.Still,
@@ -116,7 +116,7 @@ namespace SBGVR
                 "With WorldSpaceReticles, draw a thin white line from your character's hand to the weapon reticle " +
                 "while you aim, so you can see where the shot goes from where it leaves. Not for the railgun, " +
                 "thunderstorm or flash camera.");
-            PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", true,
+            PlayersCoverMarkers = config.Bind(hud, "PlayersCoverMarkers", false,
                 "With MarkersOnTop, a player character (yours or anyone else's) in front of a marker covers it, " +
                 "while scenery still doesn't. A name tag or teammate icon isn't covered by the player it belongs " +
                 "to, and weapon reticles aren't covered at all.");
@@ -194,7 +194,7 @@ namespace SBGVR
                 "With MotionControls, hold the left grip button and press the right thumbstick to switch between " +
                 "first person and third person (the right grip button and left thumbstick with MirrorButtons). " +
                 "Pressing the thumbstick without the grip button still drops your item.");
-            FirstPersonTurn = config.Bind(firstPerson, "FirstPersonTurn", View.TurnMode.Snap,
+            FirstPersonTurn = config.Bind(firstPerson, "FirstPersonTurn", View.TurnMode.Smooth,
                 "How the right thumbstick turns you in first person. Snap = turns in steps of SnapTurnAngle, " +
                 "Smooth = turns continuously, like the third-person camera. A mouse always turns smoothly.");
             SnapTurnAngle = config.Bind(firstPerson, "SnapTurnAngle", 30f,
