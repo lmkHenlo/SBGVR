@@ -122,6 +122,30 @@ namespace SBGVR.Controls
             var pitch = Quaternion.Euler(Settings.ControllerAimPitch.Value, 0f, 0f);
             origin = framePosition + frameRotation * (handPosition - headPosition);
             direction = frameRotation * handRotation * pitch * Vector3.forward;
+
+            // While the controller turns the camera for a weapon (WeaponMotionCamera), weapons aim along the camera,
+            // as on a flat screen.
+            if (WeaponMotionCamera.TryGetCameraAim(out var cameraAim)) direction = cameraAim * Vector3.forward;
+
+            // While the railgun's view is locked to the camera, its aim starts at the camera too, as on a flat screen,
+            // so moving your head (which moves your hand relative to it) doesn't move the aim.
+            if (View.RailgunScopeZoom.ViewLocked) origin = framePosition;
+
+            return direction.sqrMagnitude > 0.5f;
+        }
+
+        /// <summary>
+        /// Where the dominant controller points in the world as you see it (with VR Controls.ControllerAimPitch),
+        /// whatever the weapon aims along. Used to start the weapon motion camera's aim where you point.
+        /// </summary>
+        internal static bool TryGetPointingDirection(out Vector3 direction)
+        {
+            direction = default;
+            var camera = GameManager.Camera;
+            if (camera == null || !TryGetTrackingFrame(camera, out _, out var frameRotation)) return false;
+            if (!TryGetControllerPose(out _, out var handRotation)) return false;
+
+            direction = frameRotation * handRotation * Quaternion.Euler(Settings.ControllerAimPitch.Value, 0f, 0f) * Vector3.forward;
             return direction.sqrMagnitude > 0.5f;
         }
 

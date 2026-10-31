@@ -4,9 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers use Thunderstore's `Major.Minor.Patch` format.
 
-1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Versions 0.1.0 to 0.2.14 were named SBG VR, with the Thunderstore package `SBG_VR`. Dates are in US Central time (UTC−05:00).
+1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Dates are in US Central time (UTC−05:00).
 
 ## [Unreleased]
+
+## [1.3.2] - 2026-10-30
+
+### Changed
+
+- The controller layout panel (main menu and pause menu) shows the left Menu button as opening the Steam menu, which is what it does through SteamVR (pause with the left grip button + A), calls the motion controller the dominant controller (the one `DominantHand` picks), spells out the left grip button's combinations, and leaves out the artwork credit line (Meta's artwork is still credited in `THIRD_PARTY_NOTICES.md`).
+
+- With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers, in third or first person, turning or tilting the controller turns the camera by the same angle (1:1, with no limit, and smoothed so hand tremor doesn't shake the view while quick turns still follow closely), and weapons aim along the camera, as the golf club's swing does. Before, weapons aimed along the controller and the camera stayed put. While a shot fires the tilt holds still (not while the railgun charges); after each shot, if you're still aiming, the aim goes back to where the controller points, and when you stop aiming, the camera's tilt eases back to where it was before you aimed, exactly, however often you aim and fire. Left and right stays where you turned it. In first person the tilt eases back to level, and while you aim your character faces the camera rather than your head. The railgun's scope from third person works the same way, and closing it eases the third-person camera back to its tilt from before. Golf swings, the rocket club, the Jumbo Burger and gamepad, keyboard and mouse aiming are unchanged.
+
+### Fixed
+
+- Weapon aiming with the controllers (`MotionCamera` and `ControllerAiming`) starts where the controller points: when you start aiming, the camera turns to it over 0.15 s, then follows the controller 1:1 as before. Before, the aim started wherever the camera faced, as far from your controller as you happened to hold it, and because the aim then sat at a different height than your hand, the same turn of your hand moved the aim further or less far than the controller (1.16 times as far with the controller held 30° down, 1.41 times at 45°). Now the aim moves exactly as far as the controller does, and after each shot it goes back to where the controller points. When you stop aiming, the tilt still eases back to where it was before you aimed. All weapons, in third and first person and the railgun's scope; golf swings are unchanged.
+
+- Gun crosshairs (dueling pistol, elephant gun, rocket launcher, railgun) sit exactly where the shot will go: at the game's own aim point, with the gun's own range and the surfaces it can hit. SBGVR's separate raycast could put them on a surface the shot passes through, on something between the camera and your character in third person, or at a fixed 50 m in the sky, which from your eyes is a different place, since the aim starts at your hand. Aiming far to the side of your character shows where the shot goes after the game turns your character. Other crosshairs are unchanged.
+- The railgun's scope zooms in VR again, by the same magnification as on a flat screen: the game narrows the camera's field of view from your Field of View setting to the scope's, which a headset ignores, so the scope didn't zoom at all. SBGVR now narrows each eye's view by the same ratio, following the game's own zoom-in, and stops the moment the scope closes. Your whole view zooms, as on a flat screen. It zooms only while the scope's view is locked to the aim (below), so your head never turns a zoomed view. The floating screen, markers, crosshairs (including the scope's own) and the aim line keep their size and place. Other weapons don't zoom and are unchanged.
+- While you aim the railgun and the camera is its aim (with the controllers, while the motion camera steers it; or the scope from third person), in third or first person, your headset no longer moves the view or the aim: its turn and up and down tilt are left out of the view, so it looks exactly where the shot goes, while tilting your head toward a shoulder only turns the picture around the line of sight, as in normal VR, so the horizon stays level with the room and the crosshair stays put, and moving your head no longer shifts the aim (the railgun's aim starts at the camera, as on a flat screen, rather than at your hand placed relative to your head). The controller (with `MotionCamera`), thumbstick or mouse turns it. This holds from the frame the camera becomes the aim, through the shot, and normal head tracking returns on the frame it stops; during the camera's move into the scope, in a golf cart or with `MotionCamera` off, the controller aims and your head looks around as usual. Only how the view is drawn and where the aim starts change: no camera is turned and your character isn't moved, so repeated aiming can't build up a turn, and the headset's own tracking is untouched. In SBGVR's first person without the motion camera your head still aims (and looks up and down), so it isn't locked there. Other weapons and the golf cart are unchanged.
+- While your smoke bomb hides you, the floating screen no longer has a purple frame around it. The game draws the smoke bomb's purple look on every camera that uses its main renderer, including the UUVR camera that draws the floating screen's picture, so the effect's noisy purple edge was painted around the floating screen. That camera now skips it; your view is still tinted purple as before.
 
 ## [1.3.1] - 2026-10-29
 
@@ -100,7 +117,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 ### Changed
 
 - First public release. The mod itself is unchanged from 0.2.17, the last pre-release test build, which players tested on Steam Frame, Valve Index and Meta Quest 3.
-- The READMEs no longer call SBGVR experimental, list the tested headsets, and say that MaxFOVSlider 0.2.1 and later work alongside SBGVR (they pause their own projection in VR).
+- The READMEs no longer call SBGVR experimental, and they list the tested headsets.
 - Install instructions start with installing from Thunderstore; installing a local build is still described.
 
 ### Added
@@ -120,7 +137,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 
 ### Added
 
-- The game's field of view in VR. `VR Graphics` → `FieldOfView` (`Setting` by default) makes the game's Field of view slider work in VR, MaxFOVSlider's range included. At the game's default of 60 you get the headset's own view; higher values show more of the world, squeezed into the headset, and lower ones magnify it. `Headset` keeps the headset's view, and `Game` also follows the game's own changes, such as the overview camera. The floating screen, markers and reticles keep their size, and icons turn into edge arrows at the new edge of the view.
+- The game's field of view in VR. `VR Graphics` → `FieldOfView` (`Setting` by default) makes the game's Field of view slider work in VR. At the game's default of 60 you get the headset's own view; higher values show more of the world, squeezed into the headset, and lower ones magnify it. `Headset` keeps the headset's view, and `Game` also follows the game's own changes, such as the overview camera. The floating screen, markers and reticles keep their size, and icons turn into edge arrows at the new edge of the view.
 - `VR Graphics` → `RailgunZoom` (on by default): the railgun's aim zooms the view in VR, as it does on a flat screen. While the view is magnified, the eyes are drawn closer together by the same amount, so it stays easy to focus.
 
 ### Fixed
@@ -135,11 +152,6 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
 
 ### Changed
 
-- The project is renamed from SBG VR to SBGVR, without a space:
-  - The Thunderstore package is `SBGVR` (it was `SBG_VR`), and the zip is `lmkHenlo-SBGVR-<version>.zip`.
-  - The plugin is `SBGVR.dll` (it was `SbgVr.dll`), and the build file is `SBGVR.proj` (it was `SBG_VR.proj`).
-  - The plugin ID `com.sbgvr` and the settings file `com.sbgvr.cfg` are unchanged, so your settings carry over.
-  - Remove the old `SBG_VR` mod before installing this one, so the game doesn't end up with two copies.
 - The package description is shorter and matches the README's.
 - The README follows the [Standard Readme](https://github.com/RichardLitt/standard-readme) specification. It now has install and usage examples, how to update and uninstall, and how to contribute.
 
@@ -257,7 +269,7 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
   - `FullViewFades` (on by default): the game's fades darken your whole view, not just the floating screen.
   - `RecenterKey` (F4 by default): turns the view so the direction you're facing becomes straight ahead.
 - World-space markers: icons (your ball, the hole), name tags and the interaction reticle are drawn in the world at their target, at the right depth for each eye, instead of doubled on the floating screen. Their settings are in `VR HUD`: `WorldSpaceMarkers`, `MarkersOnTop`, `MarkerScale` and `MarkerViewAngle`.
-- Each SBG VR feature is applied on its own. If one fails to load (after a game update, say), it's turned off and logged, and the rest keep working.
+- Each SBGVR feature is applied on its own. If one fails to load (after a game update, say), it's turned off and logged, and the rest keep working.
 
 ### Fixed
 
@@ -274,5 +286,5 @@ Motion controls are tested on Meta Quest 3 with OpenXR, not yet on Valve Index o
   - Its patcher removes leftover copies of `ucrtbased.dll` and `OVRPlugin.dll` from the game folder.
   - The package includes only the 64-bit VR libraries the game loads.
 - The `com.sbgvr` plugin, which logs VR, camera, renderer and frame rate details for bug reports. The `Diagnostics` → `Enabled` and `PerformanceLogInterval` settings control it.
-- `build.ps1` and `SBG_VR.proj`, which build everything and make the Thunderstore zip.
+- `build.ps1` and `SBGVR.proj`, which build everything and make the Thunderstore zip.
 - `THIRD_PARTY_NOTICES.md`, with the licences of the bundled VR libraries.

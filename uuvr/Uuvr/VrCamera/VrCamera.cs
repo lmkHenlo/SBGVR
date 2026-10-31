@@ -13,6 +13,13 @@ public class VrCamera : UuvrBehaviour
     public static readonly HashSet<Camera> IgnoredCameras = new();
     public static VrCamera? HighestDepthVrCamera { get; private set; }
 
+    // SBGVR: while true, VR cameras render looking exactly where the game camera does: of the headset's
+    // rotation they add only its roll (tilting toward a shoulder), which turns the picture around the line of
+    // sight without moving it and keeps the horizon level with the room (RelativeTransform tracking only).
+    // Without the roll the headset would show an unrolled picture tilted with your head. Set by SBGVR while
+    // you aim the railgun.
+    public static bool LookWhereGameCameraLooks;
+
 #if MODERN
     private Quaternion _rotationBeforeRender;
 #endif
@@ -51,7 +58,20 @@ public class VrCamera : UuvrBehaviour
         if (ModConfiguration.Instance.CameraTracking.Value != ModConfiguration.CameraTrackingMode.RelativeTransform) return;
         
         _rotationBeforeRender = transform.rotation;
-        transform.rotation = _childCamera.transform.rotation;
+        transform.rotation = LookWhereGameCameraLooks
+            ? _rotationBeforeRender * HeadRoll(_childCameraPoseDriver!.transform.localRotation)
+            : _childCamera.transform.rotation;
+    }
+
+    // SBGVR: the headset's roll relative to gravity (tracking space is level), as a turn around the view's
+    // forward axis. None when looking almost straight up or down, where roll has no meaning.
+    private static Quaternion HeadRoll(Quaternion head)
+    {
+        var forward = head * Vector3.forward;
+        var level = Vector3.ProjectOnPlane(Vector3.up, forward);
+        if (level.sqrMagnitude < 1e-6f) return Quaternion.identity;
+        var roll = Vector3.SignedAngle(level, head * Vector3.up, forward);
+        return Quaternion.AngleAxis(roll, Vector3.forward);
     }
 
     protected override void OnEndFrameRendering()

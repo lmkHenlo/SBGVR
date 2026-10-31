@@ -14,9 +14,11 @@ namespace SBGVR.Hud
     /// tens of metres off (a cross-eyed reticle).
     ///
     /// Items aim straight out from the game camera, and their reticles sit at the centre of the game's
-    /// screen, so only the reticle's distance changes: each frame a ray goes from the camera along its
-    /// forward, past the local player's own character, and the reticle is drawn where it hits, or at
-    /// <see cref="SkyDistance"/> if it hits nothing. The distance glides to a new value rather than jumping,
+    /// screen, so only the reticle's distance changes. A gun's crosshair (dueling pistol, elephant gun, rocket
+    /// launcher, railgun) goes at the game's own aim point for the shot (<see cref="GameAimPoint"/>), up to the
+    /// gun's range. Every other reticle, or a gun's if that isn't available, goes where a ray from the camera
+    /// along its forward, past the local player's own character, hits, or at <see cref="SkyDistance"/> if it
+    /// hits nothing. The distance glides to a new value rather than jumping,
     /// so the eyes can follow when the aim sweeps from something near to something far. The reticle keeps its
     /// size on the floating screen and is drawn like a world-space marker (<see cref="WorldMarker"/>).
     /// </summary>
@@ -55,8 +57,15 @@ namespace SBGVR.Hud
         private readonly List<Component> _reticles = new List<Component>();
         /// <summary>For each entry in <see cref="_reticles"/>: whether <see cref="AimLine"/> draws a line to it.</summary>
         private readonly List<bool> _drawsAimLine = new List<bool>();
+        /// <summary>For each entry in <see cref="_reticles"/>: whether it's a gun's crosshair.</summary>
+        private readonly List<bool> _isGun = new List<bool>();
         private float _logDistance;
         private bool _wasShowing;
+
+        /// <summary>The gun crosshairs, placed at the game's own aim point (<see cref="GameAimPoint"/>).</summary>
+        private static bool IsGun(string reticleField) =>
+            reticleField == "duelingPistolReticle" || reticleField == "elephantGunReticle" ||
+            reticleField == "rocketLauncherReticle" || reticleField.StartsWith("railgun");
 
         /// <summary>
         /// Whether the aim line draws to this reticle: the dueling pistol, elephant gun, rocket launcher and
@@ -77,6 +86,7 @@ namespace SBGVR.Hud
         {
             _reticles.Clear();
             _drawsAimLine.Clear();
+            _isGun.Clear();
             if (SingletonBehaviour<ReticleManager>.HasInstance)
             {
                 var manager = SingletonBehaviour<ReticleManager>.Instance;
@@ -86,6 +96,7 @@ namespace SBGVR.Hud
                     if (component == null) continue;
                     _reticles.Add(component);
                     _drawsAimLine.Add(DrawsAimLine(ReticleFields[i]));
+                    _isGun.Add(IsGun(ReticleFields[i]));
                 }
 
                 var disallowed = DisallowedReticle(manager);
@@ -93,6 +104,7 @@ namespace SBGVR.Hud
                 {
                     _reticles.Add(disallowed.transform);
                     _drawsAimLine.Add(false);
+                    _isGun.Add(false);
                 }
             }
 
@@ -100,11 +112,13 @@ namespace SBGVR.Hud
             var camera = enabled ? Fades.FullViewFade.ViewCamera() : null;
             var showing = false;
             var weaponShowing = false;
+            var gunShowing = false;
             for (var i = 0; i < _reticles.Count; i++)
             {
                 if (camera == null || !_reticles[i].gameObject.activeSelf) continue;
                 showing = true;
                 if (_drawsAimLine[i]) weaponShowing = true;
+                if (_isGun[i]) gunShowing = true;
             }
 
             var point = Vector3.zero;
@@ -119,7 +133,12 @@ namespace SBGVR.Hud
                 }
                 direction.Normalize();
 
-                var target = Mathf.Log(AimDistance(origin, direction));
+                // A gun's crosshair: where the game will send the shot. It lies on this ray (the game casts the
+                // same one), so only its distance is taken, up to the gun's range rather than MaximumDistance.
+                var distance = gunShowing && GameAimPoint.TryGet(out var gunPoint, out var range)
+                    ? Mathf.Clamp(Vector3.Distance(origin, gunPoint), MinimumDistance, Mathf.Max(MinimumDistance, range))
+                    : AimDistance(origin, direction);
+                var target = Mathf.Log(distance);
                 _logDistance = _wasShowing
                     ? Mathf.Lerp(_logDistance, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / GlideSeconds))
                     : target;

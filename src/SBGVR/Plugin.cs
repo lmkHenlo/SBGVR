@@ -16,7 +16,7 @@ namespace SBGVR
     {
         public const string Guid = "com.sbgvr";
         public const string Name = "SBGVR";
-        public const string Version = "1.3.1";
+        public const string Version = "1.3.2";
 
         /// <summary>UUVR's BepInEx plugin ID (the Unity 2020+ Mono build).</summary>
         internal const string UuvrGuid = "raicuparta.uuvr-modern";
@@ -39,6 +39,11 @@ namespace SBGVR
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
+            Patch("Smoke bomb frame kept off the floating screen", typeof(Rendering.StealthFramePatches));
+            // The view lock works without the zoom; only the zoom (and the HUD and floating screen kept from it)
+            // needs the patch.
+            View.RailgunScopeZoom.ZoomAvailable = Patch("Railgun scope zoom", typeof(View.RailgunScopeZoomPatches));
+            Add(host, "Railgun scope view lock, HUD and floating screen", typeof(View.RailgunScopeZoom));
             if (Patch("Ambient occlusion for each eye", typeof(Rendering.AmbientOcclusionEyePatches)))
                 Rendering.AmbientOcclusionEyePatches.Verify();
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
@@ -61,7 +66,10 @@ namespace SBGVR
                 EnableOpenXrControllers();
                 Add(host, "Motion controls", typeof(Controls.MotionControls));
                 if (Settings.MotionCamera.Value)
+                {
                     Add(host, "Motion camera", typeof(Controls.MotionCamera));
+                    Add(host, "Motion camera for weapons", typeof(Controls.WeaponMotionCamera));
+                }
             }
 
             // Weapons aim along the controller (VR Controls.ControllerAiming) or, in first person, the head. While
