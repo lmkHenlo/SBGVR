@@ -85,6 +85,13 @@ namespace SBGVR.View
         // 0 with normal head tracking, 1 with the view locked to the railgun's aim.
         private bool _loggedLock;
 
+        /// <summary>
+        /// Whether the zoom's patch (<see cref="RailgunScopeZoomPatches"/>) applied. Without it the view lock still
+        /// works, and <see cref="Factor"/> stays 1, so the HUD and floating screen aren't adjusted for a zoom that
+        /// isn't there.
+        /// </summary>
+        internal static bool ZoomAvailable;
+
         private static int _lockFrame = -1;
         private static bool _locked;
 
@@ -124,7 +131,7 @@ namespace SBGVR.View
             // Only while the view is locked to the aim: zooming a view your head still turns magnifies every head
             // movement.
             float setting = 0f, scope = 0f;
-            var zoomed = ViewLocked && TryGetScopeFov(out setting, out scope);
+            var zoomed = ZoomAvailable && ViewLocked && TryGetScopeFov(out setting, out scope);
             var factor = zoomed
                 ? Mathf.Clamp(Mathf.Tan(setting * 0.5f * Mathf.Deg2Rad) / Mathf.Tan(scope * 0.5f * Mathf.Deg2Rad), 1f, MaxFactor)
                 : 1f;

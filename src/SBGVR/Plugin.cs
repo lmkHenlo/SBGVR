@@ -40,8 +40,10 @@ namespace SBGVR
             Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
             Patch("Smoke bomb frame kept off the floating screen", typeof(Rendering.StealthFramePatches));
-            if (Patch("Railgun scope zoom", typeof(View.RailgunScopeZoomPatches)))
-                Add(host, "Railgun scope zoom: HUD and floating screen", typeof(View.RailgunScopeZoom));
+            // The view lock works without the zoom; only the zoom (and the HUD and floating screen kept from it)
+            // needs the patch.
+            View.RailgunScopeZoom.ZoomAvailable = Patch("Railgun scope zoom", typeof(View.RailgunScopeZoomPatches));
+            Add(host, "Railgun scope view lock, HUD and floating screen", typeof(View.RailgunScopeZoom));
             if (Patch("Ambient occlusion for each eye", typeof(Rendering.AmbientOcclusionEyePatches)))
                 Rendering.AmbientOcclusionEyePatches.Verify();
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
