@@ -21,7 +21,8 @@ namespace SBGVR.Controls
     /// <c>maxPitch</c>, still applies), and sideways hand movement doesn't count.
     /// </para>
     /// <para>
-    /// The aim starts where the controller points (<see cref="StartAimWherePointing"/>): when you start aiming,
+    /// The aim starts where the controller points (<see cref="StartAimWherePointing"/>), and goes back there after
+    /// each shot while you're still aiming (<see cref="ReturnAimToPointing"/>): when you start aiming,
     /// the camera turns and tilts, over <see cref="AcquireSeconds"/>, until it looks where the controller points
     /// in the world as you see it, and from then on the change turns it 1:1. Without that, the aim started
     /// wherever the camera faced, as far from the controller as you held it from the camera's direction, and
@@ -53,8 +54,9 @@ namespace SBGVR.Controls
     /// <para>
     /// Tilt is restored, turning isn't. The pitch from before you started aiming is kept (in first person it's
     /// always level). While the item is being used (the shot; <see cref="IsFiring"/>, not while the railgun
-    /// charges), the tilt holds still, so the shot goes where you aimed; once the use is over, the pitch eases back to the kept value (<see cref="RestoreSeconds"/>), and if you're
-    /// still aiming, tilting carries on from there. When you stop aiming, it eases back the same way. Restoring
+    /// charges), the tilt holds still, so the shot goes where you aimed; once the use is over, if you're still
+    /// aiming, the tilt goes back to where the controller points (<see cref="ReturnAimToPointing"/>) and tilting
+    /// carries on from there. When you stop aiming, the pitch eases back to the kept value (<see cref="RestoreSeconds"/>). Restoring
     /// sets the kept pitch itself rather than undoing the changes, so repeated aiming and firing can't build up an
     /// error. If the camera it was restoring isn't showing any more (you switched between first and third person,
     /// say), or a golf club, rocket club or Jumbo Burger swing starts, the kept pitch is set at once instead, so no
@@ -253,10 +255,11 @@ namespace SBGVR.Controls
                 _appliedYaw = yaw;
             }
 
-            // Up and down, 1:1, except while the item is being used (the shot holds still) and while the tilt eases
-            // back after it. The cameras' pitch grows as they look down, so tilting up lowers it.
+            // Up and down, 1:1, except while the item is being used (the shot holds still). After the shot, if you're
+            // still aiming, the tilt goes back to where the controller points. The cameras' pitch grows as they look
+            // down, so tilting up lowers it.
             var inUse = IsFiring(inventory);
-            if (_wasUsing && !inUse) _restoring = true;
+            if (_wasUsing && !inUse) ReturnAimToPointing(view, tilt);
             _wasUsing = inUse;
 
             if (inUse)
@@ -305,6 +308,25 @@ namespace SBGVR.Controls
             if (Settings.DiagnosticsEnabled.Value)
                 Plugin.Log.LogInfo($"Motion camera: aim starts where the controller points, {_acquireYaw:+0.0;-0.0;0}° and " +
                                    $"{-_acquirePitch:+0.0;-0.0;0}° from where the camera looked.");
+        }
+
+        /// <summary>
+        /// After a shot, while you're still aiming: the tilt held for the shot eases to where the controller points
+        /// now (by <see cref="UpdateAcquire"/>, like the start of aiming), and tilting carries on from there. Easing
+        /// back to the pitch from before you aimed would leave the aim above or below the controller, by as much as
+        /// it moved when aiming started; that pitch is still what the camera returns to when you stop aiming.
+        /// </summary>
+        private void ReturnAimToPointing(CameraView view, float tilt)
+        {
+            _referenceTilt = tilt;
+            _appliedTilt = 0f;
+            _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
+            if (!ControllerAim.TryGetPointingDirection(out var pointing)) return;
+
+            // The cameras' pitch grows as they look down.
+            _acquirePitch = -TiltOf(pointing) - GetPitch(view);
+            if (Settings.DiagnosticsEnabled.Value)
+                Plugin.Log.LogInfo($"Motion camera: after the shot, the aim goes back to where the controller points ({-_acquirePitch:+0.0;-0.0;0}°).");
         }
 
         /// <summary>Eases the turn to where the controller pointed into the camera, on top of the 1:1 steering.</summary>
