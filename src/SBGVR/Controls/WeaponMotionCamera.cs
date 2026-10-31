@@ -259,7 +259,7 @@ namespace SBGVR.Controls
             // still aiming, the tilt goes back to where the controller points. The cameras' pitch grows as they look
             // down, so tilting up lowers it.
             var inUse = IsFiring(inventory);
-            if (_wasUsing && !inUse) ReturnAimToPointing(view, tilt);
+            if (_wasUsing && !inUse) ReturnAimToPointing(view, orbit, firstPerson, tilt);
             _wasUsing = inUse;
 
             if (inUse)
@@ -316,15 +316,22 @@ namespace SBGVR.Controls
         /// back to the pitch from before you aimed would leave the aim above or below the controller, by as much as
         /// it moved when aiming started; that pitch is still what the camera returns to when you stop aiming.
         /// </summary>
-        private void ReturnAimToPointing(CameraView view, float tilt)
+        private void ReturnAimToPointing(CameraView view, OrbitCameraModule orbit, FirstPersonCameraModule firstPerson, float tilt)
         {
             _referenceTilt = tilt;
             _appliedTilt = 0f;
             _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
             if (!ControllerAim.TryGetPointingDirection(out var pointing)) return;
 
+            // Left and right kept following the controller during the shot, so this is normally 0; it isn't if the
+            // shot came before the turn at the start of aiming had finished.
+            var yaw = view == CameraView.ThirdPerson ? orbit.Yaw : firstPerson.Yaw;
+            var pitch = GetPitch(view);
+            var looking = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
+            if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 1e-4f && new Vector2(looking.x, looking.z).sqrMagnitude >= 1e-4f)
+                _acquireYaw = Mathf.DeltaAngle(HeadingOf(looking), HeadingOf(pointing));
             // The cameras' pitch grows as they look down.
-            _acquirePitch = -TiltOf(pointing) - GetPitch(view);
+            _acquirePitch = -TiltOf(pointing) - pitch;
             if (Settings.DiagnosticsEnabled.Value)
                 Plugin.Log.LogInfo($"Motion camera: after the shot, the aim goes back to where the controller points ({-_acquirePitch:+0.0;-0.0;0}°).");
         }
