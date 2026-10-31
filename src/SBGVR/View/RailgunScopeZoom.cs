@@ -85,11 +85,24 @@ namespace SBGVR.View
         // 0 with normal head tracking, 1 with the view locked to the railgun's aim.
         private bool _loggedLock;
 
+        private static int _lockFrame = -1;
+        private static bool _locked;
+
         /// <summary>
         /// True while the view and the railgun's aim are locked to the game camera, so the headset doesn't turn the
-        /// view or move the aim. Set just before each frame renders.
+        /// view or move the aim: you're aiming the railgun and the camera is its aim (<see cref="CameraIsTheAim"/>).
+        /// Decided once a frame, so the view lock, where the aim starts and the zoom always agree.
         /// </summary>
-        internal static bool ViewLocked { get; private set; }
+        internal static bool ViewLocked
+        {
+            get
+            {
+                if (_lockFrame == Time.frameCount) return _locked;
+                _lockFrame = Time.frameCount;
+                _locked = IsAimingRailgun() && CameraIsTheAim();
+                return _locked;
+            }
+        }
 
         /// <summary>How much the railgun scope magnifies this frame: 1 when it isn't up or VR isn't running.</summary>
         internal static float Factor
@@ -108,7 +121,10 @@ namespace SBGVR.View
 
         private static float ComputeFactor()
         {
-            var zoomed = TryGetScopeFov(out var setting, out var scope);
+            // Only while the view is locked to the aim: zooming a view your head still turns magnifies every head
+            // movement.
+            float setting = 0f, scope = 0f;
+            var zoomed = ViewLocked && TryGetScopeFov(out setting, out scope);
             var factor = zoomed
                 ? Mathf.Clamp(Mathf.Tan(setting * 0.5f * Mathf.Deg2Rad) / Mathf.Tan(scope * 0.5f * Mathf.Deg2Rad), 1f, MaxFactor)
                 : 1f;
@@ -165,16 +181,17 @@ namespace SBGVR.View
         }
 
         /// <summary>
-        /// Whether the railgun aims along the game camera, so locking the view to it locks it to the aim. With the
-        /// controllers (VR Controls.ControllerAiming) it does while the motion camera steers it (MotionCamera);
-        /// otherwise the controller's own ray aims. Without them, the scope from third person aims along the
-        /// camera, but SBGVR's first person aims along your head, which is then also the only way to look up and
-        /// down, so the view isn't locked there.
+        /// Whether the railgun aims along the game camera right now, so locking the view to it locks it to the aim.
+        /// With the controllers (VR Controls.ControllerAiming) it does only while the motion camera is steering the
+        /// camera (<see cref="Controls.WeaponMotionCamera.TryGetCameraAim"/>); otherwise, during the camera's move
+        /// into the scope, in a golf cart, or with MotionCamera off, the controller's own ray aims. Without them, the
+        /// scope from third person aims along the camera, but SBGVR's first person aims along your head, which is
+        /// then also the only way to look up and down, so the view isn't locked there.
         /// </summary>
-        private static bool AimsAlongCamera()
+        private static bool CameraIsTheAim()
         {
             var controllers = Settings.MotionControls.Value && Settings.ControllerAiming.Value && Controls.MotionControls.InUse;
-            return controllers ? Settings.MotionCamera.Value : !FirstPersonView.Owns;
+            return controllers ? Controls.WeaponMotionCamera.TryGetCameraAim(out _) : !FirstPersonView.Owns;
         }
 
         /// <summary>
@@ -183,8 +200,7 @@ namespace SBGVR.View
         /// </summary>
         private void UpdateViewLock()
         {
-            var locked = IsAimingRailgun() && AimsAlongCamera();
-            ViewLocked = locked;
+            var locked = ViewLocked;
             Uuvr.VrCamera.VrCamera.LookWhereGameCameraLooks = locked;
 
             if (locked == _loggedLock || !Settings.DiagnosticsEnabled.Value) return;
@@ -218,7 +234,6 @@ namespace SBGVR.View
         {
             RestoreScreen();
             Application.onBeforeRender -= UpdateViewLock;
-            ViewLocked = false;
             Uuvr.VrCamera.VrCamera.LookWhereGameCameraLooks = false;
         }
 
