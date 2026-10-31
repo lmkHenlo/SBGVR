@@ -22,7 +22,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - Sweeping the aim from near to far moves them smoothly in depth.
    - No scenery, character (including yours) or effect ever covers any part of them; menus and fades still do.
    - The orange lock-on reticle (full-power swings, rocket launcher) sits on its target, single. So do airhorn target indicators, the giant-form timer and pop-up text.
-   - The railgun's zoomed reticle doesn't zoom the view in VR.
+   - The railgun's zoomed reticle sits on the aim, and the view zooms while its scope is locked to the aim (step 16).
    - With `AimLine` on (it's off by default): while aiming the dueling pistol, elephant gun, rocket launcher or freeze bomb, a thin white line runs from your character's hand to the reticle. The railgun, thunderstorm and flash camera show no line. It stays attached to both as you move, turn and change the aim, looks single and steady in the headset at any distance, and disappears when you stop aiming. With `AimLine` off (the default), there's no line.
 7. Ambient occlusion:
    - No black areas cover nearby scenery or your character when you look around or move.
@@ -47,7 +47,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 13. Motion camera, with `MotionControls` on:
     - Aim a golf club swing, then turn the right controller and move it sideways: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
     - Holding the controller still while aiming doesn't drift the camera. Pulling the trigger to swing doesn't move it. The thumbstick still turns the camera while aiming.
-    - The rocket club works the same way. Outside swing aiming (walking, weapons, menus), the controller doesn't turn the camera.
+    - The rocket club works the same way. Walking and in menus, the controller doesn't turn the camera; aiming weapons turns it 1:1 (step 16).
     - Stopping aiming leaves the camera where it is; aiming again starts from how you hold the controller then.
     - Tilting the controller doesn't move the camera unless `MotionCameraMaxPitch` is above 0.
     - With `MotionCamera` off, the camera only turns with the thumbstick, as before.
@@ -74,5 +74,14 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - In a match, opening the pause menu shows the layout in the same place at once (the log says `Menu controls: controller layout shown in the pause menu` the first time), and closing it (Resume, the Menu button, or the pause menu closing for any other reason) hides it at once. Every pause menu button, the settings and match setup it opens, and the rules pages stay fully visible and usable.
     - With `MenuControlsSide` = `Left` or `Right` it's beside the screen instead; with `MenuControls` = `false`, or `MotionControls` off, it isn't shown.
     - Try a different `VR UI Scale` or window size: it still stays clear of the screen.
+
+16. Weapon aiming, the railgun's scope and the smoke bomb (1.3.2), with `MotionControls`, `ControllerAiming` and `MotionCamera` on:
+    - Gun crosshairs (dueling pistol, elephant gun, rocket launcher, railgun) sit where each shot lands: on near walls, far terrain and the sky, through foliage and fences, and with your back to a wall in third person.
+    - Point at a target and start aiming: the crosshair eases onto where the controller points (the log says `Motion camera: aim starts where the controller points`). Sweeping the controller slowly and quickly moves the aim exactly as far as your hand, without jitter or lag, held high and low.
+    - Fire a few times while still aiming: during each shot the tilt holds; after it, the aim goes back to where the controller points (`after the shot, the aim goes back to where the controller points`). Stop aiming: the camera's tilt eases back to where it was before you aimed. Repeat many times: nothing creeps.
+    - Railgun from third person and in first person: once the camera has moved into the scope, the view locks to the aim and zooms (the log says `Railgun: view and aim locked to the camera` and, with Diagnostics on, `[diag] Railgun scope: … magnifies`). Turning or nodding your head doesn't move the view or the crosshair; tilting your head toward a shoulder keeps the horizon level. The floating screen, markers and crosshairs keep their size. Charging and firing work, and closing the scope brings normal head tracking back at once (`Railgun: aiming ended; head tracking is back`).
+    - During the camera's move into the scope, in a golf cart and with `MotionCamera` off, the view isn't locked or zoomed, and the controller aims as usual.
+    - Throw a smoke bomb: the view turns purple, and the floating screen has no purple frame around it.
+    - The controller layout panel shows the left Menu button as Steam Menu and the motion box as Dominant Controller.
 
 Send `LogOutput.log` from the session with notes on each step.
