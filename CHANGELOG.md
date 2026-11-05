@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- `THIRD_PARTY_NOTICES.md` credits the Meta Quest Touch Plus controller artwork in the controller layout image under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/), with its copyright notice, lists the files that contain it, and says that licence doesn't cover Meta's names, trademarks or logos and that SBGVR isn't affiliated with, sponsored by or endorsed by Meta. Both READMEs, the controller layout tool's README and the artwork file itself point to it. The mod itself is unchanged.
+
 ## [1.3.2] - 2026-10-30
 
 ### Changed

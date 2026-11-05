@@ -368,7 +368,7 @@ SBGVR/
 ├── thunderstore/             manifest.json, icon.png and the package README
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)
-└── THIRD_PARTY_NOTICES.md    licences of the bundled VR runtime libraries
+└── THIRD_PARTY_NOTICES.md    licences of the bundled VR runtime libraries and Meta's controller artwork
 ```
 
 ## AI assistance
@@ -402,4 +402,4 @@ Pull requests are accepted on [GitHub](https://github.com/lmkHenlo/SBGVR). When 
 
 ## License
 
-[GPL-3.0-or-later](LICENSE) © 2026 lmkHenlo. UUVR is GPL-3.0-or-later © 2024 Raicuparta; SBGVR's copy is modified, as listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The bundled VR runtime libraries keep their own licences; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[GPL-3.0-or-later](LICENSE) © 2026 lmkHenlo. UUVR is GPL-3.0-or-later © 2024 Raicuparta; SBGVR's copy is modified, as listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The bundled VR runtime libraries keep their own licences, and the controller layout's Meta Quest Touch Plus artwork is Meta's, used under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). SBGVR isn't affiliated with, sponsored by or endorsed by Meta.
