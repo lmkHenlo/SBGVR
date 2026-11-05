@@ -16,13 +16,6 @@ Each change is its own commit, and README.md (How it works) lists them; changed 
 the changes with `SBGVR:` comments. SBGVR's full source, including its copy of UUVR, is at
 <https://github.com/lmkHenlo/SBGVR>.
 
-SBGVR's controller layout image (`Assets/controller-layout.png` in the source, embedded in
-`plugins/SBGVR.dll`; source in `tools/controller-layout/`) contains Meta's official Meta Quest Touch
-Plus controller artwork (`tools/controller-layout/meta-quest-touch-plus.svg`, converted from Meta's
-controller asset pack). That artwork belongs to Meta Platforms, Inc., is used with permission for this
-controller documentation, and is not covered by SBGVR's GPL licence. The image's text is set in Inter
-(SIL Open Font License 1.1); the font files themselves aren't included.
-
 UUVR in turn includes the components below, which keep their own licences.
 
 | Files in this package | Component | Licence |
@@ -35,6 +28,9 @@ UUVR in turn includes the components below, which keep their own licences.
 | `patchers/CopyToGame/Plugins/x64/UnityOpenXR.dll`, `patchers/CopyToGame/Data/UnitySubsystems/UnityOpenXR/` | Unity OpenXR plugin (com.unity.xr.openxr) 1.4.2, Unity Technologies | Unity Package Distribution License ([notice below](#unity-openxr-plugin)) |
 | `plugins/Uuvr.XR.OpenXR.dll` | Adapted from the Unity OpenXR plugin's source. SBGVR added, on 2026-10-24, the controller input code and five controller profiles adapted from version 1.4.2 (`Input/OpenXRInput.cs` and `Features/Interactions/` in the source); each of those files says what was changed. | Unity Companion License ([notice below](#unity-openxr-plugin)) |
 | `plugins/Uuvr.XR.Management.dll` | Adapted from Unity XR Plugin Management (com.unity.xr.management) | Unity Companion License ([notice below](#unity-xr-plugin-management)) |
+
+SBGVR's controller layout image contains Meta's Meta Quest Touch Plus controller artwork, used under
+Meta's Art Attribution License 1.0; see [Meta Quest Touch Plus controller artwork](#meta-quest-touch-plus-controller-artwork).
 
 ## OpenVR SDK
 
@@ -337,3 +333,30 @@ Licensed under the Unity Companion License for Unity-dependent projects--see [Un
 
 Unless expressly provided otherwise, the Software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the license for details on these and other terms and conditions.
 ```
+
+## Meta Quest Touch Plus controller artwork
+
+SBGVR's controller layout image contains Meta's Meta Quest Touch Plus controller artwork, converted
+from the controller images in Meta's developer art assets:
+
+| Files | What it is |
+| --- | --- |
+| `tools/controller-layout/meta-quest-touch-plus.svg` (source only) | Meta's line art of the left and right Meta Quest Touch Plus controllers |
+| `src/SBGVR/Assets/controller-layout.png` in the source, embedded in `plugins/SBGVR.dll` | SBGVR's controller layout, made from that line art; shown in VR in the game's main menu and pause menu |
+
+The artwork is used under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/),
+only to show which button on these controllers does what in SBGVR, as that licence allows (using the
+images to refer to the product they show, including in user manuals):
+
+```text
+Copyright © Facebook Technologies, LLC and its affiliates. All rights reserved.
+```
+
+The artwork is provided "as is" under that licence and isn't covered by SBGVR's GPL licence. That
+licence doesn't cover Meta's names, trademarks or logos. Meta and Meta Quest are trademarks of Meta
+Platforms, Inc. or its affiliates; SBGVR uses them only to name the controllers and their buttons, and
+the Meta logo on the right controller's Meta button appears only because it's part of Meta's artwork
+of that controller. SBGVR is an independent mod, not affiliated with, sponsored by or endorsed by Meta.
+
+The layout image's text is set in Inter (SIL Open Font License 1.1); the font files themselves aren't
+included.

@@ -65,4 +65,4 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 
 ## License
 
-GPL-3.0-or-later. SBGVR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences; see `THIRD_PARTY_NOTICES.md`. The source, including SBGVR's copy of UUVR, is at <https://github.com/lmkHenlo/SBGVR>.
+GPL-3.0-or-later. SBGVR is © 2026 lmkHenlo, and UUVR is © 2024 Raicuparta. The VR runtime libraries included keep their own licences, and the controller layout's Meta Quest Touch Plus artwork is Meta's, used under Meta's Art Attribution License 1.0 (<https://developers.meta.com/vr/licenses/art-1.0/>); see `THIRD_PARTY_NOTICES.md`. SBGVR isn't affiliated with, sponsored by or endorsed by Meta. The source, including SBGVR's copy of UUVR, is at <https://github.com/lmkHenlo/SBGVR>.

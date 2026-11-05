@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Meta Quest Touch Plus controller artwork by Meta, converted from the controller images in Meta's
+  developer art assets. Used under Meta's Art Attribution License 1.0
+  (https://developers.meta.com/vr/licenses/art-1.0/), only to refer to these controllers.
+  Copyright © Facebook Technologies, LLC and its affiliates. All rights reserved.
+  Not covered by SBGVR's GPL licence. SBGVR is not affiliated with, sponsored by or endorsed by Meta.
+  See THIRD_PARTY_NOTICES.md.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="716" height="452" viewBox="44 50 716 452">
 <path fill="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(13.699341%, 12.199402%, 12.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0 -0.0008125 C 33.296875 -12.489094 72.851562 -14.043781 125.5 21.6945 C 155.9375 42.354656 175.050781 70.10075 190.167969 97.5695 " transform="matrix(1, 0, 0, -1, 160.5, 241.4445)"/>
 <path fill="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(13.699341%, 12.199402%, 12.5%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.001725 0 C 11.834213 -14.054688 -16.8611 -17.5 -34.1111 -22 C -47.462662 -25.484375 -71.8611 -27.25 -73.443131 -47.167969 C -74.9236 -65.78125 -61.943131 -69.996094 -61.943131 -69.996094 " transform="matrix(1, 0, 0, -1, 248.6111, 262.5)"/>
