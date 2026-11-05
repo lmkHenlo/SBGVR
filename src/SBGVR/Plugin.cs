@@ -65,6 +65,9 @@ namespace SBGVR
             {
                 EnableOpenXrControllers();
                 Add(host, "Motion controls", typeof(Controls.MotionControls));
+                // The icon set is swapped every frame anyway; the patch only saves the frame after a device switch.
+                Patch("Meta Quest button prompts: on device switch", typeof(Hud.MetaButtonPromptPatches));
+                Add(host, "Meta Quest button prompts", typeof(Hud.MetaButtonPrompts));
                 if (Settings.MotionCamera.Value)
                 {
                     Add(host, "Motion camera", typeof(Controls.MotionCamera));
