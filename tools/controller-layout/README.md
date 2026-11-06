@@ -1,7 +1,7 @@
 # Controller layout image
 
 `controller-layout.html` is the source of `src/SBGVR/Assets/controller-layout.png`, the VR controller
-layout SBGVR shows below the floating screen in the main menu (`Hud/MenuControlsPanel.cs`). Opened with
+layout SBGVR shows next to the floating screen in the main menu and the pause menu (`Hud/MenuControlsPanel.cs`). Opened with
 `?mirrored`, it's the source of `controller-layout-mirrored.png`, the same layout with `MirrorButtons` on:
 each label keeps its button's name and takes the other controller's actions (except the Menu and Meta
 buttons), and the grip-button combinations move to the right grip button. Both PNGs are embedded in

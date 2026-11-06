@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers use Thunderstore's `Major.Minor.Patch` format.
 
-1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Dates are in US Central time (UTC−05:00).
+1.0.0 is the first public release. Versions 0.1.0 to 0.2.17 are pre-release test builds that were never published; each was built from the commit that set its version number. Dates are in US Central time.
 
 ## [Unreleased]
 
