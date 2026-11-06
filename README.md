@@ -105,9 +105,9 @@ Install the new zip the same way: import it in r2modman, or run the commands abo
 
 ### Uninstalling
 
-Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`.
+Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`. That removes everything: SBGVR writes nothing to the game's `Super Battle Golf_Data` folder, and its VR runtime files stay in the mod's patcher folder (`CopyToGame`), where the game reads them.
 
-Each time the game starts, UUVR's patcher copies VR runtime files into the game's `Super Battle Golf_Data` folder, which mod managers can't clean up. Uninstalling leaves them behind. They aren't used without the mod and can be deleted:
+Versions up to 1.3.2 copied those files into `Super Battle Golf_Data` each time the game started, and mod managers can't clean them up, so they may still be there after an update or uninstall. Newer versions don't use them (the log names any it finds, under `SBGVR Redirect`), and they can be deleted:
 
 - `Plugins\openvr_api.dll`
 - `Plugins\openxr_loader.dll`
@@ -288,7 +288,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 
 **UUVR** (`uuvr/`, vendored at upstream tag v0.4.0) does the VR work:
 
-1. Its patcher (`Uuvr.Patcher`) runs before the game starts. It copies the native VR libraries (`openxr_loader`, `UnityOpenXR`, `openvr_api`, `XRSDKOpenVR`), their Unity subsystem manifests and SteamVR input files into `Super Battle Golf_Data`.
+1. Its patcher (`Uuvr.Patcher`) runs before the game starts. Unity only looks for the native VR libraries (`openxr_loader`, `UnityOpenXR`, `openvr_api`, `XRSDKOpenVR`), their Unity subsystem manifests and SteamVR's settings in `Super Battle Golf_Data`, so the patcher points those lookups at the patcher's own `CopyToGame` folder (`GameFolderRedirect`). Nothing is written to the game folder.
 2. Its plugin (`Uuvr`) creates Unity XR Management settings at runtime, adds an OpenXR or OpenVR loader and starts it.
 3. It adds a `VrCamera` to every camera that renders to the screen and drives it from the headset's rotation.
 4. It captures the 2D interface into a texture and shows it on a quad in front of the camera.

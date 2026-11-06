@@ -93,9 +93,9 @@ internal static class GameFolderRedirect
         if (found.Count == 0)
             Log.LogInfo("The game folder has no copies of the VR runtime: everything VR loads comes from the mod's folder.");
         else
-            Log.LogInfo("WARNING: the game folder still has VR runtime files copied by an earlier version. " +
-                              "They aren't used while the redirect works, but delete them to be sure the test shows " +
-                              "the redirect alone:\n  " + string.Join("\n  ", found.ToArray()));
+            Log.LogInfo("WARNING: the game folder still has VR runtime files copied by SBGVR 1.3.2 or earlier. " +
+                              "They aren't used (the mod's own copies are) and can be deleted:\n  " +
+                              string.Join("\n  ", found.ToArray()));
     }
 
     /// <summary>The file in the mod's folder that stands in for a path in the game's data folder, or null.</summary>
