@@ -17,7 +17,7 @@ SBGVR is Raicuparta's Universal Unity VR (UUVR), packaged and built for Super Ba
 
 ## Install
 
-Download `lmkHenlo-SBGVR-<version>.zip` from <https://github.com/lmkHenlo/SBGVR/releases>. In r2modman, make sure the Super Battle Golf profile has BepInExPack, then use **Import local mod** with the zip.
+Click **Install with Mod Manager** on this page, or find SBGVR in r2modman's online list for Super Battle Golf. r2modman installs BepInExPack with it.
 
 Before you start the game:
 
