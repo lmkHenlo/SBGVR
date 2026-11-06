@@ -2,7 +2,6 @@
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
 using System;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Uuvr;
@@ -40,13 +39,17 @@ namespace SBGVR.Hud
     /// rest of the view as before.
     /// </para>
     /// <para>
-    /// The image (<c>Assets/controller-layout.png</c>, embedded in the DLL) is rendered from
-    /// <c>tools/controller-layout</c>. Its controller artwork is Meta's (see THIRD_PARTY_NOTICES.md).
+    /// The image (<c>Assets/controller-layout.png</c>, or <c>Assets/controller-layout-mirrored.png</c> while
+    /// VR Controls.MirrorButtons is on, both embedded in the DLL) is rendered from <c>tools/controller-layout</c>,
+    /// and follows the setting as soon as it changes. It shows Meta Quest Touch Plus controllers; other
+    /// controllers use the input in the same place (see MotionControls). Its controller artwork is Meta's (see
+    /// THIRD_PARTY_NOTICES.md).
     /// </para>
     /// </remarks>
     internal sealed class MenuControlsPanel : MonoBehaviour
     {
         private const string ImageResource = "SBGVR.controller-layout.png";
+        private const string MirroredImageResource = "SBGVR.controller-layout-mirrored.png";
 
         /// <summary>
         /// The floating screen's queue, after the full-view fade behind the screen (4999), so that fade doesn't
@@ -73,6 +76,9 @@ namespace SBGVR.Hud
         private GameObject _panel;
         private Material _material;
         private Texture2D _texture;
+        private Texture2D _mirroredTexture;
+        private bool _showingMirrored;
+        private bool _mirroredFailed;
         private float _aspect = 1100f / 1440f;
         private bool _failed;
         private string _loggedWhere;
@@ -93,6 +99,7 @@ namespace SBGVR.Hud
             if (_panel != null) Destroy(_panel);
             if (_material != null) Destroy(_material);
             if (_texture != null) Destroy(_texture);
+            if (_mirroredTexture != null) Destroy(_mirroredTexture);
         }
 
         private void LateUpdate()
@@ -126,6 +133,7 @@ namespace SBGVR.Hud
             }
 
             if (_panel == null && !Create()) return;
+            ShowLayout(Settings.MirrorButtons.Value);
 
             var config = ModConfiguration.Instance;
             var screen = config.VrUiPosition.Value;
@@ -171,7 +179,7 @@ namespace SBGVR.Hud
 
             if (where == _loggedWhere) return;
             _loggedWhere = where;
-            Plugin.Log.LogInfo($"Menu controls: controller layout shown in {where}, {(side == MenuControlsSide.Below ? "below" : side == MenuControlsSide.Left ? "left of" : "right of")} " +
+            Plugin.Log.LogInfo($"Menu controls: controller layout{(_showingMirrored ? " (mirrored, MirrorButtons)" : "")} shown in {where}, {(side == MenuControlsSide.Below ? "below" : side == MenuControlsSide.Left ? "left of" : "right of")} " +
                                $"the floating screen, {Mathf.Abs(angle):0}° from straight ahead, {width:0.00} m wide at {distance:0.00} m.");
         }
 
@@ -179,7 +187,8 @@ namespace SBGVR.Hud
         {
             try
             {
-                _texture = LoadImage();
+                _texture = EmbeddedImage.Load(ImageResource, "SBGVR controller layout");
+                _texture.anisoLevel = 8;
                 _aspect = (float)_texture.height / _texture.width;
 
                 _panel = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -216,29 +225,31 @@ namespace SBGVR.Hud
             }
         }
 
-        private static Texture2D LoadImage()
+        /// <summary>
+        /// Shows the mirrored layout while MirrorButtons is on, the normal one otherwise; the mirrored image is
+        /// loaded the first time it's needed. If it can't be loaded, the normal layout stays.
+        /// </summary>
+        private void ShowLayout(bool mirrored)
         {
-            byte[] bytes;
-            using (var stream = typeof(MenuControlsPanel).Assembly.GetManifestResourceStream(ImageResource))
+            if (mirrored && _mirroredTexture == null && !_mirroredFailed)
             {
-                if (stream == null) throw new FileNotFoundException("The controller layout image is missing from SBGVR.dll.");
-                using (var memory = new MemoryStream())
+                try
                 {
-                    stream.CopyTo(memory);
-                    bytes = memory.ToArray();
+                    _mirroredTexture = EmbeddedImage.Load(MirroredImageResource, "SBGVR controller layout (mirrored)");
+                    _mirroredTexture.anisoLevel = 8;
+                }
+                catch (Exception exception)
+                {
+                    _mirroredFailed = true;
+                    Plugin.Log.LogError($"Menu controls: couldn't show the mirrored layout, showing the normal one: {exception.GetBaseException().Message}");
                 }
             }
 
-            // sRGB colour, with mipmaps so the text stays smooth at a distance.
-            var texture = new Texture2D(2, 2, TextureFormat.RGBA32, true, false)
-            {
-                name = "SBGVR controller layout",
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Trilinear,
-                anisoLevel = 8,
-            };
-            if (!texture.LoadImage(bytes, true)) throw new InvalidDataException("The controller layout image couldn't be read.");
-            return texture;
+            var showMirrored = mirrored && _mirroredTexture != null;
+            if (showMirrored == _showingMirrored) return;
+            _showingMirrored = showMirrored;
+            _material.mainTexture = showMirrored ? _mirroredTexture : _texture;
+            _loggedWhere = null; // log the layout shown again
         }
     }
 }

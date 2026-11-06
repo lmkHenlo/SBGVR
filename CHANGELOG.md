@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- The controller layout panel in the main menu and pause menu follows `MirrorButtons`: with it on, the panel shows the mirrored layout (subtitled "Mirrored buttons"), with each button's mirrored action and the combinations on the right grip button, and it switches as soon as the setting changes. Before, it always showed the normal layout, so every label was wrong with `MirrorButtons` on.
 - If one feature fails as VR starts or stops, the others still switch on or off; before, the features after it were skipped for the whole session. The log names the feature that failed.
 
 ## [1.4.0] - 2026-11-05

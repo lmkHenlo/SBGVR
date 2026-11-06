@@ -73,6 +73,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - It stays fully visible, without dimming or flicker, while the main menu's background scenes fade between each other and while the menu fades in or out; the rest of the view still fades as before. It disappears once the main menu is gone (joining a match).
     - In a match, opening the pause menu shows the layout in the same place at once (the log says `Menu controls: controller layout shown in the pause menu` the first time), and closing it (Resume, the Menu button, or the pause menu closing for any other reason) hides it at once. Every pause menu button, the settings and match setup it opens, and the rules pages stay fully visible and usable.
     - With `MenuControlsSide` = `Left` or `Right` it's beside the screen instead; with `MenuControls` = `false`, or `MotionControls` off, it isn't shown.
+    - With `MirrorButtons` on, it shows the mirrored layout (subtitled "Mirrored buttons"), and every label matches the README's mirrored table; the log says `controller layout (mirrored, MirrorButtons) shown`. If you can change `MirrorButtons` while the game runs (with an in-game config editor), the image switches at once.
     - Try a different `VR UI Scale` or window size: it still stays clear of the screen.
 
 16. Weapon aiming, the railgun's scope and the smoke bomb (1.3.2), with `MotionControls`, `ControllerAiming` and `MotionCamera` on:
