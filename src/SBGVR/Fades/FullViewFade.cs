@@ -191,7 +191,7 @@ namespace SBGVR.Fades
                     name = name,
                     renderQueue = renderQueue,
                 };
-                _material.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+                _material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
                 _renderer.sharedMaterial = _material;
                 _object.SetActive(false);
             }

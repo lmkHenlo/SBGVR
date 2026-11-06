@@ -209,7 +209,7 @@ namespace SBGVR.Hud
                     mainTexture = _texture,
                     renderQueue = RenderQueue,
                 };
-                _material.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+                _material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
                 renderer.sharedMaterial = _material;
                 _panel.SetActive(false);
                 return true;

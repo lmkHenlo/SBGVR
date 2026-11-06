@@ -68,9 +68,6 @@ namespace SBGVR.View
     {
         private const float MaxFactor = 20f;
 
-        /// <summary>How long the headset's rotation takes to fade out of the view as the scope opens, and back in.</summary>
-        private const string ZTestProperty = "unity_GUIZTestMode";
-
         private static int _factorFrame = -1;
         private static float _factor = 1f;
         private static bool _wasZoomed;
@@ -82,7 +79,7 @@ namespace SBGVR.View
         private Vector3 _screenPosition;
         private bool _screenMoved;
 
-        // 0 with normal head tracking, 1 with the view locked to the railgun's aim.
+        // Whether the view lock was on when it was last logged, so each change is logged once.
         private bool _loggedLock;
 
         /// <summary>
@@ -275,7 +272,7 @@ namespace SBGVR.View
                 if (_onTopMaterial != null) Destroy(_onTopMaterial);
                 _screenMaterial = current;
                 _onTopMaterial = new Material(current) { name = current.name + " (SBGVR scope zoom)" };
-                _onTopMaterial.SetInt(ZTestProperty, (int)CompareFunction.Always);
+                _onTopMaterial.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
                 _screenRenderer.sharedMaterial = _onTopMaterial;
             }
             else if (_screenMaterial != null && _screenRenderer.sharedMaterial == _onTopMaterial)

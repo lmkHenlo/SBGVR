@@ -51,7 +51,7 @@ namespace SBGVR.Hud
                 renderQueue = (int)RenderQueue.Transparent,
             };
             // The UI shader's depth test comes from this property (a canvas sets it); test against the scene.
-            material.SetInt("unity_GUIZTestMode", (int)CompareFunction.LessEqual);
+            material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.LessEqual);
             _line.sharedMaterial = material;
             _line.enabled = false;
         }
