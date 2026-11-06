@@ -88,7 +88,7 @@ Super Battle Golf/
     ├── patchers/
     │   └── SBGVR/
     │       ├── Uuvr.Patcher.dll
-    │       └── CopyToGame/...
+    │       └── VrRuntime/...
     └── plugins/
         └── SBGVR/
             ├── SBGVR.dll
@@ -105,7 +105,7 @@ Install the new zip the same way: import it in r2modman, or run the commands abo
 
 ### Uninstalling
 
-Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`. That removes everything: SBGVR writes nothing to the game's `Super Battle Golf_Data` folder, and its VR runtime files stay in the mod's patcher folder (`CopyToGame`), where the game reads them.
+Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`. That removes everything: SBGVR writes nothing to the game's `Super Battle Golf_Data` folder, and its VR runtime files stay in the mod's patcher folder (`VrRuntime`), where the game reads them.
 
 Versions up to 1.3.2 copied those files into `Super Battle Golf_Data` each time the game started, and mod managers can't clean them up, so they may still be there after an update or uninstall. Newer versions don't use them (the log names any it finds, under `SBGVR Redirect`), and they can be deleted:
 
@@ -293,7 +293,7 @@ SBGVR's settings only change the game while VR is running. The game's own settin
 
 **UUVR** (`uuvr/`, vendored at upstream tag v0.4.0) does the VR work:
 
-1. Its patcher (`Uuvr.Patcher`) runs before the game starts. Unity only looks for the native VR libraries (`openxr_loader`, `UnityOpenXR`, `openvr_api`, `XRSDKOpenVR`), their Unity subsystem manifests and SteamVR's settings in `Super Battle Golf_Data`, so the patcher points those lookups at the patcher's own `CopyToGame` folder (`GameFolderRedirect`). Nothing is written to the game folder.
+1. Its patcher (`Uuvr.Patcher`) runs before the game starts. Unity only looks for the native VR libraries (`openxr_loader`, `UnityOpenXR`, `openvr_api`, `XRSDKOpenVR`), their Unity subsystem manifests and SteamVR's settings in `Super Battle Golf_Data`, so the patcher points those lookups at the patcher's own `VrRuntime` folder (`GameFolderRedirect`). Nothing is written to the game folder.
 2. Its plugin (`Uuvr`) creates Unity XR Management settings at runtime, adds an OpenXR or OpenVR loader and starts it.
 3. It adds a `VrCamera` to every camera that renders to the screen and drives it from the headset's rotation.
 4. It captures the 2D interface into a texture and shows it on a quad in front of the camera.
@@ -313,7 +313,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
 | Remove the F3 key that turned VR off and on (`UuvrCore`) | Toggling VR with it didn't work in this game. VR now stays on from startup until the game closes. |
 | Restore OpenXR controller input: `Input/OpenXRInput.cs`, `Features/Interactions/` and the call in `OpenXRLoader.StartInternal` (wrapped so a failure is logged and VR still starts) | UUVR's copy of the Unity OpenXR plugin left out the code that tells the OpenXR runtime which controller inputs to report, so OpenXR showed no controllers. It's adapted from the plugin's 1.4.2 source, which matches the bundled `UnityOpenXR.dll`: the action set setup and the action maps of the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles, without their Input System layouts. `ControllerProfiles.Enable` turns the profiles on; until something calls it, OpenXR starts exactly as before. |
-| Load the VR runtime from the patcher's folder instead of copying it into `Super Battle Golf_Data` (`GameFolderRedirect`), and remove the copy code and its clean-up list | Mod managers can't remove files from the game folder, so uninstalling left the copies behind. The patcher points the file lookups of `UnityPlayer.dll`, Mono and the two XR plug-ins at `CopyToGame` instead; nothing in the game folder is created, changed or deleted. It logs through BepInEx (`SBGVR Redirect`), since the console isn't captured once the preloader ends. |
+| Load the VR runtime from the patcher's folder instead of copying it into `Super Battle Golf_Data` (`GameFolderRedirect`), and remove the copy code and its clean-up list | Mod managers can't remove files from the game folder, so uninstalling left the copies behind. The patcher points the file lookups of `UnityPlayer.dll`, Mono and the two XR plug-ins at `VrRuntime` (UUVR's `CopyToGame` folder, renamed since nothing is copied any more) instead; nothing in the game folder is created, changed or deleted. It logs through BepInEx (`SBGVR Redirect`), since the console isn't captured once the preloader ends. |
 | Make the floating screen's width per `VR UI Scale` (`VrUiManager.ScreenWidthPerScale`, 1.8 m) public, and look up the last sorting layer once (`UiSorting.LastLayerId`) | SBGVR works out where the screen's edges are (the menu controls panel, markers' edge arrows) and sorts markers on that layer; it used its own copies of both, which wouldn't have followed a change in UUVR. |
 
 **SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
