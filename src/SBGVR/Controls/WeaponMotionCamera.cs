@@ -9,8 +9,9 @@ namespace SBGVR.Controls
     /// <summary>
     /// VR Controls.MotionCamera for weapons: while you aim an item with the controllers, in third person or in
     /// SBGVR's first person, turning your DominantHand controller turns the camera by the same angle, left and
-    /// right and up and down, and weapons aim along the camera, as the golf club's swing does. When the shot is
-    /// done, or you stop aiming, the camera's up and down tilt eases back to where it was before you aimed.
+    /// right and up and down, and weapons aim along the camera, as the golf club's swing does. After each shot the
+    /// aim goes back to where the controller points; when you stop aiming, the camera's up and down tilt eases back
+    /// to where it was before you aimed.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -200,7 +201,7 @@ namespace SBGVR.Controls
             var starting = _view == CameraView.None;
             // A new aim starts from where the controller is, with nothing to catch up.
             if (starting) _tiltFilter.Reset();
-            var tilt = _tiltFilter.Filter(TiltOf(pointing), dt);
+            var tilt = _tiltFilter.Filter(AimAngles.TiltOf(pointing), dt);
             if (starting)
             {
                 ResolveKeptView();
@@ -213,7 +214,7 @@ namespace SBGVR.Controls
                 if (_restoring && _keptView != view) FinishRestoreNow();
 
                 _view = view;
-                _referenceForward = Horizontal(pointing);
+                _referenceForward = AimAngles.Horizontal(pointing);
                 _appliedYaw = 0f;
                 _rawYaw = 0f;
                 _lastWrappedYaw = 0f;
@@ -241,7 +242,7 @@ namespace SBGVR.Controls
             // Left and right, 1:1. Pointing almost straight up or down has no useful heading: hold the yaw.
             if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 0.01f)
             {
-                var wrappedYaw = Vector3.SignedAngle(_referenceForward, Horizontal(pointing), Vector3.up);
+                var wrappedYaw = Vector3.SignedAngle(_referenceForward, AimAngles.Horizontal(pointing), Vector3.up);
                 _rawYaw += Mathf.DeltaAngle(_lastWrappedYaw, wrappedYaw);
                 _lastWrappedYaw = wrappedYaw;
                 var yaw = _yawFilter.Filter(_rawYaw, dt);
@@ -262,21 +263,9 @@ namespace SBGVR.Controls
             if (_wasUsing && !inUse) ReturnAimToPointing(view, orbit, firstPerson, tilt);
             _wasUsing = inUse;
 
-            if (inUse)
-            {
-                // Hold the camera's tilt for the shot.
-            }
-            else if (_restoring)
-            {
-                UpdateRestore();
-                if (!_restoring)
-                {
-                    // Carry on tilting from the restored pitch.
-                    _referenceTilt = tilt;
-                    _appliedTilt = 0f;
-                }
-            }
-            else
+            // While the item is in use the camera's tilt holds for the shot. (A restore never runs while steering:
+            // starting to steer ends it, and only StopSteering starts one.)
+            if (!inUse)
             {
                 var tiltNow = Mathf.DeltaAngle(_referenceTilt, tilt);
                 var tiltChange = tiltNow - _appliedTilt;
@@ -295,16 +284,7 @@ namespace SBGVR.Controls
         /// </summary>
         private void StartAimWherePointing(CameraView view, OrbitCameraModule orbit, FirstPersonCameraModule firstPerson)
         {
-            _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
-            if (!ControllerAim.TryGetPointingDirection(out var pointing)) return;
-
-            var yaw = view == CameraView.ThirdPerson ? orbit.Yaw : firstPerson.Yaw;
-            var pitch = GetPitch(view);
-            var looking = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
-            if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 1e-4f && new Vector2(looking.x, looking.z).sqrMagnitude >= 1e-4f)
-                _acquireYaw = Mathf.DeltaAngle(HeadingOf(looking), HeadingOf(pointing));
-            // The cameras' pitch grows as they look down.
-            _acquirePitch = -TiltOf(pointing) - pitch;
+            if (!AcquirePointing(view, orbit, firstPerson)) return;
             if (Settings.DiagnosticsEnabled.Value)
                 Plugin.Log.LogInfo($"Motion camera: aim starts where the controller points, {_acquireYaw:+0.0;-0.0;0}° and " +
                                    $"{-_acquirePitch:+0.0;-0.0;0}° from where the camera looked.");
@@ -320,20 +300,31 @@ namespace SBGVR.Controls
         {
             _referenceTilt = tilt;
             _appliedTilt = 0f;
-            _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
-            if (!ControllerAim.TryGetPointingDirection(out var pointing)) return;
+            // Left and right kept following the controller during the shot, so the turn is normally 0; it isn't if
+            // the shot came before the turn at the start of aiming had finished.
+            if (!AcquirePointing(view, orbit, firstPerson)) return;
+            if (Settings.DiagnosticsEnabled.Value)
+                Plugin.Log.LogInfo($"Motion camera: after the shot, the aim goes back to where the controller points ({-_acquirePitch:+0.0;-0.0;0}°).");
+        }
 
-            // Left and right kept following the controller during the shot, so this is normally 0; it isn't if the
-            // shot came before the turn at the start of aiming had finished.
+        /// <summary>
+        /// Sets the turn and tilt from where the camera looks to where the controller points, for
+        /// <see cref="UpdateAcquire"/> to ease in from now. False, with nothing to ease, if the controller's pointing
+        /// direction isn't known.
+        /// </summary>
+        private bool AcquirePointing(CameraView view, OrbitCameraModule orbit, FirstPersonCameraModule firstPerson)
+        {
+            _acquireYaw = _acquirePitch = _acquireTime = _acquireApplied = 0f;
+            if (!ControllerAim.TryGetPointingDirection(out var pointing)) return false;
+
             var yaw = view == CameraView.ThirdPerson ? orbit.Yaw : firstPerson.Yaw;
             var pitch = GetPitch(view);
             var looking = Quaternion.Euler(pitch, yaw, 0f) * Vector3.forward;
             if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 1e-4f && new Vector2(looking.x, looking.z).sqrMagnitude >= 1e-4f)
-                _acquireYaw = Mathf.DeltaAngle(HeadingOf(looking), HeadingOf(pointing));
+                _acquireYaw = Mathf.DeltaAngle(AimAngles.HeadingOf(looking), AimAngles.HeadingOf(pointing));
             // The cameras' pitch grows as they look down.
-            _acquirePitch = -TiltOf(pointing) - pitch;
-            if (Settings.DiagnosticsEnabled.Value)
-                Plugin.Log.LogInfo($"Motion camera: after the shot, the aim goes back to where the controller points ({-_acquirePitch:+0.0;-0.0;0}°).");
+            _acquirePitch = -AimAngles.TiltOf(pointing) - pitch;
+            return true;
         }
 
         /// <summary>Eases the turn to where the controller pointed into the camera, on top of the 1:1 steering.</summary>
@@ -350,8 +341,6 @@ namespace SBGVR.Controls
             else firstPerson.SetYaw(firstPerson.Yaw + _acquireYaw * step);
             SetPitch(view, GetPitch(view) + _acquirePitch * step);
         }
-
-        private static float HeadingOf(Vector3 direction) => Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
 
         /// <summary>
         /// The camera the controller should steer for a weapon, or None. It starts when you aim an item and carries
@@ -487,7 +476,7 @@ namespace SBGVR.Controls
             {
                 next = _keptPitch;
                 _restoring = false;
-                // Still aiming (after a shot): keep it for when aiming ends.
+                // Aiming has ended (a restore only runs after StopSteering): there's nothing left to return to.
                 if (_view == CameraView.None) _keptView = CameraView.None;
             }
 
@@ -580,14 +569,5 @@ namespace SBGVR.Controls
                 return r / (r + 1f);
             }
         }
-
-        private static Vector3 Horizontal(Vector3 direction)
-        {
-            direction.y = 0f;
-            return direction.sqrMagnitude > 1e-6f ? direction.normalized : Vector3.forward;
-        }
-
-        /// <summary>Degrees above the horizon.</summary>
-        private static float TiltOf(Vector3 forward) => Mathf.Asin(Mathf.Clamp(forward.normalized.y, -1f, 1f)) * Mathf.Rad2Deg;
     }
 }
