@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-11-06
+
 ### Changed
 
 - SBGVR is on [Thunderstore](https://thunderstore.io/c/super-battle-golf/p/lmkHenlo/SBGVR/). The README and the Thunderstore README say to install and update it with r2modman from there; the GitHub zips still work with **Import local mod**.
