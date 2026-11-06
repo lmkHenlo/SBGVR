@@ -142,8 +142,8 @@ namespace SBGVR
                 "like a gamepad, including your gamepad rebinds. Left thumbstick moves, right thumbstick turns the " +
                 "camera, left trigger button aims, right trigger button swings, A jumps, B dives, X interacts, Y " +
                 "changes the swing angle, the right grip button and a tap of the left grip button cycle items, and " +
-                "the Menu button pauses. Hold the left grip button for more: right thumbstick = D-pad (emotes, push " +
-                "to talk, votes), A = pause, B = scoreboard. " +
+                "the Menu button pauses (through SteamVR it opens SteamVR's menu instead). Hold the left grip button " +
+                "for more: right thumbstick = D-pad (emotes, push to talk, votes), A = pause, B = scoreboard. " +
                 "A real gamepad, keyboard and mouse still work. Restart the game after changing this.");
             ControllerAiming = config.Bind(controls, "ControllerAiming", true,
                 "With MotionControls, weapons aim where your DominantHand controller points while you aim or use " +

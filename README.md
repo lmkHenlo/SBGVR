@@ -135,8 +135,8 @@ Controller inputs are named as in Meta's [Quest controller guidelines](https://d
 
 <!-- These tables (and the mirrored one below) follow src/SBGVR/Controls/MotionControls.cs (ReadState). Change them
      together with it, Hud/MetaButtonPrompts.cs (Layout), tools/controller-layout/controller-layout.html, the VR Controls
-     summary in thunderstore/README.md and the MirrorButtons and FirstPersonControllerToggle descriptions in
-     Settings.cs. TEST_PLAN.md step 17 checks that they agree. -->
+     summary in thunderstore/README.md and the MotionControls, MirrorButtons and FirstPersonControllerToggle
+     descriptions in Settings.cs. TEST_PLAN.md step 17 checks that they agree. -->
 
 | Controller | Gamepad | In the game |
 | --- | --- | --- |
