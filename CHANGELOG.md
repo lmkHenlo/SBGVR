@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Nothing is written to the game folder any more.** UUVR's VR runtime (the OpenXR and OpenVR libraries, their Unity subsystem manifests and SteamVR's settings) stays in the mod's own folder: instead of copying it into `Super Battle Golf_Data` each time the game starts, UUVR's patcher points the game's lookups of those files at the mod's copies (`GameFolderRedirect` in `uuvr/Uuvr.Patcher`), and logs each one as `SBGVR Redirect`. Copies an earlier version put in the game folder aren't used, and aren't removed either: delete them as described under Uninstalling in the README.
 - `THIRD_PARTY_NOTICES.md` credits the Meta Quest Touch Plus controller artwork in the controller layout image under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/), with its copyright notice, lists the files that contain it, and says that licence doesn't cover Meta's names, trademarks or logos and that SBGVR isn't affiliated with, sponsored by or endorsed by Meta. Both READMEs, the controller layout tool's README and the artwork file itself point to it. The mod itself is unchanged.
 
 ## [1.3.2] - 2026-10-30
