@@ -84,4 +84,11 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - Throw a smoke bomb: the view turns purple, and the floating screen has no purple frame around it.
     - The controller layout panel shows the left Menu button as Steam Menu and the motion box as Dominant Controller.
 
+17. Button prompts, with `MotionControls` on and Meta Quest Touch controllers:
+    - Once you use a controller, the log says `Meta Quest button prompts: 32 of 33 gamepad icons replaced` and `Button prompts: showing Meta Quest Touch icons`.
+    - Every prompt shows the button that does it: A jump, B dive, the left thumbstick press for interact and leaving the golf cart, Y swing angle, the left trigger aim, the right trigger swing, the grip buttons cycling items, the thumbsticks moving and turning the camera, the left grip button with the right thumbstick for the D-pad (emotes, push to talk, votes, restart) and with B for the scoreboard, Menu for pause. Left-controller icons are blue, right ones orange, and none is swapped. Check the tutorial and info prompts, the hold-to-restart prompt (its fill still fills), the item cycle icons, text chat, vote kick, the spectator prompts and the controls in the settings.
+    - Prompts are sharp and readable on the floating screen at their usual size and place, and appear, animate and fade as before.
+    - With `MirrorButtons` on: X jump, Y dive, the right thumbstick press for interact and leaving the golf cart, B swing angle, left and right swapped for the thumbsticks, triggers and grip buttons, the right grip button for the D-pad and with Y for the scoreboard; Menu is still the left Menu button.
+    - Use the keyboard or mouse: the prompts switch to keyboard icons; use a controller again: back to Meta icons. With a gamepad plugged in, using it shows Xbox icons, and a controller brings Meta icons back. Stopping VR brings the game's icons back.
+
 Send `LogOutput.log` from the session with notes on each step.

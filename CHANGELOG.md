@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Meta Quest button prompts.** While you play with Meta Quest Touch controllers (`MotionControls`), the game's button prompts show the controllers' own buttons instead of an Xbox controller's: Meta's A, B, X, Y and Menu buttons, and Meta's drawings of the thumbsticks, triggers and grip buttons, blue for the left controller and orange for the right one. Each prompt shows the button that does that action, following `MirrorButtons`; interacting (and leaving the golf cart) shows pressing the left thumbstick, which does it like the X button, and the D-pad and the scoreboard show the grip button held with the thumbstick or button. The prompts appear, move and fade as before; only their icons change, and they go back to the game's icons as soon as you use a gamepad, keyboard or mouse. Pressing the left thumbstick sends X rather than the gamepad's left stick press, so a prompt for that (the golf cart's honk) keeps the game's icon. Other VR controllers keep the game's icons. The icons are drawn from Meta's Meta Quest Touch Plus line art under Meta's Art Attribution License 1.0 (see `THIRD_PARTY_NOTICES.md`).
+
 ### Changed
 
 - `THIRD_PARTY_NOTICES.md` credits the Meta Quest Touch Plus controller artwork in the controller layout image under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/), with its copyright notice, lists the files that contain it, and says that licence doesn't cover Meta's names, trademarks or logos and that SBGVR isn't affiliated with, sponsored by or endorsed by Meta. Both READMEs, the controller layout tool's README and the artwork file itself point to it. The mod itself is unchanged.

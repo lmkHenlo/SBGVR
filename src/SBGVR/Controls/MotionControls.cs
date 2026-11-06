@@ -1,6 +1,7 @@
 // SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -54,6 +55,14 @@ namespace SBGVR.Controls
         /// </summary>
         internal static bool InUse =>
             VirtualGamepad != null && InputManager.UsingGamepad && ReferenceEquals(InputManager.CurrentGamepad, VirtualGamepad);
+
+        /// <summary>
+        /// Whether a connected controller is a Meta Quest Touch controller (OpenXR reports Meta Quest Touch Plus
+        /// and Touch controllers through the Oculus Touch profile), so the game's button prompts can show its
+        /// buttons (Hud.MetaButtonPrompts).
+        /// </summary>
+        internal static bool TouchControllers { get; private set; }
+
         private GamepadState _lastSent;
         private bool _hasSent;
 
@@ -88,12 +97,14 @@ namespace SBGVR.Controls
 
             if (!VrState.IsRunning)
             {
+                TouchControllers = false;
                 RemoveGamepad();
                 return;
             }
 
             _left.Refresh();
             _right.Refresh();
+            TouchControllers = (_left.IsValid && _left.IsTouch) || (_right.IsValid && _right.IsTouch);
 
             var state = _left.IsValid || _right.IsValid ? ReadState() : default;
             if (_hasSent ? SameState(state, _lastSent) : IsAtRest(state)) return;
@@ -291,6 +302,9 @@ namespace SBGVR.Controls
             /// <summary>Whether the controller has A/B or X/Y buttons (not a Vive wand or WMR controller).</summary>
             internal bool HasFaceButtons { get; private set; }
 
+            /// <summary>Whether it's a Meta Quest Touch controller ("Oculus Touch Controller OpenXR").</summary>
+            internal bool IsTouch { get; private set; }
+
             internal void Refresh()
             {
                 if (_device.isValid) return;
@@ -321,6 +335,8 @@ namespace SBGVR.Controls
 
                 HasFaceButtons = names.Contains(XRCommonUsages.primaryButton.name) &&
                                  names.Contains(XRCommonUsages.secondaryButton.name);
+                IsTouch = HasFaceButtons && _device.name != null &&
+                          _device.name.IndexOf("Oculus Touch", StringComparison.OrdinalIgnoreCase) >= 0;
 
                 // A WMR controller's touchpad is its secondary axis; a Vive wand's is its primary one.
                 var hasSecondaryPad = names.Contains(XRCommonUsages.secondary2DAxisClick.name);

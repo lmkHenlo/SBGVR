@@ -34,6 +34,7 @@
   <ItemGroup>
     <!-- The main menu's VR controller layout panel (Hud/MenuControlsPanel.cs); rendered from tools/controller-layout. -->
     <EmbeddedResource Include="Assets\controller-layout.png" LogicalName="SBGVR.controller-layout.png" />
+    <EmbeddedResource Include="Assets\meta-button-prompts.png" LogicalName="SBGVR.meta-button-prompts.png" />
   </ItemGroup>
 
 </Project>

@@ -11,7 +11,7 @@ To render it again after editing the HTML:
    (`npm pack @fontsource/inter@5.0.16`, then copy them from `package/files/`).
 2. Run `python render.py` (needs Python's `playwright` with Chromium).
 
-`meta-quest-touch-plus.svg` is Meta's Meta Quest Touch Plus line art (converted from the controller
+`meta-quest-touch-plus.svg` (also the source of `../button-prompts/`) is Meta's Meta Quest Touch Plus line art (converted from the controller
 images in Meta's developer art assets), used under Meta's
 [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/) only to show the
 controllers' buttons: Copyright © Facebook Technologies, LLC and its affiliates. All rights reserved.
