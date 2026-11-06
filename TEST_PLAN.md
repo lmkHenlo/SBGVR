@@ -16,6 +16,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - Opening a menu (Match Setup, say) covers the markers behind it, including interaction prompts such as Set Up Match.
    - A player character, including yours, covers the parts of markers behind it, and markers in front of a character stay on top of it. Hills and trees still don't hide markers.
    - Name tags aren't covered by their own players.
+   - In an online match with other players, the game's `Player.log` (`%USERPROFILE%\AppData\LocalLow\Brimstone\Super Battle Golf`) has no `NullReferenceException` from `WorldMarker`, and names with characters from other alphabets draw on top like the rest.
    - A shield or emblem on a character stays steady while markers pass behind it.
 6. Weapon reticles:
    - Every weapon reticle sits on what you're aiming at, single and sharp, not doubled: dueling pistol, elephant gun, rocket launcher, freeze bomb, flash camera, thunderstorm and railgun.
