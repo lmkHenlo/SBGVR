@@ -2,7 +2,7 @@
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, UUVR's patcher reports copying its files, `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`.
+1. Start the game from r2modman. In `LogOutput.log`, `SBGVR Redirect` says `VR runtime files are read from:` the mod's `CopyToGame` folder, then `The game folder has no copies of the VR runtime` (or a `WARNING` listing copies left by version 1.3.2 or earlier), `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`. `Super Battle Golf_Data` gets no new files: no `UnitySubsystems` folder, no `StreamingAssets\SteamVR` and no VR libraries in `Plugins`.
 2. Main menu:
    - The game shows in the headset and follows your head.
    - The menu stays readable while the background scenes change, and each scene holds still.
@@ -36,7 +36,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - The log shows `[ok] OpenXR controller profiles` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
     - Every button in the [Motion controls](README.md#motion-controls) table does what it says, in a match, the golf cart, spectating, the emote wheel and the menus (with the gamepad cursor).
     - A real gamepad, keyboard and mouse still work, before and after using the controllers.
-    - With `Preferred VR APi` = `OpenVr`, controllers are known not to work; nothing to test there until that's fixed.
+    - Start the game once with `Preferred VR APi` = `OpenVr`: VR starts and the headset shows the game, and `SBGVR Redirect` logs `XRSDKOpenVR.dll`, `openvr_api.dll`, `OpenVRSettings.asset` and `actions.json` read from the mod's folder. Controllers are known not to work with OpenVR; nothing more to test there until that's fixed.
 12. Controller aiming, with `MotionControls` on:
     - Aim each weapon (dueling pistol, elephant gun, rocket launcher, railgun, freeze bomb, thunderstorm): the reticle sits where the right controller points, and shots go there. The log says `Controller aiming: aiming with the right controller` and which pose it uses.
     - The rocket launcher's orange lock-on picks the target you point at. A full-power golf swing's homing target still follows the camera.
