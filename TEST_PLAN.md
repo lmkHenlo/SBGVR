@@ -53,7 +53,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
     - Tilting the controller doesn't move the camera unless `MotionCameraMaxPitch` is above 0.
     - With `MotionCamera` off, the camera only turns with the thumbstick, as before.
 
-14. First person (`FirstPerson`; once with it off, to check nothing changes from 1.1.1):
+14. First person (`FirstPerson`; once with it off, to check nothing changes from the previous version):
     - F5 and holding the left grip button + pressing the right thumbstick both switch views, and the log says `First person: on` / `off`. Restart the game: it starts in the view you left. Pressing the right thumbstick alone still drops your item.
     - The log has one `First person: eyes … m above the feet` line; it should say 1.50 m with `FirstPersonEyeOffset` at 0; note whether that feels right, and the `FirstPersonEyeOffset` that fixes it if not.
     - Your own body, head and held item aren't visible. Another player sees you as usual.
