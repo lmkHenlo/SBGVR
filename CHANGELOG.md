@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- If one feature fails as VR starts or stops, the others still switch on or off; before, the features after it were skipped for the whole session. The log names the feature that failed.
+
 ## [1.4.0] - 2026-11-05
 
 ### Added

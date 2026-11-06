@@ -38,13 +38,22 @@ namespace SBGVR
             IsRunning = running;
             Plugin.Log.LogInfo(running ? "VR started: VR settings are on." : "VR stopped: the game is back to normal.");
 
-            try
+            var handlers = Changed;
+            if (handlers == null) return;
+
+            // Each feature's handler runs on its own, so one that fails doesn't stop the rest: VR starts once and
+            // stays on, so a skipped handler would stay skipped for the whole session.
+            foreach (Action<bool> handler in handlers.GetInvocationList())
             {
-                Changed?.Invoke(running);
-            }
-            catch (Exception exception)
-            {
-                Plugin.Log.LogError($"A VR start/stop handler failed: {exception}");
+                try
+                {
+                    handler(running);
+                }
+                catch (Exception exception)
+                {
+                    Plugin.Log.LogError($"VR {(running ? "start" : "stop")}: {handler.Method.DeclaringType?.Name ?? "a feature"} " +
+                                        $"failed; the other features carry on. {exception}");
+                }
             }
         }
     }
