@@ -21,6 +21,18 @@ namespace SBGVR
         /// <summary>Raised once when VR starts, and once when it stops.</summary>
         internal static event Action<bool> Changed;
 
+        /// <summary>
+        /// The camera the headset sees through: the one UUVR's floating screen follows. The fades, markers,
+        /// reticles, aim line and menu controls panel are all placed relative to it.
+        /// </summary>
+        internal static Camera ViewCamera()
+        {
+            var vrCamera = Uuvr.VrCamera.VrCamera.HighestDepthVrCamera;
+            if (vrCamera != null && vrCamera.isActiveAndEnabled && vrCamera.ParentCamera != null)
+                return vrCamera.ParentCamera;
+            return Camera.main;
+        }
+
         internal static void Refresh()
         {
             SubsystemManager.GetSubsystems(Displays);

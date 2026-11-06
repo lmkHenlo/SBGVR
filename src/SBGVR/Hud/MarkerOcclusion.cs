@@ -55,7 +55,7 @@ namespace SBGVR.Hud
         private static void OnWillRenderCanvases()
         {
             var camera = WorldMarker.Enabled && Settings.MarkersOnTop.Value && Settings.PlayersCoverMarkers.Value
-                ? Fades.FullViewFade.ViewCamera()
+                ? VrState.ViewCamera()
                 : null;
 
             Markers.Clear();
