@@ -64,7 +64,9 @@ public class Patcher
         var dataPath = Path.Combine(gamePath, $"{gameName}_Data/");
         var patcherPath = Path.GetDirectoryName(installerPath);
         
-        CopyFilesToGame(patcherPath, dataPath);
+        // SBGVR prototype: nothing is copied into the game folder; Unity's lookups of the VR runtime files are
+        // pointed at CopyToGame instead (GameFolderRedirect).
+        GameFolderRedirect.Install(Path.Combine(patcherPath, "CopyToGame"), dataPath);
 
 #if LEGACY
         string globalSettingsFilePath = GetGlobalSettingsFilePath(dataPath);
