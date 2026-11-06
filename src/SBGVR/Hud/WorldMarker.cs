@@ -78,6 +78,7 @@ namespace SBGVR.Hud
         private int _graphicCount;
         private readonly List<KeyValuePair<Graphic, Material>> _originalMaterials = new List<KeyValuePair<Graphic, Material>>();
         private readonly List<KeyValuePair<TMP_Text, Material>> _originalFontMaterials = new List<KeyValuePair<TMP_Text, Material>>();
+        private static bool _loggedMaterialError;
         private readonly List<Graphic> _visibleGraphics = new List<Graphic>();
 
         /// <summary>Reused by <see cref="UpdateMaterials"/> each frame, so it doesn't allocate an array per marker.</summary>
@@ -533,17 +534,35 @@ namespace SBGVR.Hud
             _graphicCount = AllGraphics.Count;
             foreach (var graphic in AllGraphics)
             {
-                if (graphic is TMP_Text text)
-                {
-                    var original = text.fontSharedMaterial;
-                    if (original != null) _originalFontMaterials.Add(new KeyValuePair<TMP_Text, Material>(text, original));
-                    continue;
-                }
+                // TextMeshPro sets a sub-mesh's material itself, from its text's (a sub-mesh draws the glyphs from a
+                // fallback font, or sprites); EnforceDrawnMaterials still draws it on top. Reading a sub-mesh's
+                // material throws while it isn't set up, which name tags of players whose names need a fallback
+                // font hit every frame.
+                if (graphic is TMP_SubMeshUI) continue;
 
-                // Only plain UI graphics; ones with their own shader (effects) keep it.
-                var material = graphic.material;
-                if (material != null && material.shader != _onTopMaterial.shader) continue;
-                _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
+                try
+                {
+                    if (graphic is TMP_Text text)
+                    {
+                        var original = text.fontSharedMaterial;
+                        if (original != null) _originalFontMaterials.Add(new KeyValuePair<TMP_Text, Material>(text, original));
+                        continue;
+                    }
+
+                    // Only plain UI graphics; ones with their own shader (effects) keep it.
+                    var material = graphic.material;
+                    if (material != null && material.shader != _onTopMaterial.shader) continue;
+                    _originalMaterials.Add(new KeyValuePair<Graphic, Material>(graphic, material));
+                }
+                catch (System.Exception exception)
+                {
+                    // One graphic that can't be read keeps its material; the rest are still swapped, and the marker
+                    // isn't tried again every frame.
+                    if (_loggedMaterialError) continue;
+                    _loggedMaterialError = true;
+                    Plugin.Log.LogWarning($"World-space markers: left '{graphic.name}' ({graphic.GetType().Name}) on its own material: " +
+                                          $"{exception.GetBaseException().Message} (logged once).");
+                }
             }
 
             AllGraphics.Clear();
