@@ -9,7 +9,7 @@ files under `patchers/VrRuntime/Data/StreamingAssets/SteamVR/` come from UUVR.
 
 SBGVR's copy of UUVR is modified. It started from UUVR v0.4.0 (upstream commit
 de8e9218f8a9310778f2f57c189bef9ccc8c4dc8) and was changed by lmkHenlo between 2026-10-22 and
-2026-11-05, to build it against Super Battle Golf's own assemblies, leave out files the game doesn't
+2026-11-06, to build it against Super Battle Golf's own assemblies, leave out files the game doesn't
 use, fix the VR UI's camera, shutdown and drawing order for this game, add a recentre rotation, make
 the floating screen's width and drawing layer available to SBGVR, restore OpenXR controller input,
 remove the F3 key that turned VR off and on, and have the patcher load the VR runtime files from the
