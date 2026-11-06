@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-06
+
 ### Changed
 
 - The VR runtime files in the mod's folder moved from `patchers\SBGVR\CopyToGame` to `patchers\SBGVR\VrRuntime`, since nothing is copied to the game any more. Nothing else changes. r2modman replaces the folder on update; after a manual update, the old `CopyToGame` folder isn't used and can be deleted.
