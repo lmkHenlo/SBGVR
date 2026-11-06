@@ -300,7 +300,6 @@ Changes made to UUVR in this repository, each in its own commit:
 | Build against the game's `Managed` folder and a BepInEx install, with no NuGet | Matches the game exactly and builds offline. |
 | Read `GraphicRegistry.m_Graphics` by reflection | The game's `UnityEngine.UI` keeps the field private. Upstream built against a modified copy. |
 | AssetsTools.NET and `classdata.tpk` only in legacy builds | Only the Unity 2019 path edits `globalgamemanagers`. |
-| Fix the patcher's clean-up list (`ucrtbased`) and add `OVRPlugin` | The old entry never matched, and both files are no longer shipped. |
 | Remove the x86 libraries, `ucrtbased.dll` and `OVRPlugin.dll` | The game is 64-bit, and nothing imports or loads the other two. `ucrtbased.dll` is Microsoft's debug runtime, which isn't redistributable. |
 | Remove `uuvr/lib` | The build uses the game's assemblies instead. |
 | Pick the UI's camera again when the current one stops rendering | The main menu switches between seven cameras of equal depth. The floating screen kept following one that was switched off, and the menu disappeared. |
@@ -309,6 +308,7 @@ Changes made to UUVR in this repository, each in its own commit:
 | Add `VrCameraOffset.RecenterRotation` | Lets SBGVR recentre the view. Identity (the default) keeps upstream behaviour. |
 | Remove the F3 key that turned VR off and on (`UuvrCore`) | Toggling VR with it didn't work in this game. VR now stays on from startup until the game closes. |
 | Restore OpenXR controller input: `Input/OpenXRInput.cs`, `Features/Interactions/` and the call in `OpenXRLoader.StartInternal` (wrapped so a failure is logged and VR still starts) | UUVR's copy of the Unity OpenXR plugin left out the code that tells the OpenXR runtime which controller inputs to report, so OpenXR showed no controllers. It's adapted from the plugin's 1.4.2 source, which matches the bundled `UnityOpenXR.dll`: the action set setup and the action maps of the Oculus Touch, Valve Index, HTC Vive, Windows Mixed Reality and Khronos simple controller profiles, without their Input System layouts. `ControllerProfiles.Enable` turns the profiles on; until something calls it, OpenXR starts exactly as before. |
+| Load the VR runtime from the patcher's folder instead of copying it into `Super Battle Golf_Data` (`GameFolderRedirect`), and remove the copy code and its clean-up list | Mod managers can't remove files from the game folder, so uninstalling left the copies behind. The patcher points the file lookups of `UnityPlayer.dll`, Mono and the two XR plug-ins at `CopyToGame` instead; nothing in the game folder is created, changed or deleted. It logs through BepInEx (`SBGVR Redirect`), since the console isn't captured once the preloader ends. |
 
 **SBGVR** (`src/SBGVR`, plugin ID `com.sbgvr`) depends on UUVR. Each feature checks `VrState.IsRunning`, so nothing changes on a flat screen. Each feature's Harmony patches are applied on their own: one that fails to patch (after a game update, say) is removed and logged, and the rest keep working.
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 #if LEGACY
 using AssetsTools.NET;
@@ -30,15 +29,6 @@ public class Patcher
         };
 #endif
 
-    // Names without the .dll extension; it's appended when matching.
-    // SBGVR: "ucrtbased.dll" never matched (it became "ucrtbased.dll.dll"), and OVRPlugin is listed
-    // because earlier UUVR versions copied both into the game, while this package no longer ships them.
-    private static readonly List<string> PluginsToDeleteBeforePatch =
-        new()
-        {
-            "openvr_api", "openxr_loader", "UnityOpenXR", "ucrtbased", "XRSDKOpenVR", "OVRPlugin"
-        };
-
     public static IEnumerable<string> TargetDLLs { get; } = new[] { "Assembly-CSharp.dll" };
 
 #if MONO
@@ -53,8 +43,6 @@ public class Patcher
     public static void Initialize()
 #endif
     {
-        Console.WriteLine("Patching UUVR...");
-
         var installerPath = Assembly.GetExecutingAssembly().Location;
 
         var gameExePath = Process.GetCurrentProcess().MainModule.FileName;
@@ -64,8 +52,8 @@ public class Patcher
         var dataPath = Path.Combine(gamePath, $"{gameName}_Data/");
         var patcherPath = Path.GetDirectoryName(installerPath);
         
-        // SBGVR prototype: nothing is copied into the game folder; Unity's lookups of the VR runtime files are
-        // pointed at CopyToGame instead (GameFolderRedirect).
+        // SBGVR: nothing is copied into the game folder; Unity's lookups of the VR runtime files are pointed at
+        // CopyToGame, next to this patcher, instead (GameFolderRedirect).
         GameFolderRedirect.Install(Path.Combine(patcherPath, "CopyToGame"), dataPath);
 
 #if LEGACY
@@ -74,9 +62,6 @@ public class Patcher
         string classDataPath = Path.Combine(patcherPath, "classdata.tpk");
         PatchVR(globalSettingsBackupPath, globalSettingsFilePath, classDataPath);
 #endif
-
-        Console.WriteLine("");
-        Console.WriteLine("Installed successfully, probably.");
     }
 
 #if LEGACY
@@ -180,82 +165,6 @@ public class Patcher
         };
     }
 #endif
-
-    private static void CopyFilesToGame(string patcherPath, string dataPath)
-    {
-        var copyToGameFolderPath = Path.Combine(patcherPath, "CopyToGame");
-
-        Console.WriteLine($"Copying mod files to game... These files get overwritten every time the game starts. If you want to change them manually, replace them in the mod folder instead: {copyToGameFolderPath}");
-
-        CopyDirectory(Path.Combine(copyToGameFolderPath, "Data"), dataPath);
-
-        var gamePluginsPath = Path.Combine(dataPath, "Plugins");
-        Directory.CreateDirectory(gamePluginsPath);
-
-        var uuvrPluginsPath = Path.Combine(copyToGameFolderPath, "Plugins");
-
-        DeleteExistingVrPlugins(gamePluginsPath);
-
-        // IntPtr size is 4 on x86, 8 on x64.
-        var is64Bit = IntPtr.Size == 8;
-        Console.WriteLine($"Detected game as being {(is64Bit ? "x64" : "x86")}");
-
-        // Unity plugins are often in a subfolder of the Plugins folder, but they also get detected from the root folder,
-        // so we don't need to worry about the subfolders.
-        CopyDirectory(is64Bit ? Path.Combine(uuvrPluginsPath, "x64") : Path.Combine(uuvrPluginsPath, "x86"), gamePluginsPath);
-    }
-
-    // There might be leftover stuff from previous UUVR versions, or from other filthy VR mods,
-    // and they might be in different subfolders, which could cause conflicts.
-    // So we should make sure to nuke them all before replacing with our own.
-    private static void DeleteExistingVrPlugins(string gamePluginsPath)
-    {
-        var pluginPaths = Directory
-            .GetFiles(gamePluginsPath, "*.dll", SearchOption.AllDirectories)
-            .Where(pluginPath => PluginsToDeleteBeforePatch
-                .Select(pluginToDelete => $"{pluginToDelete.ToLower()}.dll")
-                .Contains(Path.GetFileName(pluginPath).ToLower()));
-
-        Console.WriteLine($"### Found {pluginPaths.Count()} plugins");
-
-        foreach (var pluginPath in pluginPaths)
-        {
-            try
-            {
-                Console.WriteLine($"Deleting plugin `{pluginPath}`");
-                File.Delete(pluginPath);
-            } catch (Exception exception)
-            {
-                Console.WriteLine($"Failed to delete plugin before patching. Path: `{pluginPath}`. Exception: `{exception}`");
-            }
-        }
-    }
-
-    private static void CopyDirectory(string sourceDir, string destinationDir)
-    {
-        DirectoryInfo dir = new(sourceDir);
-
-        if (!dir.Exists)
-            throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
-
-        var dirs = dir.GetDirectories();
-
-        Directory.CreateDirectory(destinationDir);
-
-        foreach (var file in dir.GetFiles())
-        {
-            var targetFilePath = Path.Combine(destinationDir, file.Name);
-            file.CopyTo(targetFilePath, true);
-        }
-
-        foreach (var subDir in dirs)
-        {
-            var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
-            CopyDirectory(subDir.FullName, newDestinationDir);
-        }
-
-        Console.WriteLine($"Copied files from:\n> {sourceDir}\nto:\n> {destinationDir}");
-    }
 
 #if CPP
     public override void Finalizer() { }

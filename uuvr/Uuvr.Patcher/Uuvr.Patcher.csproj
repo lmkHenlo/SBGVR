@@ -44,7 +44,7 @@
             <HintPath>$(BepInExDir)\core\Mono.Cecil.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <!-- SBGVR prototype: GameFolderRedirect logs through BepInEx, which keeps logging after the preloader. -->
+        <!-- SBGVR: GameFolderRedirect logs through BepInEx, which keeps logging after the preloader. -->
         <Reference Include="BepInEx">
             <HintPath>$(BepInExDir)\core\BepInEx.dll</HintPath>
             <Private>False</Private>
