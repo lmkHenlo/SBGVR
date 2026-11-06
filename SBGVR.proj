@@ -72,20 +72,20 @@
       <_PluginFile Include="$(StageDir)plugins\Uuvr.dll;$(StageDir)plugins\Uuvr.XR.Management.dll;$(StageDir)plugins\Uuvr.XR.OpenXR.dll;$(StageDir)plugins\Uuvr.XR.OpenVR.dll;$(StageDir)plugins\SBGVR.dll" />
       <_PluginAsset Include="$(StageDir)plugins\Assets\**\*" />
       <_PatcherFile Include="$(StageDir)patchers\Uuvr.Patcher.dll" />
-      <_PatcherContent Include="$(StageDir)patchers\CopyToGame\**\*" />
+      <_PatcherContent Include="$(StageDir)patchers\VrRuntime\**\*" />
     </ItemGroup>
     <Error Condition="!Exists('%(_RootFile.Identity)')" Text="Missing package file: %(_RootFile.Identity)" />
     <Error Condition="!Exists('%(_PluginFile.Identity)')" Text="Missing build output: %(_PluginFile.Identity)" />
     <Error Condition="!Exists('%(_PatcherFile.Identity)')" Text="Missing build output: %(_PatcherFile.Identity)" />
     <Error Condition="'@(_PluginAsset)' == ''" Text="UUVR's Assets folder is missing from $(StageDir)plugins." />
-    <Error Condition="'@(_PatcherContent)' == ''" Text="UUVR's CopyToGame files are missing from $(StageDir)patchers." />
+    <Error Condition="'@(_PatcherContent)' == ''" Text="UUVR's VrRuntime files are missing from $(StageDir)patchers." />
 
     <RemoveDir Directories="$(PackageDir)" />
     <Copy SourceFiles="@(_RootFile)" DestinationFolder="$(PackageDir)" />
     <Copy SourceFiles="@(_PluginFile)" DestinationFolder="$(PackageDir)plugins" />
     <Copy SourceFiles="@(_PluginAsset)" DestinationFiles="@(_PluginAsset->'$(PackageDir)plugins\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(_PatcherFile)" DestinationFolder="$(PackageDir)patchers" />
-    <Copy SourceFiles="@(_PatcherContent)" DestinationFiles="@(_PatcherContent->'$(PackageDir)patchers\CopyToGame\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(_PatcherContent)" DestinationFiles="@(_PatcherContent->'$(PackageDir)patchers\VrRuntime\%(RecursiveDir)%(Filename)%(Extension)')" />
     <ZipDirectory SourceDirectory="$(PackageDir)" DestinationFile="$(PackageZip)" Overwrite="true" />
     <Message Importance="high" Text="Thunderstore package: $(PackageZip)" />
   </Target>

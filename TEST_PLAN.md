@@ -2,7 +2,7 @@
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, `SBGVR Redirect` says `VR runtime files are read from:` the mod's `CopyToGame` folder, then `The game folder has no copies of the VR runtime` (or a `WARNING` listing copies left by version 1.3.2 or earlier), `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`. `Super Battle Golf_Data` gets no new files: no `UnitySubsystems` folder, no `StreamingAssets\SteamVR` and no VR libraries in `Plugins`.
+1. Start the game from r2modman. In `LogOutput.log`, `SBGVR Redirect` says `VR runtime files are read from:` the mod's `VrRuntime` folder, then `The game folder has no copies of the VR runtime` (or a `WARNING` listing copies left by version 1.3.2 or earlier), `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`. `Super Battle Golf_Data` gets no new files: no `UnitySubsystems` folder, no `StreamingAssets\SteamVR` and no VR libraries in `Plugins`.
 2. Main menu:
    - The game shows in the headset and follows your head.
    - The menu stays readable while the background scenes change, and each scene holds still.

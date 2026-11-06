@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The VR runtime files in the mod's folder moved from `patchers\SBGVR\CopyToGame` to `patchers\SBGVR\VrRuntime`, since nothing is copied to the game any more. Nothing else changes. r2modman replaces the folder on update; after a manual update, the old `CopyToGame` folder isn't used and can be deleted.
+
 ### Fixed
 
 - In online matches, other players' name tags no longer throw an error every frame. A name tag whose name needed a fallback font (characters TextMeshPro draws as a separate piece) failed to set up, so it tried again every frame; one session's `Player.log` grew to 48 MB. Those pieces are left to TextMeshPro and still draw on top.

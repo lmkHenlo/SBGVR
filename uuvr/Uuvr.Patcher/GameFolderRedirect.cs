@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 /// Unity only looks for XR plug-ins in the game's data folder: the subsystem manifests in
 /// <c>&lt;Data&gt;\UnitySubsystems</c>, the native plug-ins in <c>&lt;Data&gt;\Plugins</c>, and the OpenVR plug-in
 /// reads <c>&lt;Data&gt;\StreamingAssets\SteamVR\OpenVRSettings.asset</c>. Instead of copying UUVR's files there,
-/// this points those lookups at the same files in <c>CopyToGame</c>, next to the patcher, by replacing the file
+/// this points those lookups at the same files in <c>VrRuntime</c>, next to the patcher, by replacing the file
 /// functions in the import tables of UnityPlayer.dll (which looks up the plug-ins), Mono (which loads them for
 /// [DllImport]) and the two XR plug-ins once they load (which read their own files). Only lookups of those
 /// paths change; every other file goes through untouched, and nothing in the game folder is created, changed or
@@ -28,8 +28,8 @@ internal static class GameFolderRedirect
     private static readonly string[] RuntimePlugins = { "openvr_api.dll", "openxr_loader.dll", "UnityOpenXR.dll", "XRSDKOpenVR.dll" };
 
     private static string _dataPath = "";      // <game>\<name>_Data, no trailing separator
-    private static string _sourceData = "";    // CopyToGame\Data
-    private static string _sourcePlugins = ""; // CopyToGame\Plugins\x64
+    private static string _sourceData = "";    // VrRuntime\Data
+    private static string _sourcePlugins = ""; // VrRuntime\Plugins\x64
     private static readonly HashSet<string> PluginNames = new(RuntimePlugins, StringComparer.OrdinalIgnoreCase);
 
     // The XR plug-ins read their own files (the OpenVR plug-in its settings in StreamingAssets\SteamVR).

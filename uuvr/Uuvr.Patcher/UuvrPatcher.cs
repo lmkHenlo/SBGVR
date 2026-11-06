@@ -53,8 +53,8 @@ public class Patcher
         var patcherPath = Path.GetDirectoryName(installerPath);
         
         // SBGVR: nothing is copied into the game folder; Unity's lookups of the VR runtime files are pointed at
-        // CopyToGame, next to this patcher, instead (GameFolderRedirect).
-        GameFolderRedirect.Install(Path.Combine(patcherPath, "CopyToGame"), dataPath);
+        // VrRuntime, next to this patcher, instead (GameFolderRedirect).
+        GameFolderRedirect.Install(Path.Combine(patcherPath, "VrRuntime"), dataPath);
 
 #if LEGACY
         string globalSettingsFilePath = GetGlobalSettingsFilePath(dataPath);
