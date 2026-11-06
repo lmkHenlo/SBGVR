@@ -39,7 +39,6 @@ namespace SBGVR.Hud
         // Drawn just before UUVR's floating screen (its VR UI Render Queue, 5000 by default), so menus on the
         // floating screen cover markers the way the game's menus cover its HUD.
         private const int QueuesBeforeFloatingScreen = 10;
-        private const float FloatingScreenWidthPerScale = 1.8f;
 
         /// <summary>Markers currently drawn in the world.</summary>
         internal static readonly List<WorldMarker> InWorld = new List<WorldMarker>();
@@ -175,7 +174,7 @@ namespace SBGVR.Hud
         {
             if (_rect == null) _rect = transform;
             _lastPlacedFrame = Time.frameCount;
-            var camera = Enabled ? Fades.FullViewFade.ViewCamera() : null;
+            var camera = Enabled ? VrState.ViewCamera() : null;
             if (!inWorld || camera == null)
             {
                 if (_inWorld) MoveToHud();
@@ -430,8 +429,7 @@ namespace SBGVR.Hud
             var order = 0;
             if (_alwaysOnTop || _materialsSwapped)
             {
-                var layers = SortingLayer.layers;
-                if (layers.Length > 0) layerId = layers[layers.Length - 1].id;
+                layerId = Uuvr.VrUi.UiSorting.LastLayerId;
                 order = Uuvr.VrUi.UiSorting.ScreenOrder - 1;
             }
 
@@ -503,7 +501,7 @@ namespace SBGVR.Hud
         private float MetresPerHudUnitAtOneMetre()
         {
             var config = ModConfiguration.Instance;
-            var screenWidthMetres = FloatingScreenWidthPerScale * config.VrUiScale.Value;
+            var screenWidthMetres = Uuvr.VrUi.VrUiManager.ScreenWidthPerScale * config.VrUiScale.Value;
             var screenDistance = Mathf.Max(0.1f, Mathf.Abs(config.VrUiPosition.Value.z));
             // The scale of the canvas the marker came from: one canvas unit is that many screen pixels.
             var canvas = _hudCanvas != null ? _hudCanvas : GameplayScreenspaceUiCanvas.Canvas;

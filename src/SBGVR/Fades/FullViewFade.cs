@@ -40,8 +40,6 @@ namespace SBGVR.Fades
         private static readonly AccessTools.FieldRef<MainMenuBackgroundHandler, CanvasGroup> MenuOverlayGroup =
             AccessTools.FieldRefAccess<MainMenuBackgroundHandler, CanvasGroup>("overlayCanvasGroup");
 
-        private static FullViewFade _instance;
-
         // The latest state the game asked for, kept while its own image is hidden.
         private static ColorOverlay _colorOverlay;
         private static MainMenuBackgroundHandler _menu;
@@ -56,7 +54,6 @@ namespace SBGVR.Fades
 
         private void Awake()
         {
-            _instance = this;
             _over = new FadeSphere("SBGVR fade (over UI)", OverUiQueue, OverUiOrdersAfterScreen, transform);
             _behind = new FadeSphere("SBGVR fade (behind UI)", BehindUiQueue, 0, transform);
         }
@@ -132,7 +129,7 @@ namespace SBGVR.Fades
 
         private void OnBeforeRender()
         {
-            var camera = ViewCamera();
+            var camera = VrState.ViewCamera();
             var overAlpha = 0f;
             var overColor = Color.black;
             var behindAlpha = 0f;
@@ -162,15 +159,6 @@ namespace SBGVR.Fades
 
             _over.Show(camera, overColor, overAlpha);
             _behind.Show(camera, behindColor, behindAlpha);
-        }
-
-        /// <summary>The camera the headset sees through: the one UUVR's floating screen follows.</summary>
-        internal static Camera ViewCamera()
-        {
-            var vrCamera = Uuvr.VrCamera.VrCamera.HighestDepthVrCamera;
-            if (vrCamera != null && vrCamera.isActiveAndEnabled && vrCamera.ParentCamera != null)
-                return vrCamera.ParentCamera;
-            return Camera.main;
         }
 
         /// <summary>A sphere around the camera, drawn without depth testing at a fixed render queue and sorting order.</summary>

@@ -70,9 +70,6 @@ namespace SBGVR.Hud
         /// <summary>Gap between the floating screen's edge and the panel's near edge, in degrees.</summary>
         private const float GapDegrees = 4f;
 
-        /// <summary>UUVR's floating screen is 1.8 m wide at VR UI Scale 1.</summary>
-        private const float ScreenWidthPerScale = 1.8f;
-
         private GameObject _panel;
         private Material _material;
         private Texture2D _texture;
@@ -125,7 +122,7 @@ namespace SBGVR.Hud
             if (_failed) return;
 
             var where = ShowingFor();
-            var camera = where != null ? Fades.FullViewFade.ViewCamera() : null;
+            var camera = where != null ? VrState.ViewCamera() : null;
             if (camera == null)
             {
                 if (_panel != null && _panel.activeSelf) _panel.SetActive(false);
@@ -138,7 +135,7 @@ namespace SBGVR.Hud
             var config = ModConfiguration.Instance;
             var screen = config.VrUiPosition.Value;
             var distance = Mathf.Max(0.3f, Mathf.Abs(screen.z));
-            var screenHalfWidth = ScreenWidthPerScale * config.VrUiScale.Value / 2f;
+            var screenHalfWidth = Uuvr.VrUi.VrUiManager.ScreenWidthPerScale * config.VrUiScale.Value / 2f;
             // UUVR's screen shows the game window, so it has the window's shape.
             var screenHalfHeight = screenHalfWidth * Screen.height / Mathf.Max(1, Screen.width);
             var width = WidthPerMetre * distance;

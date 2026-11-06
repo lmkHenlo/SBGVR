@@ -109,7 +109,7 @@ namespace SBGVR.Hud
             }
 
             var enabled = WorldMarker.Enabled && Settings.WorldSpaceReticles.Value;
-            var camera = enabled ? Fades.FullViewFade.ViewCamera() : null;
+            var camera = enabled ? VrState.ViewCamera() : null;
             var showing = false;
             var weaponShowing = false;
             var gunShowing = false;

@@ -66,7 +66,7 @@ namespace SBGVR.Hud
             var start = Vector3.zero;
             var show = VrState.IsRunning && Settings.AimLine.Value && WorldReticles.AimShowing &&
                        TryGetStart(out start);
-            var camera = show ? Fades.FullViewFade.ViewCamera() : null;
+            var camera = show ? VrState.ViewCamera() : null;
             if (camera == null)
             {
                 _line.enabled = false;

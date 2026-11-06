@@ -13,12 +13,29 @@ public static class UiSorting
     // floating screen's own queue, so queues alone can't put anything after it.
     public const int ScreenOrder = short.MaxValue - 2;
 
+    private static int? _lastLayerId;
+
+    // The last sorting layer, which the VR UI draws on (0, the default layer, if the game has none). A built
+    // game's sorting layers can't change, so it's looked up once.
+    public static int LastLayerId
+    {
+        get
+        {
+            if (_lastLayerId == null)
+            {
+                var layers = SortingLayer.layers;
+                _lastLayerId = layers.Length > 0 ? layers[layers.Length - 1].id : 0;
+            }
+
+            return _lastLayerId.Value;
+        }
+    }
+
     /// <param name="ordersAfterScreen">0 sorts with the floating screen (the render queue decides which comes
     /// first); 1 or 2 sorts after it.</param>
     public static void DrawLast(Renderer renderer, int ordersAfterScreen = 0)
     {
-        var layers = SortingLayer.layers;
-        if (layers.Length > 0) renderer.sortingLayerID = layers[layers.Length - 1].id;
+        renderer.sortingLayerID = LastLayerId;
         renderer.sortingOrder = ScreenOrder + Mathf.Clamp(ordersAfterScreen, 0, short.MaxValue - ScreenOrder);
     }
 }

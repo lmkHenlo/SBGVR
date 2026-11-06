@@ -9,6 +9,10 @@ namespace Uuvr.VrUi;
 
 public class VrUiManager : UuvrBehaviour
 {
+    // SBGVR: the floating screen's width in metres at VR UI Scale 1, public so SBGVR can work out where its edges
+    // are (the menu controls panel and markers' edge arrows) without keeping its own copy.
+    public const float ScreenWidthPerScale = 1.8f;
+
 #if CPP
     public VrUiManager(System.IntPtr pointer) : base(pointer)
     {
@@ -54,7 +58,7 @@ public class VrUiManager : UuvrBehaviour
                                            ModConfiguration.UiPatchMode.CanvasRedirect;
 
         var uiTextureAspectRatio = (float) _uiTexture.height / _uiTexture.width;
-        var quadWidth = 1.8f * ModConfiguration.Instance.VrUiScale.Value;
+        var quadWidth = ScreenWidthPerScale * ModConfiguration.Instance.VrUiScale.Value;
         var quadHeight = quadWidth * uiTextureAspectRatio;
         _vrUiQuad.transform.localScale = new Vector3(quadWidth, quadHeight, 1f);
 
