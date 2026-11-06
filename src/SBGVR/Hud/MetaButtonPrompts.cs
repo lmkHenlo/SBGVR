@@ -55,13 +55,15 @@ namespace SBGVR.Hud
         /// <summary>
         /// Gamepad binding → icon, as MotionControls sends them: the left controller moves (left stick, X/Y, LB,
         /// LT), the right one turns the camera and swings (right stick, A/B, RB, RT); the left grip button held
-        /// turns the right thumbstick into the D-pad and B into View; Menu is Start.
+        /// turns the right thumbstick into the D-pad and B into View; Menu is Start. The X button and pressing the
+        /// left thumbstick both send X (west); its prompts (Interact, and leaving the golf cart) show the
+        /// thumbstick press.
         /// </summary>
         internal static readonly Dictionary<string, string> Layout = new Dictionary<string, string>
         {
             ["<Gamepad>/buttonSouth"] = "ButtonA",
             ["<Gamepad>/buttonEast"] = "ButtonB",
-            ["<Gamepad>/buttonWest"] = "ButtonX",
+            ["<Gamepad>/buttonWest"] = "StickLeft_Press",
             ["<Gamepad>/buttonNorth"] = "ButtonY",
             ["<Gamepad>/leftShoulder"] = "GripLeft",
             ["<Gamepad>/rightShoulder"] = "GripRight",
