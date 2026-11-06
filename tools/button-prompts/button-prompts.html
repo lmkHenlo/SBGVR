@@ -1,11 +1,11 @@
 <!doctype html>
 <!--
   Source of src/SBGVR/Assets/meta-button-prompts.png: the button prompt icons SBGVR shows while you play with
-  Meta Quest Touch controllers. Every icon is drawn from Meta's Meta Quest Touch Plus line art
-  (../controller-layout/meta-quest-touch-plus.svg, Meta's Art Attribution License 1.0; see THIRD_PARTY_NOTICES.md):
-  the button caps and their letters as Meta drew them, turned upright, and the thumbsticks, trigger and grip
-  button from the same drawing. Only the light backing, the side colour, the L/R letters and the direction
-  arrows are SBGVR's. render.py loads the line art into this page and saves #atlas.
+  Meta Quest Touch controllers. Every icon is SBGVR's own drawing: white-lettered outline shapes in the left
+  (blue) or right (orange) controller's colour, with a dark edge so they read on light backgrounds too.
+  Thumbsticks are a double ring with L or R, triangles for a direction and a notch for a press; triggers
+  (LT, RT) and the A, B, X, Y and Menu buttons are round buttons with their side showing; grip buttons (LG, RG)
+  are a tapered pill with the controller's side as a bracket. render.py saves #atlas.
 
   The cell order below is the one Hud/MetaButtonPrompts.cs uses (GlyphNames); keep the two the same.
 -->
@@ -13,7 +13,7 @@
 <head>
 <meta charset="utf-8">
 <style>
-@font-face { font-family: Inter; font-weight: 700; src: url(../controller-layout/fonts/inter-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url(../controller-layout/fonts/inter-latin-600-normal.woff2) format("woff2"); }
 html, body { margin: 0; background: transparent; }
 #atlas { position: relative; width: 1024px; height: 1024px; }
 #atlas svg { position: absolute; width: 128px; height: 128px; overflow: visible; }
@@ -22,25 +22,10 @@ html, body { margin: 0; background: transparent; }
 <body>
 <div id="atlas"></div>
 <script>
-// Paths in Meta's line art (the order pdftocairo writes them from Quest_03.ai).
-const LEFT = {
-  stick: [6, 7, 8, 9],          // base ring, base, top ring, top
-  caps: { X: [11, 31, 32], Y: [10, 33, 34], Menu: [12, 35, 36, 37] },
-  trigger: [5],                 // the trigger, on the controller's inner side
-  grip: [2, 1],                 // the grip button, below the controller's face
-  body: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20, 21, 31, 32, 33, 34, 35, 36, 37],
-};
-const RIGHT = {
-  stick: [13, 14, 15, 16],
-  caps: { A: [18, 39, 40, 41], B: [17, 38] },
-  trigger: [27],
-  grip: [24, 23],
-  body: [13, 14, 15, 16, 17, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 38, 39, 40, 41],
-};
-const INK = "#231F20";                       // Meta's line colour
-const SIDE = { Left: "#2563EB", Right: "#C2410C" }; // the controller layout's left and right colours
-const TILE = "#F4F4F5", TILE_EDGE = "#1F1F23";
 const NS = "http://www.w3.org/2000/svg";
+const W = "#FFFFFF", FILL = "#1C1C20", LW = 4.5;           // letters and arrows, inside of shapes, line width
+const SIDE = { Left: "#2563EB", Right: "#C2410C" };       // the controller layout's left and right colours
+const CAP_SIDE = { A: "Right", B: "Right", X: "Left", Y: "Left", Menu: "Left" };
 
 // Cell order: must match GlyphNames in Hud/MetaButtonPrompts.cs.
 const GLYPHS = [];
@@ -57,8 +42,6 @@ for (const [grip, stick, cap] of [["Left", "Right", "B"], ["Right", "Left", "Y"]
   GLYPHS.push({ name: `Grip${grip}+Button${cap}`, kind: "combo", grip, inner: { kind: "cap", cap } });
 }
 
-let source; // the line art's <svg>
-
 function el(name, attrs, parent) {
   const e = document.createElementNS(NS, name);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
@@ -66,139 +49,111 @@ function el(name, attrs, parent) {
   return e;
 }
 
-// A copy of some of the line art's paths, in the line art's own coordinates.
-function art(ids, style) {
-  const g = el("g", {});
-  const paths = source.querySelectorAll("path");
-  for (const i of ids) {
-    const p = paths[i].cloneNode();
-    if (style) style(p, i);
-    g.appendChild(p);
-  }
-  return g;
+function label(g, text, x, y, size) {
+  el("text", { x, y: y + size * 0.36, "text-anchor": "middle", "font-family": "Inter", "font-weight": 600,
+               "font-size": size, fill: W }, g).textContent = text;
 }
 
-// Places g (in art coordinates) inside the box (x, y, size) of svg, turned by angle degrees, as large as fits.
-// Returns the scale, so strokes can be kept a readable width.
-function place(svg, g, x, y, size, angle) {
-  const holder = el("g", {}, svg);
-  const inner = el("g", { transform: `rotate(${angle})` }, holder);
-  inner.appendChild(g);
-  const b = tightBox(g, holder);
-  const s = Math.min(size / b.width, size / b.height);
-  holder.setAttribute("transform",
-    `translate(${x + size / 2} ${y + size / 2}) scale(${s}) translate(${-(b.x + b.width / 2)} ${-(b.y + b.height / 2)})`);
-  return s;
+// A solid triangle pointing in dir, its tip a from (cx, cy).
+function tri(g, cx, cy, dir, a) {
+  const pts = { Up: [[0, -1], [-1, 0.45], [1, 0.45]], Down: [[0, 1], [-1, -0.45], [1, -0.45]],
+                LeftDir: [[-1, 0], [0.45, -1], [0.45, 1]], RightDir: [[1, 0], [-0.45, -1], [-0.45, 1]] }[dir];
+  el("polygon", { points: pts.map(([u, v]) => `${cx + u * a},${cy + v * a}`).join(" "), fill: W,
+                  stroke: W, "stroke-width": 2, "stroke-linejoin": "round" }, g);
 }
 
-// The exact bounds of g's paths in holder's coordinates (sampled along every path), so turned content fits.
-function tightBox(g, holder) {
-  const toHolder = holder.getCTM().inverse();
-  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  for (const p of g.querySelectorAll("path")) {
-    const pm = toHolder.multiply(p.getCTM());
-    const len = p.getTotalLength();
-    for (let t = 0; t <= len; t += Math.max(len / 200, 0.25)) {
-      const q = p.getPointAtLength(t), r = new DOMPoint(q.x, q.y).matrixTransform(pm);
-      x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y); x1 = Math.max(x1, r.x); y1 = Math.max(y1, r.y);
-    }
-  }
-  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
+// The press mark: a triangle pointing down into the top of a ring, with a gap cut around it.
+function notch(g, cx, top, color) {
+  el("polygon", { points: `${cx - 11},${top - 9} ${cx + 11},${top - 9} ${cx},${top + 7}`, fill: color,
+                  stroke: FILL, "stroke-width": 4, "stroke-linejoin": "round", "paint-order": "stroke" }, g);
 }
 
-// The angle (degrees) of an ellipse-like path's long axis, so a cap or thumbstick can be turned upright.
-function axisAngle(i) {
-  const p = source.querySelectorAll("path")[i], m = p.getCTM(), len = p.getTotalLength(), pts = [];
-  for (let t = 0; t < len; t += len / 200) { const q = p.getPointAtLength(t); pts.push(new DOMPoint(q.x, q.y).matrixTransform(m)); }
-  const cx = pts.reduce((a, q) => a + q.x, 0) / pts.length, cy = pts.reduce((a, q) => a + q.y, 0) / pts.length;
-  let sxx = 0, syy = 0, sxy = 0;
-  for (const q of pts) { sxx += (q.x - cx) ** 2; syy += (q.y - cy) ** 2; sxy += (q.x - cx) * (q.y - cy); }
-  return 0.5 * Math.atan2(2 * sxy, sxx - syy) * 180 / Math.PI;
+// A round button seen slightly from the front: its side shows as a crescent under it.
+function button(g, cx, cy, r, side) {
+  el("circle", { cx, cy: cy + r * 0.2, r, fill: SIDE[side] }, g);
+  el("circle", { cx, cy, r: r + 2.5, fill: FILL }, g);
+  el("circle", { cx, cy, r: r - LW / 2, fill: FILL, stroke: SIDE[side], "stroke-width": LW }, g);
 }
 
-function tile(svg) {
-  el("rect", { x: 5, y: 5, width: 118, height: 118, rx: 26, fill: TILE, stroke: TILE_EDGE, "stroke-width": 4 }, svg);
-}
-
-// How far to turn each cap (degrees) so its letter stands upright: Meta drew the caps in perspective, with
-// each letter at its own angle.
-const CAP_ANGLE = { A: 18, B: 18, X: -22, Y: -25, Menu: -4 };
-
-// Meta's button cap with its letter, upright.
-function drawCap(svg, cap, x, y, size) {
-  const ids = (LEFT.caps[cap] || RIGHT.caps[cap]);
-  place(svg, art(ids), x, y, size, CAP_ANGLE[cap]);
-}
-
-function arrow(svg, cx, cy, dir, s, color) {
-  const pts = { Up: [[0, -1], [-1, 0.2], [1, 0.2]], Down: [[0, 1], [-1, -0.2], [1, -0.2]],
-                LeftDir: [[-1, 0], [0.2, -1], [0.2, 1]], RightDir: [[1, 0], [-0.2, -1], [-0.2, 1]] }[dir];
-  el("polygon", { points: pts.map(([a, b]) => `${cx + a * s},${cy + b * s}`).join(" "), fill: color,
-                  stroke: TILE_EDGE, "stroke-width": 2.5, "stroke-linejoin": "round" }, svg);
-}
-
-// Meta's thumbstick drawing, upright, filled so it reads at icon size, with L or R in the side colour and
-// arrows for a direction (or a press).
-function drawStick(svg, side, dir, x, y, size) {
-  const S = side === "Left" ? LEFT : RIGHT, color = SIDE[side];
+// A thumbstick from above: a double ring with L or R, triangles for a direction, a notch for a press.
+function drawStick(g, side, dir) {
   const arrows = { Up: ["Up"], Down: ["Down"], LeftDir: ["LeftDir"], RightDir: ["RightDir"],
-                   Horizontal: ["LeftDir", "RightDir"], Vertical: ["Up", "Down"], Press: [] }[dir] || [];
-  const room = arrows.length || dir === "Press" ? 0.62 : 0.8;
-  const inner = size * room;
-  const g = art(S.stick, p => { p.setAttribute("fill", "#FFFFFF"); });
-  const sc = place(svg, g, x + (size - inner) / 2, y + (size - inner) / 2 + (dir === "Press" ? size * 0.08 : 0), inner, -axisAngle(S.stick[2]));
-  for (const p of g.querySelectorAll("path")) { p.setAttribute("stroke", INK); p.setAttribute("stroke-width", 2.6 / sc); }
-  // The top of the stick in the side colour, so the side reads at a glance.
-  const top = g.querySelectorAll("path")[3]; top.setAttribute("fill", color);
-  const c = { x: x + size / 2, y: y + size / 2 + (dir === "Press" ? size * 0.08 : 0) };
-  const topBox = top.getBoundingClientRect(), host = svg.getBoundingClientRect();
-  const tx = topBox.x - host.x + topBox.width / 2, ty = topBox.y - host.y + topBox.height / 2;
-  el("text", { x: tx, y: ty + size * 0.075, "text-anchor": "middle", "font-family": "Inter", "font-weight": 700,
-               "font-size": size * 0.21, fill: "#FFFFFF" }, svg).textContent = side[0];
-  const r = size * 0.42, a = size * 0.085;
+                   Horizontal: ["LeftDir", "RightDir"], Vertical: ["Up", "Down"] }[dir] || [];
+  const R = arrows.length ? 30 : dir === "Press" ? 38 : 42, cx = 64, cy = 64 + (dir === "Press" ? 6 : 0);
+  el("circle", { cx, cy, r: R, fill: FILL, stroke: SIDE[side], "stroke-width": LW }, g);
+  el("circle", { cx, cy, r: R * 0.7, fill: FILL, stroke: SIDE[side], "stroke-width": LW - 1 }, g);
+  label(g, side[0], cx, cy, R * 0.78);
   for (const d of arrows) {
-    const off = { Up: [0, -r], Down: [0, r], LeftDir: [-r, 0], RightDir: [r, 0] }[d];
-    arrow(svg, c.x + off[0], c.y + off[1], d, a, INK);
+    const o = R + 15, off = { Up: [0, -o], Down: [0, o], LeftDir: [-o, 0], RightDir: [o, 0] }[d];
+    tri(g, cx + off[0], cy + off[1], d, 9);
   }
-  if (dir === "Press") arrow(svg, c.x, y + size * 0.1, "Down", a * 1.1, color);
+  if (dir === "Press") notch(g, cx, cy - R, SIDE[side]);
 }
 
-// The whole controller from Meta's drawing, with the trigger or grip button filled in the side colour.
-function drawPart(svg, side, part, x, y, size) {
-  const S = side === "Left" ? LEFT : RIGHT, color = SIDE[side], hl = new Set(S[part]);
-  const g = art(S.body, (p, i) => {
-    p.dataset.part = hl.has(i) ? "1" : "";
-    // The trigger's outline is open: filled, it closes along the controller, which fills the trigger.
-    if (hl.has(i)) { p.setAttribute("stroke", color); if (i === S[part][0]) p.setAttribute("fill", color); }
-  });
-  const sc = place(svg, g, x, y, size, 0);
-  // Meta's 1-unit lines would vanish at icon size: draw them at a readable width, the button thicker.
-  for (const p of g.querySelectorAll("path"))
-    if (p.getAttribute("stroke") && p.getAttribute("stroke") !== "none")
-      p.setAttribute("stroke-width", (p.dataset.part ? 5 : 1.8) / sc);
-  return g;
+function drawTrigger(g, side) { button(g, 64, 60, 38, side); label(g, side[0] + "T", 64, 60, 30); }
+
+function drawCap(g, cap) {
+  button(g, 64, 60, 36, CAP_SIDE[cap]);
+  if (cap === "Menu") for (const k of [-1, 0, 1]) el("rect", { x: 47, y: 60 + k * 11 - 2.5, width: 34, height: 5, rx: 2.5, fill: W }, g);
+  else label(g, cap, 64, 60, 34);
 }
 
-function render(svgText) {
-  source = new DOMParser().parseFromString(svgText, "image/svg+xml").documentElement;
-  // The line art must be in the document for its geometry to be measured.
-  source.setAttribute("style", "position:absolute;left:-5000px;top:0"); document.body.appendChild(source);
-  const atlas = document.getElementById("atlas");
+// The grip button: a tapered pill with the controller's side as a bracket on the outer side.
+function drawGrip(g, side) {
+  const s = side === "Left" ? 1 : -1, cx = 64 + s * 6, cy = 64;
+  el("path", { d: `M ${cx - 34} ${cy - 20} L ${cx + 34} ${cy - 20} Q ${cx + 40} ${cy - 20} ${cx + 37} ${cy - 13} L ${cx + 30} ${cy + 15}
+                   Q ${cx + 28} ${cy + 20} ${cx + 22} ${cy + 20} L ${cx - 22} ${cy + 20} Q ${cx - 28} ${cy + 20} ${cx - 30} ${cy + 15}
+                   L ${cx - 37} ${cy - 13} Q ${cx - 40} ${cy - 20} ${cx - 34} ${cy - 20} Z`,
+               fill: FILL, stroke: SIDE[side], "stroke-width": LW, "stroke-linejoin": "round" }, g);
+  const bx = cx - s * 47;
+  el("path", { d: `M ${bx + s * 8} ${cy - 22} Q ${bx - s * 6} ${cy} ${bx + s * 8} ${cy + 22}`, fill: "none",
+               stroke: SIDE[side], "stroke-width": LW, "stroke-linecap": "round" }, g);
+  label(g, side[0] + "G", cx, cy - 1, 28);
+}
+
+function draw(g, gl) {
+  if (gl.kind === "stick") drawStick(g, gl.side, gl.dir);
+  else if (gl.kind === "cap") drawCap(g, gl.cap);
+  else (gl.part === "trigger" ? drawTrigger : drawGrip)(g, gl.side);
+}
+
+// Icons of a family share one scale, so their rings and letters match in size.
+function family(gl) {
+  if (gl.kind === "combo") return "combo";
+  if (gl.kind === "stick" && gl.dir && gl.dir !== "Press") return "arrows";
+  if (gl.kind === "part" && gl.part === "grip") return "grip";
+  return "round";
+}
+
+function render() {
+  const atlas = document.getElementById("atlas"), cells = [];
   GLYPHS.forEach((gl, n) => {
     const svg = el("svg", { viewBox: "0 0 128 128" }, atlas);
     svg.style.left = (n % 8) * 128 + "px"; svg.style.top = Math.floor(n / 8) * 128 + "px";
-    tile(svg);
-    if (gl.kind === "cap") drawCap(svg, gl.cap, 22, 22, 84);
-    else if (gl.kind === "stick") drawStick(svg, gl.side, gl.dir, 14, 14, 100);
-    else if (gl.kind === "part") drawPart(svg, gl.side, gl.part, 14, 12, 104);
-    else if (gl.kind === "combo") {
-      // Hold the grip button (small, top left) and press the other control (large).
-      drawPart(svg, gl.grip, "grip", 8, 8, 52);
-      if (gl.inner.kind === "cap") drawCap(svg, gl.inner.cap, 52, 50, 64);
-      else drawStick(svg, gl.inner.side, gl.inner.dir, 42, 40, 76);
-    }
+    // A dark edge round every shape, so the icons read on light backgrounds too.
+    const f = el("filter", { id: "edge" + n, x: "-10%", y: "-10%", width: "120%", height: "120%" }, el("defs", {}, svg));
+    el("feMorphology", { in: "SourceAlpha", operator: "dilate", radius: 2.5, result: "d" }, f);
+    el("feFlood", { "flood-color": "#0E0E11", "flood-opacity": 0.9 }, f);
+    el("feComposite", { in2: "d", operator: "in", result: "o" }, f);
+    const m = el("feMerge", {}, f); el("feMergeNode", { in: "o" }, m); el("feMergeNode", { in: "SourceGraphic" }, m);
+    const outer = el("g", { filter: `url(#edge${n})` }, svg), fit = el("g", {}, outer), root = el("g", {}, fit);
+    if (gl.kind === "combo") {
+      // Hold the grip button (top) and use the other control (below).
+      drawGrip(el("g", { transform: "translate(64 27) scale(0.56) translate(-64 -64)" }, root), gl.grip);
+      draw(el("g", { transform: "translate(64 83) scale(0.66) translate(-64 -64)" }, root), gl.inner);
+    } else draw(root, gl);
+    cells.push({ fit, root, family: family(gl) });
   });
-  source.remove();
+  // Fill the cell as the game's own icons do, each drawing centred on its cell, every family at its largest
+  // scale that keeps all its icons inside the cell, with room left for the lines and the edge.
+  const scale = {};
+  for (const c of cells) {
+    const b = c.root.getBBox();
+    const e = Math.max(64 - b.x, b.x + b.width - 64, 64 - b.y, b.y + b.height - 64);
+    scale[c.family] = Math.min(scale[c.family] || Infinity, 53 / e);
+  }
+  for (const c of cells)
+    c.fit.setAttribute("transform", `translate(64 64) scale(${scale[c.family]}) translate(-64 -64)`);
   return GLYPHS.map(g => g.name);
 }
 </script>

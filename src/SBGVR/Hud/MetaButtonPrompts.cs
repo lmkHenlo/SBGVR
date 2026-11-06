@@ -15,16 +15,15 @@ namespace SBGVR.Hud
 {
     /// <summary>
     /// While you play with Meta Quest Touch controllers (VR Controls.MotionControls), the game's button prompts
-    /// show the controllers' own buttons instead of an Xbox controller's: Meta's button caps (A, B, X, Y, Menu),
-    /// and Meta's drawings of the thumbsticks, triggers and grip buttons, in the left or right controller's
-    /// colour. Each prompt shows the button that sends its gamepad input (MotionControls), including
+    /// show the controllers' own buttons instead of an Xbox controller's: A, B, X, Y and Menu, the thumbsticks
+    /// (L, R), triggers (LT, RT) and grip buttons (LG, RG), outlined in the left or right controller's colour. Each prompt shows the button that sends its gamepad input (MotionControls), including
     /// MirrorButtons; the D-pad and View button, which take the grip button held, show both.
     /// </summary>
     /// <remarks>
     /// The game draws every prompt from its current icon set (InputManager.currentDeviceIconSet): sprites for
     /// images, and TextMeshPro sprite tags for prompts in text. The controllers reach the game as a gamepad, so
     /// the game picks its Xbox set. While the controllers are the device in use, this puts in a copy of that set
-    /// whose icons are taken from Meta's art (Assets/meta-button-prompts.png, drawn by tools/button-prompts),
+    /// whose icons are SBGVR's (Assets/meta-button-prompts.png, drawn by tools/button-prompts),
     /// keeping its binding paths and merges, and tells the game's prompts to refresh, as the game does when the
     /// device changes. The game's set comes back as soon as anything else is used, or VR stops. Nothing about
     /// the input or the prompts themselves changes. The left thumbstick press has no controller input
