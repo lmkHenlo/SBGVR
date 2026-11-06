@@ -38,14 +38,14 @@ internal static class GameFolderRedirect
     private static readonly object Lock = new();
     private static readonly HashSet<string> Logged = new(StringComparer.OrdinalIgnoreCase);
 
-    public static void Install(string copyToGamePath, string dataPath)
+    public static void Install(string vrRuntimePath, string dataPath)
     {
         _dataPath = Path.GetFullPath(dataPath).TrimEnd('\\', '/');
-        _sourceData = Path.Combine(copyToGamePath, "Data");
-        _sourcePlugins = Path.Combine(Path.Combine(copyToGamePath, "Plugins"), IntPtr.Size == 8 ? "x64" : "x86");
+        _sourceData = Path.Combine(vrRuntimePath, "Data");
+        _sourcePlugins = Path.Combine(Path.Combine(vrRuntimePath, "Plugins"), IntPtr.Size == 8 ? "x64" : "x86");
 
         Log.LogInfo($"Game data folder: {_dataPath}");
-        Log.LogInfo($"VR runtime files are read from: {copyToGamePath}");
+        Log.LogInfo($"VR runtime files are read from: {vrRuntimePath}");
         ReportGameFolderCopies();
 
         var unity = GetModuleHandleW("UnityPlayer.dll");
