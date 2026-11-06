@@ -295,26 +295,8 @@ namespace SBGVR.Hud
 
         private static Texture2D LoadAtlas()
         {
-            byte[] bytes;
-            using (var stream = typeof(MetaButtonPrompts).Assembly.GetManifestResourceStream(ImageResource))
-            {
-                if (stream == null) throw new FileNotFoundException("the button prompt icons are missing from SBGVR.dll");
-                using (var memory = new MemoryStream())
-                {
-                    stream.CopyTo(memory);
-                    bytes = memory.ToArray();
-                }
-            }
-
-            // sRGB colour, with mipmaps so the icons stay smooth on the floating screen at any size.
-            var texture = new Texture2D(2, 2, TextureFormat.RGBA32, true, false)
-            {
-                name = SpriteAssetName + " icons",
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Trilinear,
-                hideFlags = HideFlags.HideAndDontSave,
-            };
-            if (!texture.LoadImage(bytes, true)) throw new InvalidDataException("the button prompt icons couldn't be read");
+            // Mipmapped, so the icons stay smooth on the floating screen at any size.
+            var texture = EmbeddedImage.Load(ImageResource, SpriteAssetName + " icons");
             if (texture.width != Columns * Cell || texture.height < (GlyphNames.Length + Columns - 1) / Columns * Cell)
                 throw new InvalidDataException($"the button prompt icons are {texture.width} x {texture.height}, not {Columns * Cell} wide");
             return texture;
