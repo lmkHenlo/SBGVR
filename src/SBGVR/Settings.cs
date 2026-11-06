@@ -165,18 +165,18 @@ namespace SBGVR
                 "camera and swings or fires, X and Y act as A and B, and the right grip button opens the D-pad " +
                 "layer. The Menu button stays on the left controller.");
             MotionCamera = config.Bind(controls, "MotionCamera", true,
-                "With MotionControls, while you aim and charge a golf club or rocket club swing, small movements of " +
-                "your DominantHand controller turn the camera, like the right thumbstick: turn it or move it " +
-                "sideways to turn the camera left or right (and, with MotionCameraMaxPitch above 0, tilt it to look up " +
-                "or down). Your character faces the " +
-                "camera while aiming, so this fine-tunes where the swing goes. It starts from how you hold the " +
-                "controller when you start aiming and stops when you swing; the thumbstick still works. Only while " +
-                "you're playing with the controllers, not a gamepad, keyboard or mouse. Works in first person too " +
-                "(left and right only). While you aim an item, in third or first person (with ControllerAiming), turning or " +
-                "tilting the controller turns the camera by the same angle, 1:1, and weapons aim along the camera; " +
-                "the aim starts, and after each shot goes back to, where the controller points; when you stop aiming, " +
-                "the camera's tilt eases back to where it was. The " +
-                "MotionCamera settings below are for swings only.");
+                "With MotionControls, small movements of your DominantHand controller turn the camera, only while " +
+                "you're playing with the controllers (not a gamepad, keyboard or mouse). " +
+                "Swings: while you aim and charge a golf club or rocket club swing, turn the controller or move it " +
+                "sideways to turn the camera left or right, like the right thumbstick (and, with MotionCameraMaxPitch " +
+                "above 0, tilt it to look up or down). Your character faces the camera while aiming, so this " +
+                "fine-tunes where the swing goes. It starts from how you hold the controller when you start aiming " +
+                "and stops when you swing; the thumbstick still works. In first person it turns left and right only. " +
+                "The MotionCamera settings below tune swings only. " +
+                "Items (with ControllerAiming): while you aim an item, in third or first person, turning or tilting " +
+                "the controller turns the camera by the same angle (1:1), and weapons aim along the camera. The aim " +
+                "starts where the controller points and goes back there after each shot; when you stop aiming, the " +
+                "camera's tilt eases back to where it was.");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
                 new ConfigDescription(
                     "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +
