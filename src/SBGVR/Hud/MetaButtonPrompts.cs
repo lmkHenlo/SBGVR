@@ -59,6 +59,12 @@ namespace SBGVR.Hud
         /// left thumbstick both send X (west); its prompts (Interact, and leaving the golf cart) show the
         /// thumbstick press.
         /// </summary>
+        /// <remarks>
+        /// Follows MotionControls.ReadState, which decides what each button sends. Change it together with
+        /// that, tools/controller-layout/controller-layout.html (the menu panel's images) and the docs (README.md's
+        /// Motion controls tables, thunderstore/README.md's VR Controls summary, and the MirrorButtons and
+        /// FirstPersonControllerToggle descriptions in Settings.cs). TEST_PLAN.md step 17 checks that they agree.
+        /// </remarks>
         internal static readonly Dictionary<string, string> Layout = new Dictionary<string, string>
         {
             ["<Gamepad>/buttonSouth"] = "ButtonA",

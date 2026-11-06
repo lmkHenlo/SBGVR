@@ -133,6 +133,11 @@ On by default (`VR Controls` → `MotionControls` in `com.sbgvr.cfg`; restart th
 
 Controller inputs are named as in Meta's [Quest controller guidelines](https://developers.meta.com/vr/design/controllers/); other controllers use the input in the same place.
 
+<!-- These tables (and the mirrored one below) follow src/SBGVR/Controls/MotionControls.cs (ReadState). Change them
+     together with it, Hud/MetaButtonPrompts.cs (Layout), tools/controller-layout/controller-layout.html, the VR Controls
+     summary in thunderstore/README.md and the MirrorButtons and FirstPersonControllerToggle descriptions in
+     Settings.cs. TEST_PLAN.md step 17 checks that they agree. -->
+
 | Controller | Gamepad | In the game |
 | --- | --- | --- |
 | Left thumbstick | Left stick | Move; menu cursor |

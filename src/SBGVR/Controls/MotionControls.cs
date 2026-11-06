@@ -117,6 +117,12 @@ namespace SBGVR.Controls
 
         private GamepadState ReadState()
         {
+            // The button layout is written down in three more places; change them together with this method:
+            // MetaButtonPrompts.Layout (the prompt icon for each gamepad input; MirroredLayout follows it),
+            // tools/controller-layout/controller-layout.html (the menu panel's normal and mirrored images), and the
+            // docs (README.md's Motion controls tables, thunderstore/README.md's VR Controls summary, and the
+            // MirrorButtons and FirstPersonControllerToggle descriptions in Settings.cs). TEST_PLAN.md step 17
+            // checks that they agree.
             // The gamepad's left side (moving, aiming, X/Y, LB and the D-pad layer) comes from the left
             // controller and its right side (camera, swinging and firing, A/B, RB) from the right one, unless
             // VR Controls.MirrorButtons swaps them. The Menu button only exists on the left controller (the
