@@ -5,7 +5,7 @@
 
 Play Super Battle Golf in a PC VR headset: Raicuparta's UUVR with Super Battle Golf fixes. Client-side.
 
-SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, in the Thunderstore package format that r2modman installs. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking, and VR controllers can optionally act as a gamepad and aim weapons. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
+SBGVR packages Raicuparta's [Universal Unity VR](https://github.com/Raicuparta/uuvr) (UUVR) as a mod for Super Battle Golf, published on [Thunderstore](https://thunderstore.io/c/super-battle-golf/p/lmkHenlo/SBGVR/) so that r2modman installs it like any other mod. It adds a plugin of its own for fixes specific to the game. UUVR starts a VR runtime inside the game, makes the game's camera follow the headset and moves the 2D interface onto a floating screen. The game is rendered in stereo with head tracking, and VR controllers can optionally act as a gamepad and aim weapons. Only the VR player's own view changes. Nothing is sent over the network, so a VR player can join any lobby.
 
 ## Table of Contents
 
@@ -60,15 +60,13 @@ UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which wor
 
 ### With r2modman
 
-1. Download `lmkHenlo-SBGVR-<version>.zip` from [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases).
-2. In r2modman, make sure the Super Battle Golf profile has `BepInExPack` (install it from r2modman's online list if not).
-3. Use r2modman's **Import local mod** with the zip.
+Install SBGVR from its [Thunderstore page](https://thunderstore.io/c/super-battle-golf/p/lmkHenlo/SBGVR/) with **Install with Mod Manager**, or find SBGVR in r2modman's online list for Super Battle Golf. r2modman installs `BepInExPack` with it.
 
-A zip you built yourself ([Building from source](#building-from-source) writes `artifacts\lmkHenlo-SBGVR-<version>.zip`) installs the same way.
+To install a zip instead, such as one from [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases) or one you built yourself ([Building from source](#building-from-source) writes `artifacts\lmkHenlo-SBGVR-<version>.zip`), make sure the profile has `BepInExPack`, then use r2modman's **Import local mod** with the zip.
 
 ### By hand
 
-Install BepInEx 5 into the game folder and start the game once. Then run this in PowerShell. It installs the newest SBGVR zip in your Downloads folder, or in `artifacts` if you run it in the repository folder after a build. Change `$game` if the game is installed somewhere else.
+Install BepInEx 5 into the game folder and start the game once. Download the SBGVR zip from [Thunderstore](https://thunderstore.io/c/super-battle-golf/p/lmkHenlo/SBGVR/) (**Manual Download**) or [GitHub Releases](https://github.com/lmkHenlo/SBGVR/releases), then run this in PowerShell. It installs the newest SBGVR zip in your Downloads folder, or in `artifacts` if you run it in the repository folder after a build. Change `$game` if the game is installed somewhere else.
 
 ```powershell
 $game = "C:\Program Files (x86)\Steam\steamapps\common\Super Battle Golf"
@@ -101,7 +99,7 @@ Super Battle Golf/
 
 ### Updating
 
-Install the new zip the same way: import it in r2modman, or run the commands above again. If an earlier version left a `BepInEx\patchers\SBGVR\CopyToGame` folder, it isn't used any more and can be deleted; r2modman removes it itself. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
+Update SBGVR the way you installed it: in r2modman, from its list of installed mods (or by importing the new zip), or by running the commands above again. If an earlier version left a `BepInEx\patchers\SBGVR\CopyToGame` folder, it isn't used any more and can be deleted; r2modman removes it itself. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
 
 ### Uninstalling
 
