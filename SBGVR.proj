@@ -64,7 +64,7 @@
     Thunderstore package layout:
       manifest.json, icon.png, README.md, LICENSE, THIRD_PARTY_NOTICES.md
       plugins/   UUVR, its XR libraries, SBGVR and UUVR's cursor image
-      patchers/  UUVR's patcher and the native VR files it copies into the game
+      patchers/  UUVR's patcher and the VR runtime files (VrRuntime/) the game reads from there
   -->
   <Target Name="Package">
     <ItemGroup>

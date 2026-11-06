@@ -101,7 +101,7 @@ Super Battle Golf/
 
 ### Updating
 
-Install the new zip the same way: import it in r2modman, or run the commands above again. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
+Install the new zip the same way: import it in r2modman, or run the commands above again. If an earlier version left a `BepInEx\patchers\SBGVR\CopyToGame` folder, it isn't used any more and can be deleted; r2modman removes it itself. Settings are kept, since they're in `BepInEx\config`, outside the mod's folders. [CHANGELOG.md](CHANGELOG.md) lists what changed, including settings that were added or removed.
 
 ### Uninstalling
 
