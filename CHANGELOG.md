@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The Meta Quest button prompt icons are redrawn to be easier to read at the size the game shows them: white letters and outlines in the left (blue) or right (orange) controller's colour, with a dark edge for bright scenes. Thumbsticks are a double ring with L or R, triggers are LT and RT, grip buttons are LG and RG, and A, B, X, Y and Menu are round buttons; the grip button combinations show the grip button above the other control. They're SBGVR's own drawings, so `THIRD_PARTY_NOTICES.md` credits Meta's artwork for the controller layout images only.
 - SBGVR is on [Thunderstore](https://thunderstore.io/c/super-battle-golf/p/lmkHenlo/SBGVR/). The README and the Thunderstore README say to install and update it with r2modman from there; the GitHub zips still work with **Import local mod**.
 - The README's mirrored button table says that through SteamVR the Menu button opens SteamVR's menu, so you pause with the right grip button + X, as the normal table already said for the left grip button + A.
 

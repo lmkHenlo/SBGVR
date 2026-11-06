@@ -31,8 +31,8 @@ UUVR in turn includes the components below, which keep their own licences.
 | `plugins/Uuvr.XR.OpenXR.dll` | Adapted from the Unity OpenXR plugin's source. SBGVR added, on 2026-10-24, the controller input code and five controller profiles adapted from version 1.4.2 (`Input/OpenXRInput.cs` and `Features/Interactions/` in the source); each of those files says what was changed. | Unity Companion License ([notice below](#unity-openxr-plugin)) |
 | `plugins/Uuvr.XR.Management.dll` | Adapted from Unity XR Plugin Management (com.unity.xr.management) | Unity Companion License ([notice below](#unity-xr-plugin-management)) |
 
-SBGVR's controller layout images and button prompt icons contain Meta's Meta Quest Touch Plus controller
-artwork, used under Meta's Art Attribution License 1.0; see [Meta Quest Touch Plus controller artwork](#meta-quest-touch-plus-controller-artwork).
+SBGVR's controller layout images contain Meta's Meta Quest Touch Plus controller artwork, used under
+Meta's Art Attribution License 1.0; see [Meta Quest Touch Plus controller artwork](#meta-quest-touch-plus-controller-artwork).
 
 ## OpenVR SDK
 
@@ -338,19 +338,17 @@ Unless expressly provided otherwise, the Software under this license is made ava
 
 ## Meta Quest Touch Plus controller artwork
 
-SBGVR's controller layout images and button prompt icons contain Meta's Meta Quest Touch Plus controller
-artwork, converted from the controller images in Meta's developer art assets:
+SBGVR's controller layout images contain Meta's Meta Quest Touch Plus controller artwork, converted
+from the controller images in Meta's developer art assets:
 
 | Files | What it is |
 | --- | --- |
 | `tools/controller-layout/meta-quest-touch-plus.svg` (source only) | Meta's line art of the left and right Meta Quest Touch Plus controllers |
 | `src/SBGVR/Assets/controller-layout.png` and `src/SBGVR/Assets/controller-layout-mirrored.png` in the source, embedded in `plugins/SBGVR.dll` | SBGVR's controller layout, normal and with `MirrorButtons`, made from that line art; shown in VR in the game's main menu and pause menu |
-| `src/SBGVR/Assets/meta-button-prompts.png` in the source, embedded in `plugins/SBGVR.dll`; source in `tools/button-prompts/` | SBGVR's button prompt icons, drawn from that line art (Meta's button caps and letters, thumbsticks, triggers and grip buttons); shown in the game's button prompts while you play with Meta Quest Touch controllers |
 
 The artwork is used under Meta's [Art Attribution License 1.0](https://developers.meta.com/vr/licenses/art-1.0/),
-only to show which button on these controllers does what in SBGVR and which button each of the game's
-prompts asks for, as that licence allows (using the images to refer to the product they show in a game,
-including in user manuals):
+only to show which button on these controllers does what in SBGVR, as that licence allows (using the
+images to refer to the product they show in a game, including in user manuals):
 
 ```text
 Copyright © Facebook Technologies, LLC and its affiliates. All rights reserved.
@@ -362,6 +360,5 @@ Platforms, Inc. or its affiliates; SBGVR uses them only to name the controllers 
 the Meta logo on the right controller's Meta button appears only because it's part of Meta's artwork
 of that controller. SBGVR is an independent mod, not affiliated with, sponsored by or endorsed by Meta.
 
-SBGVR adds only a light backing, the left and right colours, the L and R letters and the direction
-arrows to the icons. The layout image's text and the icons' L and R letters are set in Inter (SIL Open
+The layout image's text and the letters on SBGVR's own button prompt icons are set in Inter (SIL Open
 Font License 1.1); the font files themselves aren't included.
