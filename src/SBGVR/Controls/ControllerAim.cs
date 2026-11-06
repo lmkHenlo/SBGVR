@@ -1,7 +1,6 @@
 // SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using Uuvr;
@@ -34,13 +33,11 @@ namespace SBGVR.Controls
     {
         private static readonly InputFeatureUsage<Vector3> PointerPosition = new InputFeatureUsage<Vector3>("PointerPosition");
         private static readonly InputFeatureUsage<Quaternion> PointerRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
-        private static readonly List<XRInputDevice> Found = new List<XRInputDevice>();
 
-        private static XRInputDevice _device;
-        private static ControllerHand _deviceHand;
-        private static float _nextSearch;
+        private static XRInputDevice _loggedDevice;
         private static Transform _standIn;
-        private static bool _loggedPose;
+        private static Camera _offsetCamera;
+        private static VrCameraOffset _offset;
 
         /// <summary>Set while the game picks the rocket launcher's lock-on target (shared with golf swings).</summary>
         internal static bool PickingRocketLauncherTarget;
@@ -169,11 +166,17 @@ namespace SBGVR.Controls
                 return true;
             }
 
-            // Every other mode tracks the head under UUVR's VrCameraOffset, a child of the game camera.
-            var offset = camera.GetComponentInChildren<VrCameraOffset>(true);
-            if (offset == null) return false;
-            position = offset.transform.position;
-            rotation = offset.transform.rotation;
+            // Every other mode tracks the head under UUVR's VrCameraOffset, a child of the game camera. This runs
+            // many times a frame, so the offset is looked up again only when the camera changes or it's gone.
+            if (_offsetCamera != camera || _offset == null || !_offset.transform.IsChildOf(camera.transform))
+            {
+                _offsetCamera = camera;
+                _offset = camera.GetComponentInChildren<VrCameraOffset>(true);
+            }
+
+            if (_offset == null) return false;
+            position = _offset.transform.position;
+            rotation = _offset.transform.rotation;
             return true;
         }
 
@@ -186,46 +189,28 @@ namespace SBGVR.Controls
             position = default;
             rotation = default;
 
-            // DominantHand can be changed while the game runs (with a config editor): look for the other hand then.
-            var hand = Settings.DominantHand.Value;
-            if (_device.isValid && hand != _deviceHand)
-            {
-                _device = default;
-                _nextSearch = 0f;
-            }
+            // The controllers MotionControls found (it looks for them, and notices them connecting and
+            // disconnecting). DominantHand can be changed while the game runs (with a config editor).
+            if (!MotionControls.TryGetController(Settings.DominantHand.Value, out var device)) return false;
 
-            if (!_device.isValid)
-            {
-                if (Time.unscaledTime < _nextSearch) return false;
-                _nextSearch = Time.unscaledTime + 1f;
-
-                var side = hand == ControllerHand.Left ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
-                Found.Clear();
-                InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Controller | side, Found);
-                if (Found.Count == 0) return false;
-                _device = Found[0];
-                _deviceHand = hand;
-                _loggedPose = false;
-            }
-
-            if (_device.TryGetFeatureValue(XRCommonUsages.isTracked, out var tracked) && !tracked) return false;
+            if (device.TryGetFeatureValue(XRCommonUsages.isTracked, out var tracked) && !tracked) return false;
 
             // The pointing pose (OpenXR's aim pose) points where the controller does; the grip pose, which
             // every runtime reports, is the fallback.
-            var usesPointer = _device.TryGetFeatureValue(PointerPosition, out position) &&
-                              _device.TryGetFeatureValue(PointerRotation, out rotation);
+            var usesPointer = device.TryGetFeatureValue(PointerPosition, out position) &&
+                              device.TryGetFeatureValue(PointerRotation, out rotation);
             if (!usesPointer &&
-                !(_device.TryGetFeatureValue(XRCommonUsages.devicePosition, out position) &&
-                  _device.TryGetFeatureValue(XRCommonUsages.deviceRotation, out rotation)))
+                !(device.TryGetFeatureValue(XRCommonUsages.devicePosition, out position) &&
+                  device.TryGetFeatureValue(XRCommonUsages.deviceRotation, out rotation)))
             {
                 return false;
             }
 
-            if (!_loggedPose)
+            if (device != _loggedDevice)
             {
-                _loggedPose = true;
+                _loggedDevice = device;
                 Plugin.Log.LogInfo($"Controller aiming: aiming with the {Settings.DominantHand.Value.ToString().ToLowerInvariant()} " +
-                                   $"controller (\"{_device.name}\"), using its {(usesPointer ? "pointing" : "grip")} pose.");
+                                   $"controller (\"{device.name}\"), using its {(usesPointer ? "pointing" : "grip")} pose.");
             }
 
             // Not an all-zero rotation (an unset pose). Unity's == and != on rotations compare them only

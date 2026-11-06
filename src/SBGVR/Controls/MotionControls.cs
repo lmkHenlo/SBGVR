@@ -40,6 +40,8 @@ namespace SBGVR.Controls
         /// <summary>How long a left grip button tap holds LB down, so the game sees the press.</summary>
         private const float GripTapPressTime = 0.06f;
 
+        private static MotionControls _instance;
+
         private readonly Hand _left = new Hand(InputDeviceCharacteristics.Left, "Left");
         private readonly Hand _right = new Hand(InputDeviceCharacteristics.Right, "Right");
 
@@ -72,14 +74,28 @@ namespace SBGVR.Controls
         private float _leftShoulderPulseUntil = -1f;
         private bool _viewToggleHeld;
 
+        /// <summary>
+        /// The controller connected in that hand, as motion controls found it (ControllerAim aims with it too);
+        /// false while there's none, or while motion controls aren't running.
+        /// </summary>
+        internal static bool TryGetController(ControllerHand hand, out XRInputDevice device)
+        {
+            device = default;
+            if (_instance == null) return false;
+            device = (hand == ControllerHand.Left ? _instance._left : _instance._right).Device;
+            return device.isValid;
+        }
+
         private void OnEnable()
         {
+            _instance = this;
             InputSystem.onBeforeUpdate += BeforeInputUpdate;
             VrState.Changed += OnVrChanged;
         }
 
         private void OnDisable()
         {
+            if (_instance == this) _instance = null;
             InputSystem.onBeforeUpdate -= BeforeInputUpdate;
             VrState.Changed -= OnVrChanged;
             RemoveGamepad();
@@ -304,6 +320,8 @@ namespace SBGVR.Controls
             }
 
             internal bool IsValid => _device.isValid;
+
+            internal XRInputDevice Device => _device;
 
             /// <summary>Whether the controller has A/B or X/Y buttons (not a Vive wand or WMR controller).</summary>
             internal bool HasFaceButtons { get; private set; }
