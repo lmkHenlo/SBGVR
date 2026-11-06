@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="CopyToGame\**" >
+        <Content Include="VrRuntime\**" >
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
         <Content Include="classdata.tpk" Condition=" '$(UnityGeneration)' == 'legacy' ">
