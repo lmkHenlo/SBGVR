@@ -99,15 +99,15 @@ namespace SBGVR.Controls
             {
                 _hasReference = true;
                 _referencePosition = position;
-                _referenceForward = Horizontal(forward);
-                _referencePitch = PitchOf(forward);
+                _referenceForward = AimAngles.Horizontal(forward);
+                _referencePitch = AimAngles.TiltOf(forward);
                 _appliedYaw = 0f;
                 _appliedPitch = 0f;
                 return;
             }
 
             var strength = Settings.MotionCameraStrength.Value;
-            var turn = Vector3.SignedAngle(_referenceForward, Horizontal(forward), Vector3.up);
+            var turn = Vector3.SignedAngle(_referenceForward, AimAngles.Horizontal(forward), Vector3.up);
             var right = Vector3.Cross(Vector3.up, _referenceForward);
             var sideways = Vector3.Dot(position - _referencePosition, right);
             var maxYaw = Settings.MotionCameraMaxYaw.Value;
@@ -117,7 +117,7 @@ namespace SBGVR.Controls
                 -maxYaw, maxYaw);
 
             // Tilting the controller up looks up; the orbit camera's pitch grows as it looks down.
-            var tilt = Mathf.DeltaAngle(_referencePitch, PitchOf(forward));
+            var tilt = Mathf.DeltaAngle(_referencePitch, AimAngles.TiltOf(forward));
             var maxPitch = Settings.MotionCameraMaxPitch.Value;
             var pitch = Mathf.Clamp(DeadZone(tilt, RotationDeadZone) * strength, -maxPitch, maxPitch);
 
@@ -174,14 +174,6 @@ namespace SBGVR.Controls
             _appliedPitch = 0f;
         }
 
-        private static Vector3 Horizontal(Vector3 direction)
-        {
-            direction.y = 0f;
-            return direction.sqrMagnitude > 1e-6f ? direction.normalized : Vector3.forward;
-        }
-
-        /// <summary>Degrees above the horizon.</summary>
-        private static float PitchOf(Vector3 forward) => Mathf.Asin(Mathf.Clamp(forward.normalized.y, -1f, 1f)) * Mathf.Rad2Deg;
 
         private static float DeadZone(float value, float deadZone) =>
             Mathf.Abs(value) <= deadZone ? 0f : value - Mathf.Sign(value) * deadZone;
