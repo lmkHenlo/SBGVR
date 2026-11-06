@@ -1,4 +1,4 @@
-// SBGVR: prototype. Loads UUVR's VR runtime files from the patcher's own folder instead of copying them into
+// SBGVR: loads UUVR's VR runtime files from the patcher's own folder instead of copying them into
 // the game's data folder, so the mod writes nothing outside BepInEx.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
