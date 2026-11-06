@@ -21,6 +21,10 @@ internal static class GameFolderRedirect
 {
     private const int MaxLoggedRedirects = 60;
 
+    // BepInEx's log, not the console: BepInEx stops capturing the console when its preloader ends, and Unity looks
+    // up the XR plug-ins after that.
+    private static readonly BepInEx.Logging.ManualLogSource Log = BepInEx.Logging.Logger.CreateLogSource("SBGVR Redirect");
+
     private static readonly string[] RuntimePlugins = { "openvr_api.dll", "openxr_loader.dll", "UnityOpenXR.dll", "XRSDKOpenVR.dll" };
 
     private static string _dataPath = "";      // <game>\<name>_Data, no trailing separator
@@ -40,14 +44,14 @@ internal static class GameFolderRedirect
         _sourceData = Path.Combine(copyToGamePath, "Data");
         _sourcePlugins = Path.Combine(Path.Combine(copyToGamePath, "Plugins"), IntPtr.Size == 8 ? "x64" : "x86");
 
-        Console.WriteLine($"[Redirect] Game data folder: {_dataPath}");
-        Console.WriteLine($"[Redirect] VR runtime files are read from: {copyToGamePath}");
+        Log.LogInfo($"Game data folder: {_dataPath}");
+        Log.LogInfo($"VR runtime files are read from: {copyToGamePath}");
         ReportGameFolderCopies();
 
         var unity = GetModuleHandleW("UnityPlayer.dll");
         if (unity == IntPtr.Zero)
         {
-            Console.WriteLine("[Redirect] [FAILED] UnityPlayer.dll isn't loaded; nothing redirected.");
+            Log.LogInfo("[FAILED] UnityPlayer.dll isn't loaded; nothing redirected.");
             return;
         }
         var count = PatchImports(unity, "UnityPlayer.dll", AllHooks);
@@ -56,18 +60,22 @@ internal static class GameFolderRedirect
         var mono = FindMono();
         if (mono != IntPtr.Zero) count += PatchImports(mono, "Mono", LibraryHooks);
 
-        // Loaded now from the mod's folder, so the XR plug-ins that need them find them by name however Unity loads
-        // the plug-ins.
-        foreach (var loader in new[] { "openxr_loader.dll", "openvr_api.dll" })
+        // Loaded now from the mod's folder (the loaders first, which the plug-ins need), so whatever later asks
+        // Windows for them by name gets these: Unity and Mono don't always ask with a path.
+        foreach (var plugin in new[] { "openxr_loader.dll", "openvr_api.dll", "UnityOpenXR.dll", "XRSDKOpenVR.dll" })
         {
-            var path = Path.Combine(_sourcePlugins, loader);
+            var path = Path.Combine(_sourcePlugins, plugin);
             var module = LoadLibraryExW(path, IntPtr.Zero, 0x8); // LOAD_WITH_ALTERED_SEARCH_PATH
-            Console.WriteLine(module != IntPtr.Zero
-                ? $"[Redirect] Loaded {path}"
-                : $"[Redirect] [FAILED] Loading {path} failed with Windows error {Marshal.GetLastWin32Error()}.");
+            if (module == IntPtr.Zero)
+            {
+                Log.LogError($"[FAILED] Loading {path} failed with Windows error {Marshal.GetLastWin32Error()}.");
+                continue;
+            }
+            Log.LogInfo($"Loaded {path}");
+            if (PluginsWithOwnLookups.Contains(plugin)) count += PatchImports(module, plugin, AllHooks);
         }
 
-        Console.WriteLine($"[Redirect] {count} imports redirected. Each redirected path is logged below as it's used " +
+        Log.LogInfo($"{count} imports redirected. Each redirected path is logged below as it's used " +
                           $"(the first {MaxLoggedRedirects}).");
     }
 
@@ -83,9 +91,9 @@ internal static class GameFolderRedirect
                 if (PluginNames.Contains(Path.GetFileName(file))) found.Add(file);
 
         if (found.Count == 0)
-            Console.WriteLine("[Redirect] The game folder has no copies of the VR runtime: everything VR loads comes from the mod's folder.");
+            Log.LogInfo("The game folder has no copies of the VR runtime: everything VR loads comes from the mod's folder.");
         else
-            Console.WriteLine("[Redirect] WARNING: the game folder still has VR runtime files copied by an earlier version. " +
+            Log.LogInfo("WARNING: the game folder still has VR runtime files copied by an earlier version. " +
                               "They aren't used while the redirect works, but delete them to be sure the test shows " +
                               "the redirect alone:\n  " + string.Join("\n  ", found.ToArray()));
     }
@@ -120,6 +128,20 @@ internal static class GameFolderRedirect
             if (PluginNames.Contains(name)) target = _sourcePlugins + @"\" + name;
         }
         return target == null ? null : prefix + target;
+    }
+
+    /// <summary>
+    /// For loading a library: also one of the VR runtime's asked for by name alone ("UnityOpenXR", as Mono does
+    /// for [DllImport]) or by a relative path, which Windows would have found in the game's Plugins folder.
+    /// </summary>
+    internal static string? RedirectLibrary(string path)
+    {
+        var target = Redirect(path);
+        if (target != null || string.IsNullOrEmpty(path) || Path.IsPathRooted(path)) return target;
+        var name = path.Replace('/', '\\');
+        name = name.Substring(name.LastIndexOf('\\') + 1);
+        if (!name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) name += ".dll";
+        return PluginNames.Contains(name) ? _sourcePlugins + @"\" + name : null;
     }
 
     /// <summary>
@@ -242,7 +264,7 @@ internal static class GameFolderRedirect
         string? target = null;
         try
         {
-            if (name != IntPtr.Zero) target = Redirect(Marshal.PtrToStringUni(name));
+            if (name != IntPtr.Zero) target = RedirectLibrary(Marshal.PtrToStringUni(name));
         }
         catch
         {
@@ -280,11 +302,11 @@ internal static class GameFolderRedirect
             }
             catch (Exception exception)
             {
-                Console.WriteLine($"[Redirect] Couldn't redirect {Path.GetFileName(target)}'s own file lookups: {exception.Message}");
+                Log.LogInfo($"Couldn't redirect {Path.GetFileName(target)}'s own file lookups: {exception.Message}");
             }
         }
         if (module == IntPtr.Zero)
-            Console.WriteLine($"[Redirect] [FAILED] Loading {target} failed with Windows error {error}.");
+            Log.LogInfo($"[FAILED] Loading {target} failed with Windows error {error}.");
         SetLastError(error);
         return module;
     }
@@ -294,7 +316,7 @@ internal static class GameFolderRedirect
         lock (Lock)
         {
             if (Logged.Count >= MaxLoggedRedirects || !Logged.Add(function + "|" + from)) return;
-            Console.WriteLine($"[Redirect] {function}: {from} -> {to}");
+            Log.LogInfo($"{function}: {from} -> {to}");
         }
     }
 
@@ -342,7 +364,7 @@ internal static class GameFolderRedirect
             }
         }
 
-        Console.WriteLine($"[Redirect] {moduleName}: {(changed.Count == 0 ? "no file imports to redirect" : string.Join(", ", changed.ToArray()))}");
+        Log.LogInfo($"{moduleName}: {(changed.Count == 0 ? "no file imports to redirect" : string.Join(", ", changed.ToArray()))}");
         return changed.Count;
     }
 
@@ -353,7 +375,7 @@ internal static class GameFolderRedirect
             var module = GetModuleHandleW(name);
             if (module != IntPtr.Zero) return module;
         }
-        Console.WriteLine("[Redirect] Mono's module wasn't found; [DllImport] loads aren't redirected.");
+        Log.LogInfo("Mono's module wasn't found; [DllImport] loads aren't redirected.");
         return IntPtr.Zero;
     }
 
