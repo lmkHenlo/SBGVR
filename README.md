@@ -179,12 +179,12 @@ Your character faces the camera while you aim, so turning the camera this way fi
 | A button / B button | X / Y | Interact / swing angle |
 | Left grip button | RB | Next item |
 | Tap the right grip button | LB | Previous item |
-| Menu button (left controller) | Start | Pause (the Menu button is only on the left controller) |
+| Menu button (left controller) | Start | Pause (the Menu button is only on the left controller; SteamVR keeps it for its own menu, so through SteamVR pause with the right grip button + X) |
 | Press the right thumbstick | X | Interact (same as the A button here) |
 | Press the left thumbstick | R3 | Drop item |
 | Hold the right grip button + left thumbstick | D-pad | Emotes, push to talk, votes, restart |
 | Hold the right grip button + press the left thumbstick | – | Switch between first person and third person |
-| Hold the right grip button + X button | Start | Pause |
+| Hold the right grip button + X button | Start | Pause (for controllers without a Menu button the game can use, such as the Valve Index) |
 | Hold the right grip button + Y button | Back | Scoreboard |
 
 Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad (swapped with `MirrorButtons`).
