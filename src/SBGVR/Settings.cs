@@ -180,7 +180,7 @@ namespace SBGVR
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
                 new ConfigDescription(
                     "How much of the controller's turn and tilt goes into the camera: 0.25 = turning it 8 degrees " +
-                    "turns the camera 2 degrees.",
+                    "turns the camera about 2 degrees.",
                     new AcceptableValueRange<float>(0.05f, 1f)));
             MotionCameraMovement = config.Bind(controls, "MotionCameraMovement", 2f,
                 new ConfigDescription(

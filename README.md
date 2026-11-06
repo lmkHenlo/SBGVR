@@ -42,7 +42,7 @@ UUVR is normally installed with [Rai Pal](https://pal.raicuparta.com), which wor
 
 - It puts UUVR into a Thunderstore package that r2modman can install next to other Super Battle Golf mods.
 - It builds UUVR against the game's own assemblies.
-- It adds a plugin (`com.sbgvr`) for what the game needs in VR: comfort options, HUD markers and weapon reticles drawn in the world at the right depth, full-view fades, and ambient occlusion drawn for each eye.
+- It adds a plugin (`com.sbgvr`) for what the game needs in VR: comfort options, HUD markers and weapon reticles drawn in the world at the right depth, full-view fades, ambient occlusion drawn for each eye, motion controls with controller aiming, Meta Quest button prompts, the controller layout in the menus, and an optional first person view.
 
 ### See Also
 
@@ -129,7 +129,7 @@ Start the VR runtime, then the game. UUVR turns VR on at startup.
 
 Motion controls only work with UUVR's default VR runtime, OpenXR (`Preferred VR APi` = `OpenXr`); with `OpenVr`, the controllers don't work (see [Known issues](#known-issues)).
 
-On by default (`VR Controls` → `MotionControls` in `com.sbgvr.cfg`; restart the game after changing it). While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply. A real gamepad, keyboard and mouse still work alongside. The game shows gamepad button icons.
+On by default (`VR Controls` → `MotionControls` in `com.sbgvr.cfg`; restart the game after changing it). While VR runs, your VR controllers work like a gamepad, so the game's gamepad controls, menus and your gamepad rebinds all apply. A real gamepad, keyboard and mouse still work alongside. The game shows gamepad button icons, or the controllers' own buttons with Meta Quest Touch controllers (see [Button prompts](#button-prompts)).
 
 Controller inputs are named as in Meta's [Quest controller guidelines](https://developers.meta.com/vr/design/controllers/); other controllers use the input in the same place.
 
@@ -163,7 +163,7 @@ The Meta button on the right controller opens the headset's universal menu and i
 - turn the controller, or move it sideways, to turn the camera left or right;
 - with `MotionCameraMaxPitch` above 0 (it's 0 by default), tilt it to look up or down.
 
-Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera 2°, up to 30° left or right from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`. Like controller aiming, it only works while you're playing with the controllers.
+Your character faces the camera while you aim, so turning the camera this way fine-tunes where the swing goes, and the trajectory preview follows. Big hand movements make small changes: by default, turning the controller 8° or moving it 10 cm sideways turns the camera about 2°, up to 30° left or right from where you started. It starts from however you hold the controller when you start aiming, stops the moment you swing (so pulling the trigger or following through doesn't move it), and the camera stays where it is when you stop aiming. The thumbstick still works alongside. Tune it with `MotionCameraStrength`, `MotionCameraMovement`, `MotionCameraMaxYaw` and `MotionCameraMaxPitch`. Like controller aiming, it only works while you're playing with the controllers.
 
 **Motion camera for weapons.** With `MotionCamera` and `ControllerAiming` on, while you aim an item with the controllers, in third person or in first person, turning your `DominantHand` controller left or right, or tilting it up or down, turns the camera by the same angle: 1:1, with no scaling, dead zone or limit, and smoothed so hand tremor doesn't shake the view (an adaptive filter: steady when you hold still, close behind your hand when you turn quickly) (the `MotionCamera…` tuning settings are for swings only; the game's own up and down limit still applies). Weapons aim along the camera, as on a flat screen, so a 10° turn or tilt of your hand moves the aim 10°, and the crosshair, your character and the shot line up with the camera. When you start aiming, the camera turns (over 0.15 s) to where the controller points, so the aim starts where you point however you hold it, and from then on moves exactly as far as the controller does; the thumbstick still works alongside. While a shot fires, the tilt holds still (charging the railgun is still aiming, so you can keep tilting while it charges); once it's done, if you're still aiming, the aim goes back to where the controller points and tilting carries on from there; when you stop aiming, the camera's up and down tilt eases back to where it was before you aimed (about a third of a second). Left and right stays where you turned it. In first person, the camera's tilt is level again once it has eased back, as your head does the looking up and down there, and while you aim your character faces the camera rather than your head. Switching between first and third person while aiming or easing back sets the tilt back at once, so none is left behind. The railgun's scope, which the game switches to when you aim the railgun in third person, works the same way: the controller turns and tilts the scope, and when you close it the third-person camera eases back to the tilt it had before. While the railgun's scope is open and the controller steers it, in third or first person, your view is locked to the railgun's aim and zoomed, like the flat-screen scope: it looks exactly where the shot goes, the controller turns it, and turning, tilting or moving your head doesn't move the view or the aim (tilting your head toward a shoulder keeps the horizon level, as in normal VR). It changes nothing else: your character isn't moved, and golf swings, golf carts and gamepad, keyboard or mouse aiming are as before.
 
@@ -189,7 +189,7 @@ Your character faces the camera while you aim, so turning the camera this way fi
 
 Controllers without A/B and X/Y buttons (HTC Vive wands, Windows Mixed Reality controllers) use touchpad clicks instead: the edges of the right touchpad are Y (top), B (right), A (bottom) and X (left), and the left touchpad is the D-pad (swapped with `MirrorButtons`).
 
-**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the buttons stay where they are unless you also turn on `MirrorButtons` (see below). If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character. This only happens while you're playing with the controllers: once you use a gamepad, keyboard or mouse, weapons aim along the camera again until you next use a controller.
+**Aiming with your controller.** With `ControllerAiming` on (the default once `MotionControls` is on), weapons aim where your dominant hand's controller points while you aim or use them: the dueling pistol, elephant gun, rocket launcher (and its orange lock-on), railgun, freeze bomb and thunderstorm. The reticle follows the controller, and your character turns to face that way when you fire. Set `DominantHand` to `Left` to aim with the left controller; the buttons stay where they are unless you also turn on `MirrorButtons` (see Mirrored buttons above). If the aim sits a little above or below where the controller points, adjust `ControllerAimPitch`. Golf swings, the flash camera and the airhorn still work as in the game: swings follow the camera, and the flash camera and airhorn act in front of your character. This only happens while you're playing with the controllers: once you use a gamepad, keyboard or mouse, weapons aim along the camera again until you next use a controller.
 
 ### First person
 
@@ -286,8 +286,8 @@ SBGVR's settings only change the game while VR is running. The game's own settin
   - For this game: in Steam, right-click Super Battle Golf → Properties → General, and untick **Use Desktop Game Theatre while SteamVR is active**.
   - For every game: in SteamVR Settings → Dashboard, turn off **Present Non-VR Applications on Theater Screen Upon Launch**.
 - **Motion controls don't work with OpenVR.** With `General` → `Preferred VR APi` = `OpenVr` in `raicuparta.uuvr-modern.cfg`, the VR controllers don't control the game, so controller aiming and the motion camera don't work either. Keep the default, `OpenXr`, to use them; a gamepad, keyboard and mouse work with either.
-- **First person is new.** It's tested on Meta Quest 3 with OpenXR, not yet on Valve Index or Steam Frame. Your hands and what you're holding aren't visible in first person, since the game hides your whole character while its first-person camera is on.
-- **Motion controls are new.** They're tested on Meta Quest 3 with OpenXR, not yet on Valve Index or Steam Frame. They act as a gamepad: there's no pointing at the floating screen, and controllers don't vibrate (no haptics). Controller aiming covers weapons only; golf swings follow the camera. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
+- **First person is only tested on Meta Quest 3.** It's tested with OpenXR, not yet on Valve Index or Steam Frame. Your hands and what you're holding aren't visible in first person, since the game hides your whole character while its first-person camera is on.
+- **Motion controls are only tested on Meta Quest 3.** They're tested with OpenXR, not yet on Valve Index or Steam Frame. They act as a gamepad: there's no pointing at the floating screen, and controllers don't vibrate (no haptics). Controller aiming covers weapons only; golf swings follow the camera. Vive wands and Windows Mixed Reality controllers use touchpad clicks for their missing buttons.
 
 ## How it works
 
@@ -376,8 +376,9 @@ SBGVR/
 ├── SBGVR.proj                builds everything and makes the Thunderstore zip
 ├── TEST_PLAN.md              what to check in VR for each build
 ├── build.ps1                 Windows build wrapper
-├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Comfort/, Controls/, Diagnostics/, Fades/, Hud/, Rendering/
+├── src/SBGVR/                the SBGVR plugin (com.sbgvr): Assets/, Comfort/, Controls/, Diagnostics/, Fades/, Hud/, Rendering/, View/
 ├── thunderstore/             manifest.json, icon.png and the package README
+├── tools/                    sources of the controller layout and button prompt images
 ├── uuvr/                     UUVR v0.4.0 with the changes listed above
 ├── LICENSE                   GPL-3.0 (UUVR's licence text)
 └── THIRD_PARTY_NOTICES.md    licences of the bundled VR runtime libraries and Meta's controller artwork
@@ -410,7 +411,7 @@ Pull requests are accepted on [GitHub](https://github.com/lmkHenlo/SBGVR). When 
 - Write commit messages in the [Conventional Commits](https://www.conventionalcommits.org/) style.
 - Put changes to UUVR's files (`uuvr/`) in their own commits, so the differences from upstream stay easy to review.
 - Add your change to [CHANGELOG.md](CHANGELOG.md) under Unreleased, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-- Change the version in all three places listed in [Building from source](#building-from-source).
+- Leave the version as it is: it changes in all three places listed in [Building from source](#building-from-source) when a release is made.
 
 ## License
 
