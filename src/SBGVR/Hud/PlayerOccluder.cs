@@ -101,7 +101,7 @@ namespace SBGVR.Hud
                 renderQueue = MarkingRenderQueue,
             };
             material.SetInt("_ColorMask", 0);
-            material.SetInt("unity_GUIZTestMode", (int)CompareFunction.LessEqual);
+            material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.LessEqual);
             material.SetInt("_Stencil", stencilBit);
             material.SetInt("_StencilComp", (int)CompareFunction.Always);
             material.SetInt("_StencilOp", (int)StencilOp.Replace);

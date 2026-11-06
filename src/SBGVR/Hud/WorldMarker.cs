@@ -45,7 +45,6 @@ namespace SBGVR.Hud
 
         private static Material _onTopMaterial;
 
-        private const string ZTestProperty = "unity_GUIZTestMode";
 
         // On-top materials shared by all markers: plain UI graphics by render queue, text by its font material
         // and render queue.
@@ -107,7 +106,7 @@ namespace SBGVR.Hud
             {
                 name = "SBGVR marker (on top)",
             };
-            _onTopMaterial.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+            _onTopMaterial.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
         }
 
         /// <summary>True when markers should be drawn in the world right now.</summary>
@@ -241,13 +240,13 @@ namespace SBGVR.Hud
 
             copy = new Material(source) { name = $"{source.name} (SBGVR marker {renderQueue}/{coveringMask})" };
             // Always set, not only "if HasProperty": the UI shaders (UI/Default, TextMeshPro, SoftMask's) read
-            // their depth test from unity_GUIZTestMode without declaring it in their Properties block, so
+            // their depth test from GuiZTest without declaring it in their Properties block, so
             // HasProperty can be false for it, and a value set on the source isn't certain to survive the copy
             // (or a mask's own copy before it). The copies every marker is drawn with then kept the world-space
             // canvas's depth test, and scenery and characters covered markers even with MarkersOnTop on.
             // Setting it on a shader that doesn't use it changes nothing.
             LogDrawnCopy(source, copy);
-            copy.SetInt(ZTestProperty, (int)CompareFunction.Always);
+            copy.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
             if (coveringMask != 0 && copy.HasProperty("_StencilComp"))
             {
                 copy.SetInt("_Stencil", 0);
@@ -270,9 +269,9 @@ namespace SBGVR.Hud
         private static void LogDrawnCopy(Material source, Material copy)
         {
             if (!Settings.DiagnosticsEnabled.Value || source.shader == null || !LoggedShaders.Add(source.shader.name)) return;
-            Plugin.Log.LogInfo($"[diag] Markers on top: '{source.shader.name}' ({(copy.HasProperty(ZTestProperty) ? "declares" : "doesn't declare")} " +
-                               $"{ZTestProperty}; depth test {(CompareFunction)source.GetInt(ZTestProperty)} on '{source.name}', " +
-                               $"{(CompareFunction)copy.GetInt(ZTestProperty)} on its copy before SBGVR sets it to Always).");
+            Plugin.Log.LogInfo($"[diag] Markers on top: '{source.shader.name}' ({(copy.HasProperty(Rendering.GuiZTest.Id) ? "declares" : "doesn't declare")} " +
+                               $"{Rendering.GuiZTest.Name}; depth test {(CompareFunction)source.GetInt(Rendering.GuiZTest.Id)} on '{source.name}', " +
+                               $"{(CompareFunction)copy.GetInt(Rendering.GuiZTest.Id)} on its copy before SBGVR sets it to Always).");
         }
 
         private void ApplyRenderQueue()
@@ -303,7 +302,7 @@ namespace SBGVR.Hud
             if (FontMaterials.TryGetValue((original, renderQueue), out var material) && material != null) return material;
 
             material = new Material(original) { name = $"{original.name} (SBGVR marker {renderQueue})" };
-            material.SetInt("unity_GUIZTestMode", (int)CompareFunction.Always);
+            material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.Always);
             material.renderQueue = renderQueue;
             FontMaterials[(original, renderQueue)] = material;
             return material;
