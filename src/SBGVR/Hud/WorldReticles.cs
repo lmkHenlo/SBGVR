@@ -82,7 +82,21 @@ namespace SBGVR.Hud
             return refs;
         }
 
+        private void Awake() => AfterGameLayout.Reticles = this;
+
+        private void OnDestroy()
+        {
+            if (AfterGameLayout.Reticles == this) AfterGameLayout.Reticles = null;
+        }
+
+        // Only if AfterGameLayout couldn't register; it normally places the reticles later in the frame.
         private void LateUpdate()
+        {
+            if (!AfterGameLayout.Registered) Place();
+        }
+
+        /// <summary>Places the weapon reticles for this frame.</summary>
+        internal void Place()
         {
             _reticles.Clear();
             _drawsAimLine.Clear();

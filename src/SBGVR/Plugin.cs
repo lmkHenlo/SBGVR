@@ -53,6 +53,7 @@ namespace SBGVR
             // moves one patch's target turns off only that part; only the view angle refines the icon patch.
             Hud.WorldMarker.Initialize();
             Hud.MarkerOcclusion.Initialize();
+            Hud.AfterGameLayout.Register();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
                 Patch("World-space markers: icons up to MarkerViewAngle", typeof(Hud.MarkerViewAnglePatches));
             Add(host, "World-space reticles", typeof(Hud.WorldReticles));
