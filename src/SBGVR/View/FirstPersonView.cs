@@ -342,7 +342,7 @@ namespace SBGVR.View
 
             var root = player.transform;
             var movement = player.Movement;
-            var scale = movement != null ? movement.CharacterScale : 1f;
+            var scale = movement != null ? movement.GetEffectiveCharacterScale() : 1f;
             var target = EyeHeight * scale * root.lossyScale.y + Settings.FirstPersonEyeOffset.Value;
             _eyeHeight = snap
                 ? target
