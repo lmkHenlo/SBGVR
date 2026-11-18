@@ -36,7 +36,7 @@ namespace SBGVR.Hud
         }
 
         // The timer over a player in Jumbo Burger giant form.
-        [HarmonyPatch(typeof(JumboBurgerGiantFormTimerUi), "LateUpdate")]
+        [HarmonyPatch(typeof(JumboBurgerGiantFormTimerUi), nameof(JumboBurgerGiantFormTimerUi.OnPostPostLateBUpdate))]
         [HarmonyPostfix]
         private static void GiantFormTimer(
             RectTransform ___rectTransform, Vector3 ___worldPosition, Transform ___parent, PlayerInfo ___parentPlayer)
@@ -45,7 +45,7 @@ namespace SBGVR.Hud
         }
 
         // Text that pops up over something (points, hits and the like).
-        [HarmonyPatch(typeof(TextPopupUi), "LateUpdate")]
+        [HarmonyPatch(typeof(TextPopupUi), nameof(TextPopupUi.OnPostPostLateBUpdate))]
         [HarmonyPostfix]
         private static void TextPopup(RectTransform ___rectTransform, Vector3 ___worldPosition, Transform ___parent)
         {
