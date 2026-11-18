@@ -49,15 +49,15 @@ namespace SBGVR
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
             if (Patch("Full-view fades", typeof(Fades.FullViewFadePatches)))
                 host.AddComponent<Fades.FullViewFade>();
+            // Everything drawn in the world through WorldMarker. Each part stands on its own, so a game update that
+            // moves one patch's target turns off only that part; only the view angle refines the icon patch.
+            Hud.WorldMarker.Initialize();
+            Hud.MarkerOcclusion.Initialize();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
-            {
-                Hud.WorldMarker.Initialize();
-                Hud.MarkerOcclusion.Initialize();
                 Patch("World-space markers: icons up to MarkerViewAngle", typeof(Hud.MarkerViewAnglePatches));
-                Add(host, "World-space reticles", typeof(Hud.WorldReticles));
-                Add(host, "Aim line", typeof(Hud.AimLine));
-                Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
-            }
+            Add(host, "World-space reticles", typeof(Hud.WorldReticles));
+            Add(host, "Aim line", typeof(Hud.AimLine));
+            Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Controller layout in the main menu", typeof(Hud.MenuControlsPanel));
             Add(host, "Recenter key", typeof(Comfort.Recenter));
