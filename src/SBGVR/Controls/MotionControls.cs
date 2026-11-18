@@ -47,6 +47,12 @@ namespace SBGVR.Controls
 
         private Gamepad _gamepad;
 
+        /// <summary>Whether Start has run, after which the Input System has finished starting.</summary>
+        private bool _started;
+
+        /// <summary>Whether <see cref="BeforeInputUpdate"/> is subscribed to the Input System.</summary>
+        private bool _subscribed;
+
         /// <summary>The virtual gamepad the controllers drive, while it exists.</summary>
         internal static Gamepad VirtualGamepad { get; private set; }
 
@@ -89,16 +95,43 @@ namespace SBGVR.Controls
         private void OnEnable()
         {
             _instance = this;
-            InputSystem.onBeforeUpdate += BeforeInputUpdate;
             VrState.Changed += OnVrChanged;
+            // The first subscription waits for Start: BepInEx can load SBGVR while the Input System is still
+            // starting (it does with Input System 1.20), when subscribing throws.
+            if (_started) Subscribe();
+        }
+
+        private void Start()
+        {
+            _started = true;
+            Subscribe();
         }
 
         private void OnDisable()
         {
             if (_instance == this) _instance = null;
-            InputSystem.onBeforeUpdate -= BeforeInputUpdate;
+            if (_subscribed)
+            {
+                InputSystem.onBeforeUpdate -= BeforeInputUpdate;
+                _subscribed = false;
+            }
             VrState.Changed -= OnVrChanged;
             RemoveGamepad();
+        }
+
+        private void Subscribe()
+        {
+            if (_subscribed) return;
+            try
+            {
+                InputSystem.onBeforeUpdate += BeforeInputUpdate;
+                _subscribed = true;
+                Plugin.Log.LogInfo("Motion controls: reading the controllers.");
+            }
+            catch (Exception exception)
+            {
+                Plugin.Log.LogError($"[FAILED] Motion controls: couldn't read the controllers: {exception.GetBaseException().Message}");
+            }
         }
 
         private void OnVrChanged(bool running)
