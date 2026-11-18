@@ -56,6 +56,8 @@ namespace SBGVR
             Hud.AfterGameLayout.Register();
             if (Patch("World-space markers", typeof(Hud.MarkerPatches)))
                 Patch("World-space markers: icons up to MarkerViewAngle", typeof(Hud.MarkerViewAnglePatches));
+            else
+                Skipped("World-space markers: icons up to MarkerViewAngle", "World-space markers");
             Add(host, "World-space reticles", typeof(Hud.WorldReticles));
             Add(host, "Aim line", typeof(Hud.AimLine));
             Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
@@ -78,16 +80,28 @@ namespace SBGVR
 
             // Weapons aim along the controller (VR Controls.ControllerAiming) or, in first person, the head. While
             // neither applies, the patched methods read the game camera exactly as before.
-            if (Patch("Aiming with the controller or head", typeof(Controls.ControllerAimPatches)) &&
-                Patch("Aiming with the controller or head: rocket launcher lock-on", typeof(Controls.ControllerAimLockOnPatches)))
+            const string aiming = "Aiming with the controller or head";
+            const string lockOn = aiming + ": rocket launcher lock-on";
+            const string lockOnScope = lockOn + " (scope)";
+            if (!Patch(aiming, typeof(Controls.ControllerAimPatches)))
             {
-                Patch("Aiming with the controller or head: rocket launcher lock-on (scope)", typeof(Controls.ControllerAimLockOnPatches.RocketLauncherScope));
+                Skipped(lockOn, aiming);
+                Skipped(lockOnScope, aiming);
             }
+            else if (Patch(lockOn, typeof(Controls.ControllerAimLockOnPatches)))
+                Patch(lockOnScope, typeof(Controls.ControllerAimLockOnPatches.RocketLauncherScope));
+            else
+                Skipped(lockOnScope, lockOn);
 
             if (Patch("First person", typeof(View.FirstPersonPatches)))
             {
                 Patch("First person: walking and aiming where you look", typeof(View.FirstPersonMovementPatches));
                 Add(host, "First person toggle", typeof(View.FirstPersonView));
+            }
+            else
+            {
+                Skipped("First person: walking and aiming where you look", "First person");
+                Skipped("First person toggle", "First person");
             }
             if (Settings.DiagnosticsEnabled.Value)
                 Add(host, "Diagnostics", typeof(Diagnostics.VrDiagnostics));
@@ -143,6 +157,12 @@ namespace SBGVR
 
                 return false;
             }
+        }
+
+        /// <summary>Logs a feature that wasn't started because one it builds on failed (see <see cref="Patch"/>).</summary>
+        private static void Skipped(string feature, string needs)
+        {
+            Log.LogWarning($"[skipped] {feature}: needs {needs}, which failed.");
         }
 
         private static void UnpatchClass(Type patchClass)
