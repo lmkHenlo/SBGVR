@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+For Super Battle Golf's 1.4.0 update:
+
+- VR controllers work again. The game's newer Input System starts SBGVR before it's ready itself, so motion controls failed to start, though the log said `[ok] Motion controls`. They now start a moment later, and the log says `Motion controls: reading the controllers.` once they do.
+- Weapon reticles are in the world at the aim again, not on the floating screen, and so are icons, name tags, the interaction reticle, the lock-on reticle, airhorn targets, the giant-form timer and text popups. The game moved the code that lays them out, which turned off SBGVR's world-space markers. The weapon reticles and the aim line no longer depend on the icon patch, so a change there can't take them out too.
+- The weapon reticles and the aim line are placed after the game moves its camera, which it now does later in the frame, so they don't trail the view by a frame.
+- First person reads the character's size from the game's new method; the old one was removed.
+
+### Changed
+
+- If a feature is turned off because one it needs failed, the log says so with a `[skipped]` line.
+
 ## [1.4.2] - 2026-11-06
 
 ### Changed

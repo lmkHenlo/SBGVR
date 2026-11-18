@@ -347,7 +347,8 @@ namespace SBGVR.View
             _eyeHeight = snap
                 ? target
                 : Mathf.Lerp(_eyeHeight, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime / EyeHeightSmoothing));
-            // In a golf cart, the cart's pose this frame (the player is moved onto it only after the camera).
+            // In a golf cart, the cart's pose this frame (before the game's 1.4.0 update, the player was moved onto
+            // it only after the camera).
             var feet = TryGetCart(out var cart) ? cart.position : root.position;
             Anchor().SetPositionAndRotation(feet + Vector3.up * _eyeHeight, Quaternion.identity);
 
