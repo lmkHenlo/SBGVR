@@ -105,15 +105,6 @@ Update SBGVR the way you installed it: in r2modman, from its list of installed m
 
 Remove the mod in r2modman, or delete `BepInEx\plugins\SBGVR` and `BepInEx\patchers\SBGVR`. That removes everything: SBGVR writes nothing to the game's `Super Battle Golf_Data` folder, and its VR runtime files stay in the mod's patcher folder (`VrRuntime`), where the game reads them.
 
-Versions up to 1.3.2 copied those files into `Super Battle Golf_Data` each time the game started, and mod managers can't clean them up, so they may still be there after an update or uninstall. Newer versions don't use them (the log names any it finds, under `SBGVR Redirect`), and they can be deleted:
-
-- `Plugins\openvr_api.dll`
-- `Plugins\openxr_loader.dll`
-- `Plugins\UnityOpenXR.dll`
-- `Plugins\XRSDKOpenVR.dll`
-- the `UnitySubsystems` folder
-- `StreamingAssets\SteamVR`
-
 ## Usage
 
 Start the VR runtime, then the game. UUVR turns VR on at startup.
