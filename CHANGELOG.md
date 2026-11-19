@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Camera distance in VR.** While VR runs, the game's Field of View slider (Settings → Graphics) becomes **Camera Distance**, from 50% to 175% of the game's default distance in 5% steps, saved as `VR Comfort` → `CameraDistance`. In VR the field of view only moved the camera closer or further, the wrong way round for a slider labelled Field of View. In VR the camera now works from the default field of view (60°) and the slider sets its distance directly; walls still pull it in. Your flat-screen field of view isn't changed, and with VR off the slider is the game's own. The railgun scope's zoom in VR also starts from 60°, so it zooms the same for everyone.
 - `VR Controls` → `ControllerAimSensitivity` (1): with `MotionCamera` and `ControllerAiming`, how far the aim moves for each degree you turn or tilt the controller while you aim an item, from 0.25 to 3. At 1 nothing changes: the crosshair stays where the controller points. Otherwise aiming still starts where the controller points and moves that many times as far as your hand, and after a shot the aim carries on from where it is.
 
 ### Changed
