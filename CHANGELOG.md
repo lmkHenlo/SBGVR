@@ -22,7 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
-- Scrolling lists in the menus are clipped to their boxes in VR again. The Match Setup course lists ran over the rest of the menu: in VR the screen the menus are drawn on has no stencil buffer, which the game's list masks need. While VR runs, those masks clip to their rectangle instead, so a list box with rounded corners clips square.
+- Scrolling lists in the menus are clipped to their boxes in VR. The Match Setup course lists ran over the rest of the menu: in VR the screen the menus are drawn on has no stencil buffer, which the game's list masks need. While VR runs, those masks clip to their rectangle instead, so a list box with rounded corners clips square.
 
 ## [1.4.3] - 2026-11-18
 
