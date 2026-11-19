@@ -51,7 +51,7 @@ If the headset shows nothing, try these UUVR settings, one at a time:
 
 ## Good to know
 
-- **Nothing in the game folder.** The mod's VR runtime files stay in its own folder, so uninstalling it removes everything. Versions up to 1.3.2 copied them into `Super Battle Golf_Data` each time the game started, and those copies stay after an update or uninstall. They aren't used any more, and you can delete them: `Plugins\openvr_api.dll`, `Plugins\openxr_loader.dll`, `Plugins\UnityOpenXR.dll`, `Plugins\XRSDKOpenVR.dll`, the `UnitySubsystems` folder and `StreamingAssets\SteamVR`.
+- **Nothing in the game folder.** The mod's VR runtime files stay in its own folder, so uninstalling it removes everything.
 - **Field of view.** Your headset sets the field of view. While VR runs, the game's Field of View slider sets the camera's distance instead (Camera Distance, 50% to 175%); your flat-screen field of view isn't changed. The railgun's scope does zoom, by the same magnification as on a flat screen at the default 60°.
 - **SteamVR menu opening on launch or when a match starts.** In Steam, right-click Super Battle Golf → Properties → General and untick **Use Desktop Game Theatre while SteamVR is active**. (Or, for every game: SteamVR Settings → Dashboard → **Present Non-VR Applications on Theater Screen Upon Launch** off.) Steam otherwise shows the game on SteamVR's theatre screen, and SteamVR opens its menu when the game switches to VR or pauses while loading.
 - **Reporting problems.** Open an issue at <https://github.com/lmkHenlo/SBGVR/issues> with `BepInEx\LogOutput.log` from a session where the problem happened. SBGVR writes the VR and camera details needed to track it down.
