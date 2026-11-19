@@ -62,6 +62,10 @@ namespace SBGVR
             Add(host, "World-space reticles", typeof(Hud.WorldReticles));
             Add(host, "Aim line", typeof(Hud.AimLine));
             Patch("World-space lock-on reticles, airhorn targets, timers and popups", typeof(Hud.MoreMarkerPatches));
+            if (Patch("Menu lists clipped in VR", typeof(Hud.VrUiMaskPatches)))
+                Add(host, "Menu lists clipped in VR: rectangle clips", typeof(Hud.VrUiMasks));
+            else
+                Skipped("Menu lists clipped in VR: rectangle clips", "Menu lists clipped in VR");
             Add(host, "Main menu background", typeof(Comfort.MenuBackground));
             Add(host, "Controller layout in the main menu", typeof(Hud.MenuControlsPanel));
             Add(host, "Recenter key", typeof(Comfort.Recenter));

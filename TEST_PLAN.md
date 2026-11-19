@@ -8,7 +8,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
    - The menu stays readable while the background scenes change, and each scene holds still.
    - The fade between scenes darkens the whole view behind the menu.
    - The mouse cursor is visible, and clicks land where it points.
-3. Settings, lobby and match setup menus work, and item effects don't show through them. Joining or leaving a match fades the whole view.
+3. Settings, lobby and match setup menus work, and item effects don't show through them. In Match Setup → Courses, both course lists stay inside their boxes while you scroll them. Joining or leaving a match fades the whole view.
 4. Play a hole: teeing off, aiming, the swing power bar, the ball flight camera, the hole overview, spectating and the golf cart. Camera moves between views use the game's own sweep (`CameraTransitions` = `Game`).
 5. Markers:
    - Your ball's and the hole's icons sit on their targets at every distance, including close up, without doubling. So do name tags and the interaction reticle.
