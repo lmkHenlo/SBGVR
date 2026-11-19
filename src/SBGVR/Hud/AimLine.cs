@@ -54,14 +54,23 @@ namespace SBGVR.Hud
             material.SetInt(Rendering.GuiZTest.Id, (int)CompareFunction.LessEqual);
             _line.sharedMaterial = material;
             _line.enabled = false;
+            AfterGameLayout.Line = this;
         }
 
         private void OnDestroy()
         {
+            if (AfterGameLayout.Line == this) AfterGameLayout.Line = null;
             if (_line != null) Destroy(_line.gameObject);
         }
 
+        // Only if AfterGameLayout couldn't register; it normally draws the line later in the frame.
         private void LateUpdate()
+        {
+            if (!AfterGameLayout.Registered) Draw();
+        }
+
+        /// <summary>Draws the line for this frame, after <see cref="WorldReticles"/> has placed the reticle.</summary>
+        internal void Draw()
         {
             var start = Vector3.zero;
             var show = VrState.IsRunning && Settings.AimLine.Value && WorldReticles.AimShowing &&

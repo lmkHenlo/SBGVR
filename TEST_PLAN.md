@@ -2,7 +2,7 @@
 
 For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 
-1. Start the game from r2modman. In `LogOutput.log`, `SBGVR Redirect` says `VR runtime files are read from:` the mod's `VrRuntime` folder, then `The game folder has no copies of the VR runtime` (or a `WARNING` listing copies left by version 1.3.2 or earlier), `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]`. `Super Battle Golf_Data` gets no new files: no `UnitySubsystems` folder, no `StreamingAssets\SteamVR` and no VR libraries in `Plugins`.
+1. Start the game from r2modman. In `LogOutput.log`, `SBGVR Redirect` says `VR runtime files are read from:` the mod's `VrRuntime` folder, then `The game folder has no copies of the VR runtime` (or a `WARNING` listing copies left by version 1.3.2 or earlier), `SBGVR <version> loaded` appears, and every SBGVR feature line starts with `[ok]` (none with `[FAILED]` or `[skipped]`). `Player.log` (in `%USERPROFILE%\AppData\LocalLow\Brimstone\Super Battle Golf`) has no exception with `SBGVR` in its stack trace: Unity writes errors from SBGVR's components there and not to `LogOutput.log`. `Super Battle Golf_Data` gets no new files: no `UnitySubsystems` folder, no `StreamingAssets\SteamVR` and no VR libraries in `Plugins`.
 2. Main menu:
    - The game shows in the headset and follows your head.
    - The menu stays readable while the background scenes change, and each scene holds still.
@@ -34,7 +34,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 9. F4 recentres the view.
 10. The frame rate lines in the log are close to the headset's refresh rate.
 11. Motion controls, with `MotionControls` on (and once with it off, to check nothing changes):
-    - The log shows `[ok] OpenXR controller profiles` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
+    - The log shows `[ok] OpenXR controller profiles`, then `Motion controls: reading the controllers.` and, when you pick up each controller, `Motion controls: left/right controller connected` with its inputs.
     - Every button in the [Motion controls](README.md#motion-controls) table does what it says, in a match, the golf cart, spectating, the emote wheel and the menus (with the gamepad cursor).
     - A real gamepad, keyboard and mouse still work, before and after using the controllers.
     - Start the game once with `Preferred VR APi` = `OpenVr`: VR starts and the headset shows the game, and `SBGVR Redirect` logs `XRSDKOpenVR.dll`, `openvr_api.dll`, `OpenVRSettings.asset` and `actions.json` read from the mod's folder. Controllers are known not to work with OpenVR; nothing more to test there until that's fixed.
