@@ -41,8 +41,9 @@ namespace SBGVR.View
     /// </list>
     /// </para>
     /// <para>
-    /// The view lock (<see cref="ViewLocked"/>): the headset reaches the view and the aim in two ways, and both
-    /// are taken out while you aim the railgun (<see cref="IsAimingRailgun"/>: from the moment you aim it, through
+    /// The view lock (<see cref="ViewLocked"/>), in the scope and in SBGVR's first person (in VR third person the
+    /// railgun aims from the third-person camera instead, <see cref="RailgunThirdPersonPatches"/>, with no lock):
+    /// the headset reaches the view and the aim in two ways, and both are taken out while you aim the railgun (<see cref="IsAimingRailgun"/>: from the moment you aim it, through
     /// the camera's move into the scope and the shot, until you stop) and it aims along the camera
     /// (<see cref="AimsAlongCamera"/>):
     /// <list type="bullet">
@@ -95,7 +96,9 @@ namespace SBGVR.View
         /// <summary>
         /// True while the view and the railgun's aim are locked to the game camera, so the headset doesn't turn the
         /// view or move the aim: you're aiming the railgun and the camera is its aim (<see cref="CameraIsTheAim"/>).
-        /// Decided once a frame, so the view lock, where the aim starts and the zoom always agree.
+        /// Not while it aims from the third-person camera (<see cref="RailgunThirdPersonPatches"/>): with no scope
+        /// there's no zoom, and it aims like the other guns, which don't lock the view. Decided once a frame, so the
+        /// view lock, where the aim starts and the zoom always agree.
         /// </summary>
         internal static bool ViewLocked
         {
@@ -103,7 +106,7 @@ namespace SBGVR.View
             {
                 if (_lockFrame == Time.frameCount) return _locked;
                 _lockFrame = Time.frameCount;
-                _locked = IsAimingRailgun() && CameraIsTheAim();
+                _locked = IsAimingRailgun() && !AimsFromThirdPerson() && CameraIsTheAim();
                 return _locked;
             }
         }
@@ -177,6 +180,17 @@ namespace SBGVR.View
             var player = GameManager.LocalPlayerInfo;
             return inventory != null && player != null && player.NetworkedEquippedItem == ItemType.Railgun &&
                    (inventory.IsInFirstPersonAim || inventory.IsAimingItem || inventory.IsUsingItemAtAll);
+        }
+
+        /// <summary>
+        /// Whether the railgun aims from the third-person camera, with no scope up. A scope already open (you left
+        /// SBGVR's first person while in it) still counts as the scope until it closes.
+        /// </summary>
+        private static bool AimsFromThirdPerson()
+        {
+            if (!RailgunThirdPersonPatches.AimsInThirdPerson) return false;
+            var inventory = GameManager.LocalPlayerInventory;
+            return inventory == null || !inventory.IsInFirstPersonAim;
         }
 
         private void OnEnable()

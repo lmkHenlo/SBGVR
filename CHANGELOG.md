@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `VR Controls` → `ControllerAimSensitivity` (1): with `MotionCamera` and `ControllerAiming`, how far the aim moves for each degree you turn or tilt the controller while you aim an item, from 0.25 to 3. At 1 nothing changes: the crosshair stays where the controller points. Otherwise aiming still starts where the controller points and moves that many times as far as your hand, and after a shot the aim carries on from where it is.
+
+### Changed
+
+- In VR third person the railgun aims from the third-person camera like the other guns, instead of switching to its zoomed scope; your head moves the view as usual while you aim it. In first person, and on a flat screen, it opens its scope as before.
+- The motion camera (`MotionCamera`) works for the Jumbo Burger's giant swing too: while you aim and charge it with the controllers, turning or moving the controller turns the camera, as for the golf club and rocket club.
+
 ## [1.4.3] - 2026-11-18
 
 ### Fixed

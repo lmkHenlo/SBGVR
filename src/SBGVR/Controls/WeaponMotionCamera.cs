@@ -18,8 +18,10 @@ namespace SBGVR.Controls
     /// It works like <see cref="MotionCamera"/> does for golf swings: when you start aiming, the controller's
     /// heading and tilt in tracking space (the room) are remembered, and each frame the change since then turns
     /// the camera, adding only the change since the last frame, so the thumbstick keeps working alongside.
-    /// Unlike golf, the turn is 1:1, with no scaling, dead zone or limit (the game's own pitch limit,
-    /// <c>maxPitch</c>, still applies), and sideways hand movement doesn't count.
+    /// Unlike golf, the turn is 1:1, with no dead zone or limit (the game's own pitch limit, <c>maxPitch</c>, still
+    /// applies), and sideways hand movement doesn't count. VR Controls.ControllerAimSensitivity scales it (1 by
+    /// default): the aim then still starts where the controller points, and moves that many times as far as the
+    /// controller from there.
     /// </para>
     /// <para>
     /// The aim starts where the controller points (<see cref="StartAimWherePointing"/>), and goes back there after
@@ -122,6 +124,9 @@ namespace SBGVR.Controls
         private OneEuroFilter _tiltFilter;
         private bool _wasUsing;
 
+        /// <summary>VR Controls.ControllerAimSensitivity, read when aiming starts so the aim can't jump mid-aim.</summary>
+        private float _sensitivity = 1f;
+
         // The turn and tilt that bring the camera to where the controller pointed when aiming started, and how
         // much of them has been added (eased in over AcquireSeconds).
         private float _acquireYaw;
@@ -222,6 +227,7 @@ namespace SBGVR.Controls
                 _referenceTilt = tilt;
                 _appliedTilt = 0f;
                 _wasUsing = false;
+                _sensitivity = Settings.ControllerAimSensitivity.Value;
                 // A restore still under way keeps the pitch from before the earlier aim: that's the one to return to.
                 if (_keptView != view)
                 {
@@ -239,13 +245,14 @@ namespace SBGVR.Controls
 
             UpdateAcquire(view, orbit, firstPerson, dt);
 
-            // Left and right, 1:1. Pointing almost straight up or down has no useful heading: hold the yaw.
+            // Left and right, 1:1 (times ControllerAimSensitivity). Pointing almost straight up or down has no useful
+            // heading: hold the yaw.
             if (new Vector2(pointing.x, pointing.z).sqrMagnitude >= 0.01f)
             {
                 var wrappedYaw = Vector3.SignedAngle(_referenceForward, AimAngles.Horizontal(pointing), Vector3.up);
                 _rawYaw += Mathf.DeltaAngle(_lastWrappedYaw, wrappedYaw);
                 _lastWrappedYaw = wrappedYaw;
-                var yaw = _yawFilter.Filter(_rawYaw, dt);
+                var yaw = _yawFilter.Filter(_rawYaw, dt) * _sensitivity;
                 var yawChange = yaw - _appliedYaw;
                 if (yawChange != 0f)
                 {
@@ -256,9 +263,9 @@ namespace SBGVR.Controls
                 _appliedYaw = yaw;
             }
 
-            // Up and down, 1:1, except while the item is being used (the shot holds still). After the shot, if you're
-            // still aiming, the tilt goes back to where the controller points. The cameras' pitch grows as they look
-            // down, so tilting up lowers it.
+            // Up and down, 1:1 (times ControllerAimSensitivity), except while the item is being used (the shot holds
+            // still). After the shot, if you're still aiming, the tilt goes back to where the controller points (at
+            // sensitivity 1). The cameras' pitch grows as they look down, so tilting up lowers it.
             var inUse = IsFiring(inventory);
             if (_wasUsing && !inUse) ReturnAimToPointing(view, orbit, firstPerson, tilt);
             _wasUsing = inUse;
@@ -267,7 +274,7 @@ namespace SBGVR.Controls
             // starting to steer ends it, and only StopSteering starts one.)
             if (!inUse)
             {
-                var tiltNow = Mathf.DeltaAngle(_referenceTilt, tilt);
+                var tiltNow = Mathf.DeltaAngle(_referenceTilt, tilt) * _sensitivity;
                 var tiltChange = tiltNow - _appliedTilt;
                 if (tiltChange != 0f) SetPitch(view, GetPitch(view) - tiltChange);
                 _appliedTilt = tiltNow;
@@ -300,6 +307,10 @@ namespace SBGVR.Controls
         {
             _referenceTilt = tilt;
             _appliedTilt = 0f;
+            // With ControllerAimSensitivity other than 1 the aim moves further or less far than the controller, so
+            // it isn't where the controller points by design: easing it there would jump it. It carries on from
+            // where it is instead.
+            if (_sensitivity != 1f) return;
             // Left and right kept following the controller during the shot, so the turn is normally 0; it isn't if
             // the shot came before the turn at the start of aiming had finished.
             if (!AcquirePointing(view, orbit, firstPerson)) return;
@@ -365,10 +376,12 @@ namespace SBGVR.Controls
                 case CameraModuleType.Orbit:
                     if (!CameraModuleController.TryGetOrbitModule(out orbit) || orbit == null || _yawLocked(orbit))
                         return CameraView.None;
-                    // Aiming the railgun in third person switches to its scope: leave the third-person camera
-                    // alone meanwhile, since the game copies its pitch and yaw into the scope.
+                    // The railgun aims from here like the other guns (View.RailgunThirdPersonPatches). If that patch
+                    // couldn't apply, aiming it switches to its scope: leave the third-person camera alone
+                    // meanwhile, since the game copies its pitch and yaw into the scope.
                     var player = GameManager.LocalPlayerInfo;
-                    if (player != null && player.NetworkedEquippedItem == ItemType.Railgun) return CameraView.None;
+                    if (player != null && player.NetworkedEquippedItem == ItemType.Railgun &&
+                        !View.RailgunThirdPersonPatches.AimsInThirdPerson) return CameraView.None;
                     return CameraView.ThirdPerson;
                 case CameraModuleType.FirstPerson:
                     if (!CameraModuleController.TryGetFirstPersonModule(out firstPerson) || firstPerson == null)

@@ -1,15 +1,14 @@
 // SBGVR: Super Battle Golf fixes for UUVR.
 // Copyright (c) 2026 lmkHenlo. Licensed under the GNU GPL v3.0 or later; see LICENSE.
 
-using System;
-using HarmonyLib;
 using UnityEngine;
 
 namespace SBGVR.Controls
 {
     /// <summary>
-    /// VR Controls.MotionCamera: while you aim and charge a golf club or rocket club swing, small movements of
-    /// your dominant hand's controller turn the game camera, as the right thumbstick does.
+    /// VR Controls.MotionCamera: while you aim and charge a golf swing (the golf club, the rocket club or the
+    /// Jumbo Burger's giant swing), small movements of your dominant hand's controller turn the game camera, as
+    /// the right thumbstick does.
     /// </summary>
     /// <remarks>
     /// When you start aiming, the controller's pose is remembered. From then on, turning it left or right and
@@ -33,9 +32,6 @@ namespace SBGVR.Controls
         private const float RotationDeadZone = 1f;
         private const float MovementDeadZone = 0.01f;
 
-        /// <summary>The game's own (private) PlayerGolfer.GetSwingType.</summary>
-        private static Func<PlayerGolfer, SwingType> _getSwingType;
-
         private bool _hasReference;
         private Vector3 _referencePosition;
         private Vector3 _referenceForward;
@@ -44,16 +40,6 @@ namespace SBGVR.Controls
         /// <summary>The yaw and pitch already added to the camera since aiming started.</summary>
         private float _appliedYaw;
         private float _appliedPitch;
-
-        private void Awake()
-        {
-            var method = AccessTools.Method(typeof(PlayerGolfer), "GetSwingType");
-            if (method != null) _getSwingType = AccessTools.MethodDelegate<Func<PlayerGolfer, SwingType>>(method);
-            if (_getSwingType != null) return;
-
-            Plugin.Log.LogError("[FAILED] Motion camera: PlayerGolfer.GetSwingType is missing. Motion camera is off.");
-            enabled = false;
-        }
 
         private void OnDisable() => Reset();
 
@@ -140,7 +126,10 @@ namespace SBGVR.Controls
             _appliedPitch = pitch;
         }
 
-        /// <summary>The local player's golfer while it aims or charges a golf club or rocket club swing.</summary>
+        /// <summary>
+        /// The local player's golfer while it aims, charges or plays a swing: the golf club, the rocket club or the
+        /// Jumbo Burger's giant swing, which the game all aim the same way.
+        /// </summary>
         private static PlayerGolfer LocalAimingGolfer()
         {
             if (!VrState.IsRunning || !Settings.MotionControls.Value || !Settings.MotionCamera.Value) return null;
@@ -149,11 +138,7 @@ namespace SBGVR.Controls
             var player = GameManager.LocalPlayerInfo;
             var golfer = player != null ? player.AsGolfer : null;
             if (golfer == null) return null;
-            if (!(golfer.IsAimingSwing || golfer.IsChargingSwing || golfer.IsSwinging)) return null;
-
-            // The golf club and the rocket club, not the Jumbo Burger's giant swing.
-            var type = _getSwingType(golfer);
-            return type == SwingType.Regular || type == SwingType.RocketDriver ? golfer : null;
+            return golfer.IsAimingSwing || golfer.IsChargingSwing || golfer.IsSwinging ? golfer : null;
         }
 
         /// <summary>Turns smaller than this, in degrees, aren't logged, so ordinary hand wobble stays out of the log.</summary>
