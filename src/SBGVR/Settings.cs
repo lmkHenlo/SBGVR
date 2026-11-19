@@ -49,6 +49,7 @@ namespace SBGVR
         internal static ConfigEntry<bool> ControllerAiming;
         internal static ConfigEntry<Controls.ControllerHand> DominantHand;
         internal static ConfigEntry<float> ControllerAimPitch;
+        internal static ConfigEntry<float> ControllerAimSensitivity;
         internal static ConfigEntry<bool> MirrorButtons;
         internal static ConfigEntry<bool> MotionCamera;
         internal static ConfigEntry<float> MotionCameraStrength;
@@ -159,6 +160,14 @@ namespace SBGVR
                     "Degrees to tilt the aim from where the controller points: positive tilts it down, negative " +
                     "up. For controllers that aim too high or low in your hand.",
                     new AcceptableValueRange<float>(-45f, 45f)));
+            ControllerAimSensitivity = config.Bind(controls, "ControllerAimSensitivity", 1f,
+                new ConfigDescription(
+                    "With MotionCamera and ControllerAiming: how far the aim moves for each degree you turn or tilt " +
+                    "the controller while you aim an item. 1 = the same angle, so the crosshair stays where the " +
+                    "controller points. Below 1 the aim moves less, for steadier aiming; above 1 it moves more, for " +
+                    "less wrist movement. Aiming still starts where the controller points. Doesn't apply with " +
+                    "MotionCamera off or in a golf cart, where weapons aim straight along the controller.",
+                    new AcceptableValueRange<float>(0.25f, 3f)));
             MirrorButtons = config.Bind(controls, "MirrorButtons", false,
                 "With MotionControls, mirror the button layout left to right, for example for left-handed play " +
                 "with DominantHand = Left: the right controller moves and aims items, the left one turns the " +
@@ -174,7 +183,7 @@ namespace SBGVR
                 "and stops when you swing; the thumbstick still works. In first person it turns left and right only. " +
                 "The MotionCamera settings below tune swings only. " +
                 "Items (with ControllerAiming): while you aim an item, in third or first person, turning or tilting " +
-                "the controller turns the camera by the same angle (1:1), and weapons aim along the camera. The aim " +
+                "the controller turns the camera by the same angle (1:1, or as set by ControllerAimSensitivity), and weapons aim along the camera. The aim " +
                 "starts where the controller points and goes back there after each shot; when you stop aiming, the " +
                 "camera's tilt eases back to where it was.");
             MotionCameraStrength = config.Bind(controls, "MotionCameraStrength", 0.25f,
