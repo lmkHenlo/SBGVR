@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - In VR third person the railgun aims from the third-person camera like the other guns, instead of switching to its zoomed scope; your head moves the view as usual while you aim it. In first person, and on a flat screen, it opens its scope as before.
 - The motion camera (`MotionCamera`) works for the Jumbo Burger's giant swing too: while you aim and charge it with the controllers, turning or moving the controller turns the camera, as for the golf club and rocket club.
 
+### Fixed
+
+- Scrolling lists in the menus are clipped to their boxes in VR again. The Match Setup course lists ran over the rest of the menu: in VR the screen the menus are drawn on has no stencil buffer, which the game's list masks need. While VR runs, those masks clip to their rectangle instead, so a list box with rounded corners clips square.
+
 ## [1.4.3] - 2026-11-18
 
 ### Fixed
