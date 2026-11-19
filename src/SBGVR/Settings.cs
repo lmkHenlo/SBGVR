@@ -32,6 +32,7 @@ namespace SBGVR
         internal static ConfigEntry<MenuBackgroundMode> MenuBackground;
         internal static ConfigEntry<bool> FullViewFades;
         internal static ConfigEntry<Key> RecenterKey;
+        internal static ConfigEntry<float> CameraDistance;
 
         internal static ConfigEntry<bool> WorldSpaceMarkers;
         internal static ConfigEntry<bool> MarkersOnTop;
@@ -92,6 +93,13 @@ namespace SBGVR
                 "instead of only the floating screen.");
             RecenterKey = config.Bind(comfort, "RecenterKey", Key.F4,
                 "Key that turns the view so the direction you're facing becomes straight ahead. None = no key.");
+            CameraDistance = config.Bind(comfort, "CameraDistance", 1f,
+                new ConfigDescription(
+                    "How far the third-person camera is from your character in VR, as a share of the game's default " +
+                    "distance: 1 = the default, 0.5 = half as far, 1.75 = 1.75 times as far. While VR runs, the game's " +
+                    "Field of View slider in Settings shows and sets this as Camera Distance (50% to 175%); the " +
+                    "flat-screen field of view isn't changed.",
+                    new AcceptableValueRange<float>(0.5f, 1.75f)));
 
             const string hud = "VR HUD";
             WorldSpaceMarkers = config.Bind(hud, "WorldSpaceMarkers", true,

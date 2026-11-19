@@ -21,7 +21,7 @@ namespace SBGVR.View
     /// <para>
     /// The game zooms the scope by narrowing the first-person camera's field of view: it starts at
     /// <c>ItemSettings.RailgunZoomInitialFov</c> and eases to <c>RailgunZoomFinalFov</c>, from your Field of View
-    /// setting. A headset ignores <c>Camera.fieldOfView</c> (each eye's view comes from the headset), so in VR
+    /// setting (which reads as 60 in VR, <see cref="CameraDistancePatches"/>, so the zoom is the same for everyone). A headset ignores <c>Camera.fieldOfView</c> (each eye's view comes from the headset), so in VR
     /// the scope didn't zoom at all. Here each eye's projection is narrowed instead, in
     /// <c>XRSystem.BuildView</c>, by <see cref="Factor"/>: tan(setting / 2) / tan(scope / 2), the ratio the flat
     /// screen magnifies by. The scope's field of view is read from the game every frame, so the zoom follows
@@ -140,7 +140,10 @@ namespace SBGVR.View
             return factor;
         }
 
-        /// <summary>Your Field of View setting and the scope's current field of view, while the scope is up in VR.</summary>
+        /// <summary>
+        /// The Field of View setting (60 in VR, <see cref="CameraDistancePatches"/>) and the scope's current field of
+        /// view, while the scope is up in VR.
+        /// </summary>
         private static bool TryGetScopeFov(out float setting, out float scope)
         {
             setting = scope = 0f;

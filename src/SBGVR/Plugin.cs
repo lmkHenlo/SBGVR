@@ -39,6 +39,12 @@ namespace SBGVR
             Patch("Screen shake", typeof(Comfort.ScreenShakePatches));
             Patch("Impact and flash frames, CRT effect, menu blur", typeof(Comfort.ScreenEffectPatches));
             Patch("Camera transitions", typeof(Comfort.CameraTransitionPatches));
+            const string cameraDistance = "Camera distance in VR";
+            const string cameraDistanceSlider = cameraDistance + ": settings slider";
+            if (!Patch(cameraDistance, typeof(View.CameraDistancePatches)))
+                Skipped(cameraDistanceSlider, cameraDistance);
+            else if (Patch(cameraDistanceSlider, typeof(View.CameraDistanceSliderPatches)))
+                Add(host, cameraDistanceSlider + ": Camera Distance", typeof(View.CameraDistanceSlider));
             Patch("Smoke bomb frame kept off the floating screen", typeof(Rendering.StealthFramePatches));
             // The view lock works without the zoom; only the zoom (and the HUD and floating screen kept from it)
             // needs the patch.
