@@ -167,7 +167,7 @@ namespace SBGVR
             MotionCamera = config.Bind(controls, "MotionCamera", true,
                 "With MotionControls, small movements of your DominantHand controller turn the camera, only while " +
                 "you're playing with the controllers (not a gamepad, keyboard or mouse). " +
-                "Swings: while you aim and charge a golf club or rocket club swing, turn the controller or move it " +
+                "Swings: while you aim and charge a golf club, rocket club or Jumbo Burger giant swing, turn the controller or move it " +
                 "sideways to turn the camera left or right, like the right thumbstick (and, with MotionCameraMaxPitch " +
                 "above 0, tilt it to look up or down). Your character faces the camera while aiming, so this " +
                 "fine-tunes where the swing goes. It starts from how you hold the controller when you start aiming " +

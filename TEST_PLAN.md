@@ -48,7 +48,7 @@ For each build, with SteamVR running and SteamVR set as the OpenXR runtime:
 13. Motion camera, with `MotionControls` on:
     - Aim a golf club swing, then turn the right controller and move it sideways: the camera turns a little, smoothly, your character turns with it, and the trajectory preview follows. The ball goes where the preview showed.
     - Holding the controller still while aiming doesn't drift the camera. Pulling the trigger to swing doesn't move it. The thumbstick still turns the camera while aiming.
-    - The rocket club works the same way. Walking and in menus, the controller doesn't turn the camera; aiming weapons turns it 1:1 (step 16).
+    - The rocket club and the Jumbo Burger's giant swing work the same way. Walking and in menus, the controller doesn't turn the camera; aiming weapons turns it 1:1 (step 16).
     - Stopping aiming leaves the camera where it is; aiming again starts from how you hold the controller then.
     - Tilting the controller doesn't move the camera unless `MotionCameraMaxPitch` is above 0.
     - With `MotionCamera` off, the camera only turns with the thumbstick, as before.

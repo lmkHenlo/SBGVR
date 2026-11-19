@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The motion camera (`MotionCamera`) works for the Jumbo Burger's giant swing too: while you aim and charge it with the controllers, turning or moving the controller turns the camera, as for the golf club and rocket club.
+
 ## [1.4.3] - 2026-11-18
 
 ### Fixed
