@@ -365,10 +365,12 @@ namespace SBGVR.Controls
                 case CameraModuleType.Orbit:
                     if (!CameraModuleController.TryGetOrbitModule(out orbit) || orbit == null || _yawLocked(orbit))
                         return CameraView.None;
-                    // Aiming the railgun in third person switches to its scope: leave the third-person camera
-                    // alone meanwhile, since the game copies its pitch and yaw into the scope.
+                    // The railgun aims from here like the other guns (View.RailgunThirdPersonPatches). If that patch
+                    // couldn't apply, aiming it switches to its scope: leave the third-person camera alone
+                    // meanwhile, since the game copies its pitch and yaw into the scope.
                     var player = GameManager.LocalPlayerInfo;
-                    if (player != null && player.NetworkedEquippedItem == ItemType.Railgun) return CameraView.None;
+                    if (player != null && player.NetworkedEquippedItem == ItemType.Railgun &&
+                        !View.RailgunThirdPersonPatches.AimsInThirdPerson) return CameraView.None;
                     return CameraView.ThirdPerson;
                 case CameraModuleType.FirstPerson:
                     if (!CameraModuleController.TryGetFirstPersonModule(out firstPerson) || firstPerson == null)

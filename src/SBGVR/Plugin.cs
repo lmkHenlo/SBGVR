@@ -44,6 +44,7 @@ namespace SBGVR
             // needs the patch.
             View.RailgunScopeZoom.ZoomAvailable = Patch("Railgun scope zoom", typeof(View.RailgunScopeZoomPatches));
             Add(host, "Railgun scope view lock, HUD and floating screen", typeof(View.RailgunScopeZoom));
+            View.RailgunThirdPersonPatches.Applied = Patch("Railgun aims in third person", typeof(View.RailgunThirdPersonPatches));
             if (Patch("Ambient occlusion for each eye", typeof(Rendering.AmbientOcclusionEyePatches)))
                 Rendering.AmbientOcclusionEyePatches.Verify();
             Patch("Ambient occlusion", typeof(Rendering.AmbientOcclusionPatches));
